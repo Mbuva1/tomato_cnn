@@ -110,13 +110,18 @@ import os
 # ─────────────────────────────────────────────
 # DATABASE CONFIGURATION
 # ─────────────────────────────────────────────
+# Railway's MySQL plugin injects MYSQLHOST / MYSQLUSER / MYSQLPASSWORD /
+# MYSQLDATABASE / MYSQLPORT automatically (when the services are linked).
+# We check those first, then fall back to the old DB_* names (handy for
+# local development / docker-compose / other hosts), then to hardcoded
+# local defaults as a last resort.
 
 DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'localhost'),
-    'user': os.environ.get('DB_USER', 'root'),
-    'password': os.environ.get('DB_PASSWORD', 'root123'),
-    'database': os.environ.get('DB_NAME', 'tomato_cnn'),
-    'port': int(os.environ.get('DB_PORT', 3306)),  # ← FIXED: Convert to int
+    'host': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', 'localhost')),
+    'user': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
+    'password': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', 'root123')),
+    'database': os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'tomato_cnn')),
+    'port': int(os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', 3306))),
 }
 
 
@@ -124,7 +129,16 @@ def get_connection():
     try:
         return mysql.connector.connect(**DB_CONFIG)
     except mysql.connector.Error as e:
-        print(f"[Database] Connection error: {e}")
+        # NOTE: don't f-string the exception directly — mysql.connector's
+        # Error objects can contain unfilled C-style format placeholders
+        # (e.g. '%-.100s:%u') in their message, and running that through
+        # Python's own string formatting can raise a second, confusing
+        # TypeError that masks the real error. Passing it as a separate
+        # print() argument (or via str(e)) avoids that.
+        print("[Database] Connection error:", str(e))
+        return None
+    except Exception as e:
+        print("[Database] Unexpected error connecting to database:", str(e))
         return None
 
 
@@ -332,7 +346,7 @@ def create_free_trials_table():
         print("[Database] Free trials table ready")
         return True
     except Exception as e:
-        print(f"[Database] Error creating free_trials table: {e}")
+        print("[Database] Error creating free_trials table:", str(e))
         return False
 
 
