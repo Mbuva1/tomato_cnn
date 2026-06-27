@@ -120,14 +120,28 @@ def get_db_config():
     """
     Get database configuration from environment variables.
     Priority:
-    1. MYSQL_URL (Railway provides this)
-    2. DATABASE_URL (fallback)
-    3. Individual MYSQL_* variables (Railway)
-    4. Individual DB_* variables (local development)
-    5. Hardcoded defaults (last resort)
+    1. MYSQL_PUBLIC_URL (Railway - works from anywhere) ← FIXED
+    2. MYSQL_URL (Railway - internal, only works in same project)
+    3. DATABASE_URL (fallback)
+    4. Individual MYSQL_* variables (Railway)
+    5. Individual DB_* variables (local development)
+    6. Hardcoded defaults (last resort)
     """
-    # Try MYSQL_URL first (Railway provides this)
-    mysql_url = os.environ.get('MYSQL_URL') or os.environ.get('DATABASE_URL')
+    # Try MYSQL_PUBLIC_URL FIRST (Railway - works from anywhere)
+    mysql_url = os.environ.get('MYSQL_PUBLIC_URL')
+    
+    if mysql_url:
+        logger.info("[Database] Using MYSQL_PUBLIC_URL (public/anywhere)")
+    else:
+        # Fallback to MYSQL_URL (internal - only works in same project)
+        mysql_url = os.environ.get('MYSQL_URL')
+        if mysql_url:
+            logger.info("[Database] Using MYSQL_URL (internal - check if app and DB are in same project)")
+        else:
+            # Fallback to DATABASE_URL
+            mysql_url = os.environ.get('DATABASE_URL')
+            if mysql_url:
+                logger.info("[Database] Using DATABASE_URL")
     
     if mysql_url:
         try:
@@ -139,10 +153,17 @@ def get_db_config():
                 'database': parsed.path.lstrip('/'),
                 'port': parsed.port or 3306,
             }
-            logger.info(f"[Database] Using MYSQL_URL: {parsed.hostname}:{parsed.port}")
+            
+            # Warn if using internal hostname
+            if config['host'] and 'internal' in config['host']:
+                logger.warning(f"[Database] ⚠️ Using internal hostname: {config['host']}")
+                logger.warning("[Database] ⚠️ This only works if app and DB are in the same Railway project")
+                logger.warning("[Database] ⚠️ If you're getting connection errors, use MYSQL_PUBLIC_URL instead")
+            
+            logger.info(f"[Database] Connection config: {config['host']}:{config['port']}")
             return config
         except Exception as e:
-            logger.error(f"[Database] Error parsing MYSQL_URL: {e}")
+            logger.error(f"[Database] Error parsing URL: {e}")
             # Fall through to individual variables
     
     # Fallback to individual variables - RAILWAY SPECIFIC
@@ -158,6 +179,11 @@ def get_db_config():
         'port': int(os.environ.get('MYSQLPORT') or 
                     os.environ.get('DB_PORT', 3306)),
     }
+    
+    # Warn if using internal hostname from individual variables
+    if config['host'] and 'internal' in config['host']:
+        logger.warning(f"[Database] ⚠️ Using internal hostname: {config['host']}")
+        logger.warning("[Database] ⚠️ This only works if app and DB are in the same Railway project")
     
     logger.info(f"[Database] Using individual variables: {config['host']}:{config['port']}")
     return config
@@ -184,19 +210,21 @@ def get_connection():
         
         # Attempt connection
         connection = mysql.connector.connect(**config)
-        logger.info("[Database] Connection successful!")
+        logger.info("[Database] ✅ Connection successful!")
         return connection
         
     except mysql.connector.Error as e:
         error_code = e.errno if hasattr(e, 'errno') else 'Unknown'
-        logger.error(f"[Database] MySQL Error {error_code}: {str(e)}")
+        logger.error(f"[Database] ❌ MySQL Error {error_code}: {str(e)}")
         
         if error_code == 2003:
-            logger.error("[Database] Cannot connect to MySQL server. Check:")
-            logger.error("  - Hostname is correct (should be like caboose.proxy.rlwy.net)")
-            logger.error("  - Port is correct (Railway uses non-standard ports like 48566)")
-            logger.error("  - Database server is running")
-            logger.error("  - Network/firewall allows connection")
+            logger.error("[Database] Cannot connect to MySQL server. Possible causes:")
+            logger.error("  1. Using internal hostname (mysql.railway.internal) but app not in same project")
+            logger.error("  2. Using internal hostname but trying to connect from outside Railway")
+            logger.error("  3. Database service is not running")
+            logger.error("  4. Firewall or network issues")
+            logger.error("[Database] SOLUTION: Use MYSQL_PUBLIC_URL instead of internal URL")
+            logger.error("[Database] Check: Is MYSQL_PUBLIC_URL set in your environment?")
         elif error_code == 1045:
             logger.error("[Database] Access denied. Check username/password")
         elif error_code == 1049:
@@ -222,8 +250,8 @@ def get_connection():
 def debug_environment():
     """Debug function to check environment variables."""
     logger.info("[Database] Debug - Environment Variables:")
-    mysql_vars = ['MYSQL_URL', 'MYSQLHOST', 'MYSQLUSER', 'MYSQLPASSWORD', 
-                  'MYSQL_DATABASE', 'MYSQLPORT', 'DATABASE_URL']
+    mysql_vars = ['MYSQL_PUBLIC_URL', 'MYSQL_URL', 'MYSQLHOST', 'MYSQLUSER', 
+                  'MYSQLPASSWORD', 'MYSQL_DATABASE', 'MYSQLPORT', 'DATABASE_URL']
     
     found_vars = []
     missing_vars = []
@@ -283,7 +311,8 @@ def save_prediction(farmer_id, image_name, predicted_disease, confidence, treatm
         return pid
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error saving prediction: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return None
 
 
@@ -306,7 +335,8 @@ def get_recent_predictions(farmer_id, limit=5):
         return results
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting recent predictions: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return []
 
 
@@ -328,7 +358,8 @@ def get_all_predictions(farmer_id):
         return results
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting all predictions: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return []
 
 
@@ -367,7 +398,8 @@ def save_feedback(prediction_id, farmer_id, is_correct, rating=None, comment=Non
         return True
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error saving feedback: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return False
 
 
@@ -389,7 +421,8 @@ def get_feedback(prediction_id, farmer_id):
         return result
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting feedback: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return None
 
 
@@ -445,7 +478,8 @@ def get_feedback_summary(farmer_id):
         }
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting feedback summary: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return {
             'total': 0, 'correct': 0, 'incorrect': 0,
             'correct_pct': 0, 'incorrect_pct': 0, 'avg_rating': 0
@@ -480,7 +514,8 @@ def get_predictions_with_feedback(farmer_id, limit=None):
         return results
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting predictions with feedback: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return []
 
 
@@ -511,7 +546,8 @@ def create_free_trials_table():
         return True
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error creating free_trials table: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return False
 
 
@@ -539,7 +575,8 @@ def get_farmer_email(farmer_id):
         return result
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error getting farmer email: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return None
 
 
@@ -576,7 +613,8 @@ def update_notification_settings_with_email(farmer_id, phone1, phone2, email, la
         return True
     except mysql.connector.Error as e:
         logger.error(f"[Database] Error updating notification settings: {e}")
-        conn.close() if conn else None
+        if conn:
+            conn.close()
         return False
 
 
@@ -594,11 +632,11 @@ def test_connection():
     # Try connection
     conn = get_connection()
     if conn:
-        logger.info("✓ Database connection successful!")
+        logger.info("✅ Database connection successful!")
         conn.close()
         return True
     else:
-        logger.error("✗ Database connection failed!")
+        logger.error("❌ Database connection failed!")
         return False
 
 
