@@ -1,0 +1,8 @@
+Flask==2.3.3
+mysql-connector-python==8.0.33
+numpy==1.24.3
+Pillow==10.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+xhtml2pdf==0.2.11
+flask-mail==0.9.1
