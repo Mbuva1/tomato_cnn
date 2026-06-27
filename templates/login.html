@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TomatoGuard — Farmer Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: #0a1a0a;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .bg-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 0;
+        }
+
+        .tomato {
+            position: fixed; font-size: 2em;
+            animation: floatTomato linear infinite;
+            opacity: 0.15; z-index: 1; pointer-events: none;
+        }
+
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0;    }
+            10%  { opacity: 0.15; }
+            90%  { opacity: 0.15; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0;    }
+        }
+
+        .overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center,
+                rgba(10,30,10,0.85) 0%, rgba(5,15,5,0.95) 100%);
+            z-index: 2;
+        }
+
+        .wrapper {
+            position: relative; z-index: 3;
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .card {
+            background: rgba(15,35,15,0.9);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 20px; padding: 40px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5),
+                        0 0 40px rgba(76,175,80,0.1);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { text-align: center; margin-bottom: 25px; }
+
+        .logo-icon {
+            font-size: 3.5em; display: block;
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1);    }
+            50%       { transform: scale(1.1); }
+        }
+
+        .logo h1 { font-size: 1.8em; color: #4caf50; margin-top: 10px; letter-spacing: 2px; }
+        .logo p  { color: #66bb6a; font-size: 0.85em; margin-top: 5px; opacity: 0.8; }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex; margin-bottom: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px; padding: 4px;
+        }
+
+        .tab {
+            flex: 1; padding: 10px; text-align: center;
+            border-radius: 8px; cursor: pointer;
+            color: #66bb6a; font-size: 0.9em;
+            transition: all 0.3s ease; border: none; background: none;
+        }
+
+        .tab.active { background: #4caf50; color: white; font-weight: bold; }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ── INPUT GROUP ── */
+        .input-group { margin-bottom: 16px; position: relative; }
+
+        .input-group label {
+            display: block; color: #a5d6a7;
+            font-size: 0.85em; margin-bottom: 6px; letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%; padding: 12px 42px 12px 42px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 10px; color: #e8f5e9;
+            font-size: 0.95em; transition: all 0.3s ease; outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 15px rgba(76,175,80,0.2);
+            background: rgba(0,0,0,0.6);
+        }
+
+        .input-group input.valid   { border-color: #4caf50; }
+        .input-group input.invalid { border-color: #ef5350; }
+        .input-group input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .input-icon {
+            position: absolute; left: 13px; bottom: 13px;
+            font-size: 1.1em; opacity: 0.7; pointer-events: none;
+        }
+
+        /* ── SHOW PASSWORD EYE ── */
+        .eye-btn {
+            position: absolute; right: 13px; bottom: 11px;
+            background: none; border: none; cursor: pointer;
+            font-size: 1.1em; color: #a5d6a7; padding: 2px;
+            transition: color 0.2s ease;
+        }
+
+        .eye-btn:hover { color: #4caf50; }
+
+        /* ── FORGOT PASSWORD LINK ── */
+        .forgot-link {
+            display: block; text-align: right;
+            color: #66bb6a; font-size: 0.8em;
+            margin-top: -10px; margin-bottom: 14px;
+            cursor: pointer; text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover { color: #4caf50; text-decoration: underline; }
+
+        /* ── VALIDATION MESSAGES ── */
+        .val-msg { font-size: 0.75em; margin-top: 4px; padding-left: 4px; display: none; }
+        .val-msg.error   { color: #ef9a9a; display: block; }
+        .val-msg.success { color: #81c784; display: block; }
+
+        /* ── PASSWORD STRENGTH ── */
+        .strength-wrap { margin-top: 6px; display: none; }
+        .strength-bar-bg {
+            height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 4px; overflow: hidden;
+        }
+        .strength-bar { height: 100%; width: 0%; border-radius: 4px; transition: all 0.3s ease; }
+        .strength-label { font-size: 0.72em; margin-top: 3px; text-align: right; }
+
+        .pw-reqs {
+            margin-top: 8px; padding: 10px 12px;
+            background: rgba(0,0,0,0.3); border-radius: 8px; display: none;
+        }
+        .pw-reqs p { font-size: 0.75em; margin-bottom: 3px; color: #ef9a9a; transition: color 0.2s ease; }
+        .pw-reqs p.met { color: #81c784; }
+        .pw-reqs p::before { content: '✗  '; }
+        .pw-reqs p.met::before { content: '✓  '; }
+
+        /* ── DIVIDER ── */
+        .divider {
+            text-align: center; color: rgba(255,255,255,0.3);
+            font-size: 0.8em; margin: 15px 0; position: relative;
+        }
+        .divider::before, .divider::after {
+            content: ''; position: absolute; top: 50%;
+            width: 40%; height: 1px; background: rgba(255,255,255,0.1);
+        }
+        .divider::before { left: 0; }
+        .divider::after  { right: 0; }
+
+        /* ── BUTTONS ── */
+        .btn-submit {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white; border: none; border-radius: 10px;
+            font-size: 1em; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease; letter-spacing: 1px;
+            margin-top: 8px; display: block;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.4);
+        }
+
+        /* ── GOOGLE BUTTON ── */
+        .btn-google {
+            width: 100%; padding: 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px; color: #e8f5e9;
+            font-size: 0.95em; font-weight: 500;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-decoration: none; margin-top: 8px;
+        }
+
+        .btn-google:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-1px);
+        }
+
+        .google-icon {
+            width: 20px; height: 20px; flex-shrink: 0;
+        }
+
+        /* ── DISABLED GOOGLE BUTTON ── */
+        .btn-google.disabled {
+            opacity: 0.4; cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* ── ALERTS ── */
+        .alert {
+            padding: 12px 15px; border-radius: 8px;
+            margin-bottom: 16px; font-size: 0.9em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .alert-error   { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; }
+        .alert-success { background: rgba(46,125,50,0.2);  border: 1px solid rgba(46,125,50,0.4);  color: #a5d6a7; }
+        .alert-info    { background: rgba(33,150,243,0.15); border: 1px solid rgba(33,150,243,0.3); color: #90caf9; }
+
+        /* ── FORGOT PASSWORD MODAL ── */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            z-index: 999; align-items: center; justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: rgba(10,30,10,0.97);
+            border: 1px solid rgba(76,175,80,0.4);
+            border-radius: 16px; padding: 30px;
+            max-width: 380px; width: 90%;
+            position: relative; animation: slideUp 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal h3 { color: #4caf50; margin-bottom: 8px; font-size: 1.1em; }
+        .modal p  { color: #a5d6a7; font-size: 0.85em; margin-bottom: 18px; line-height: 1.6; }
+
+        .modal-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4);
+            color: #ef9a9a; border-radius: 8px; padding: 4px 10px;
+            cursor: pointer; font-size: 0.85em;
+        }
+
+        .modal-close:hover { background: rgba(211,47,47,0.5); color: white; }
+
+        .modal .input-group input { padding-left: 15px; }
+
+        .modal-note {
+            margin-top: 12px; padding: 10px 12px;
+            background: rgba(33,150,243,0.1); border: 1px solid rgba(33,150,243,0.2);
+            border-radius: 8px; font-size: 0.8em; color: #90caf9;
+            line-height: 1.6;
+        }
+
+        /* ── FOOTER ── */
+        .card-footer {
+            text-align: center; margin-top: 18px;
+            color: rgba(255,255,255,0.3); font-size: 0.78em;
+        }
+
+        .card-footer span { color: #4caf50; }
+
+        @media (max-height: 650px) {
+            .logo-icon { font-size: 2.5em; }
+            .logo h1   { font-size: 1.4em; }
+            .logo       { margin-bottom: 15px; }
+            .card       { padding: 25px; }
+            .input-group { margin-bottom: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas class="bg-canvas" id="bgCanvas"></canvas>
+    <div class="overlay"></div>
+
+    <div class="wrapper">
+        <div class="card">
+
+            <!-- LOGO -->
+            <div class="logo">
+                <span class="logo-icon">🍅</span>
+                <h1>TOMATOGUARD</h1>
+                <p>AI-Powered Tomato Disease Detection</p>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab active" id="loginTab" onclick="switchTab('login')">🔐 Login</button>
+                <button class="tab" id="registerTab" onclick="switchTab('register')">🌱 Register</button>
+            </div>
+
+            <!-- ALERTS -->
+            {% if error %}
+            <div class="alert alert-error">⚠️ {{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert alert-success">✅ {{ success }}</div>
+            {% endif %}
+
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- LOGIN FORM                             -->
+            <!-- ══════════════════════════════════════ -->
+            <div class="form-section active" id="loginForm">
+                <form method="POST" action="/login">
+
+                    <div class="input-group">
+                        <label>USERNAME</label>
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="username"
+                               placeholder="Enter your username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="password" id="loginPassword"
+                               placeholder="Enter your password" required>
+                        <!-- Show/hide password button -->
+                        <button type="button" class="eye-btn"
+                                onclick="togglePassword('loginPassword', this)"
+                                title="Show/Hide password">👁️</button>
+                    </div>
+
+                    <!-- Forgot password link -->
+                    <a class="forgot-link" onclick="openForgotModal()">🔑 Forgot password?</a>
+
+                    <button type="submit" class="btn-submit">🚀 LOGIN TO DASHBOARD</button>
+                </form>
+
+                <div class="divider">or</div>
+
+                <!-- Google Login -->
+                {% if google_enabled %}
+                <a href="{{ url_for('google.login') }}" class="btn-google">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </a>
+                {% else %}
+                <button class="btn-google disabled" title="Google login not configured">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                {% endif %}
+
+                <div style="margin-top:15px; text-align:center; color:#66bb6a; font-size:0.85em;">
+                    New farmer?
+                    <a href="#" onclick="switchTab('register')"
+                       style="color:#4caf50; font-weight:bold;">Create an account</a>
+                </div>
+            </div>
+
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- REGISTER FORM                         -->
+            <!-- ══════════════════════════════════════ -->
+            <div class="form-section" id="registerForm">
+                <form method="POST" action="/register" id="regForm" onsubmit="return validateForm()">
+
+                    <div class="input-group">
+                        <label>FULL NAME</label>
+                        <span class="input-icon">🧑</span>
+                        <input type="text" name="full_name" id="fullName"
+                               placeholder="e.g. John Doe"
+                               oninput="validateName()" required>
+                        <div class="val-msg" id="nameMsg"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>USERNAME</label>
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="username" id="regUsername"
+                               placeholder="Choose a username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="password" id="regPassword"
+                               placeholder="Create a strong password"
+                               oninput="validatePassword()" required>
+                        <button type="button" class="eye-btn"
+                                onclick="togglePassword('regPassword', this)"
+                                title="Show/Hide password">👁️</button>
+
+                        <div class="strength-wrap" id="strengthWrap">
+                            <div class="strength-bar-bg">
+                                <div class="strength-bar" id="strengthBar"></div>
+                            </div>
+                            <div class="strength-label" id="strengthLabel"></div>
+                        </div>
+
+                        <div class="pw-reqs" id="pwReqs">
+                            <p id="req-len">At least 8 characters</p>
+                            <p id="req-upper">At least one uppercase letter (A-Z)</p>
+                            <p id="req-lower">At least one lowercase letter (a-z)</p>
+                            <p id="req-num">At least one number (0-9)</p>
+                            <p id="req-special">At least one special character (!@#$%^&*)</p>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>CONFIRM PASSWORD</label>
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="confirm_password" id="confirmPw"
+                               placeholder="Confirm your password"
+                               oninput="validateConfirm()" required>
+                        <button type="button" class="eye-btn"
+                                onclick="togglePassword('confirmPw', this)"
+                                title="Show/Hide password">👁️</button>
+                        <div class="val-msg" id="confirmMsg"></div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">🌱 CREATE ACCOUNT</button>
+                </form>
+
+                <div class="divider">or</div>
+
+                {% if google_enabled %}
+                <a href="{{ url_for('google.login') }}" class="btn-google">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </a>
+                {% else %}
+                <button class="btn-google disabled">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+                {% endif %}
+
+                <div style="margin-top:15px; text-align:center; color:#66bb6a; font-size:0.85em;">
+                    Already have an account?
+                    <a href="#" onclick="switchTab('login')"
+                       style="color:#4caf50; font-weight:bold;">Login here</a>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <p>🍅 TomatoGuard — Built with <span>CNN from Scratch</span></p>
+                <p style="margin-top:4px;">Pure Python + NumPy | Deep Learning</p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- FORGOT PASSWORD MODAL                 -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeForgotModal()">✕ Close</button>
+            <h3>🔑 Forgot Password?</h3>
+            <p>Enter your username below. Your account will be found and you can reset your password by contacting your system administrator.</p>
+
+            <div class="input-group">
+                <label>USERNAME</label>
+                <input type="text" id="forgotUsername" placeholder="Enter your username">
+            </div>
+
+            <button class="btn-submit" onclick="submitForgot()" style="margin-top:0;">
+                🔍 Find My Account
+            </button>
+
+            <div class="modal-note" id="forgotResult" style="display:none;"></div>
+
+            <div class="modal-note" style="margin-top:12px;">
+                <strong>Note:</strong> Password reset currently requires contacting your
+                system administrator. Show them your username and they will reset it for you.
+                In future versions, email-based reset will be available.
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // ── CANVAS PARTICLES ──
+        const canvas = document.getElementById('bgCanvas');
+        const ctx    = canvas.getContext('2d');
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                r: Math.random() * 2 + 0.5,
+                dx: (Math.random()-0.5)*0.5, dy: (Math.random()-0.5)*0.5,
+                alpha: Math.random()*0.5+0.1
+            });
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle='#0a1a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                ctx.fillStyle=`rgba(76,175,80,${p.alpha})`; ctx.fill();
+                p.x+=p.dx; p.y+=p.dy;
+                if(p.x<0||p.x>canvas.width)  p.dx*=-1;
+                if(p.y<0||p.y>canvas.height) p.dy*=-1;
+            });
+            particles.forEach((p1,i) => {
+                particles.slice(i+1).forEach(p2 => {
+                    const dist=Math.hypot(p1.x-p2.x,p1.y-p2.y);
+                    if(dist<100){
+                        ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+                        ctx.strokeStyle=`rgba(76,175,80,${0.1*(1-dist/100)})`;
+                        ctx.lineWidth=0.5; ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+        window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+        // ── FLOATING TOMATOES ──
+        const emojis=['🍅','🌿','🍃','🌱','🍅','🌾'];
+        for(let i=0;i<20;i++){
+            const el=document.createElement('div');
+            el.className='tomato';
+            el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+            el.style.left=Math.random()*100+'vw';
+            el.style.fontSize=(1.5+Math.random()*2.5)+'em';
+            el.style.animationDuration=(8+Math.random()*15)+'s';
+            el.style.animationDelay=(Math.random()*10)+'s';
+            document.body.appendChild(el);
+        }
+
+        // ── TAB SWITCHING ──
+        function switchTab(tab) {
+            ['loginForm','registerForm'].forEach(id=>document.getElementById(id).classList.remove('active'));
+            ['loginTab','registerTab'].forEach(id=>document.getElementById(id).classList.remove('active'));
+            if(tab==='login'){
+                document.getElementById('loginForm').classList.add('active');
+                document.getElementById('loginTab').classList.add('active');
+            } else {
+                document.getElementById('registerForm').classList.add('active');
+                document.getElementById('registerTab').classList.add('active');
+            }
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+
+        {% if show_register %}
+        switchTab('register');
+        {% endif %}
+
+
+        // ════════════════════════════════════════
+        // SHOW / HIDE PASSWORD
+        // ════════════════════════════════════════
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';   // hide icon
+                btn.title = 'Hide password';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';   // show icon
+                btn.title = 'Show password';
+            }
+        }
+
+
+        // ════════════════════════════════════════
+        // FORGOT PASSWORD MODAL
+        // ════════════════════════════════════════
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.add('active');
+            document.getElementById('forgotUsername').value = '';
+            document.getElementById('forgotResult').style.display = 'none';
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('active');
+        }
+
+        function submitForgot() {
+            const username = document.getElementById('forgotUsername').value.trim();
+            const result   = document.getElementById('forgotResult');
+
+            if (!username) {
+                result.style.display = 'block';
+                result.style.color   = '#ef9a9a';
+                result.textContent   = '⚠️ Please enter your username.';
+                return;
+            }
+
+            // Check if account exists via a simple fetch
+            fetch('/check_username', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            })
+            .then(r => r.json())
+            .then(data => {
+                result.style.display = 'block';
+                if (data.found) {
+                    result.style.color = '#81c784';
+                    result.innerHTML = `✅ Account found for <strong>${username}</strong>.<br>
+                        Please contact your system administrator with your username to reset your password.`;
+                } else {
+                    result.style.color = '#ef9a9a';
+                    result.textContent = `❌ No account found with username "${username}". Please check and try again.`;
+                }
+            })
+            .catch(() => {
+                result.style.display = 'block';
+                result.style.color   = '#ef9a9a';
+                result.textContent   = '❌ Could not connect. Please try again.';
+            });
+        }
+
+        // Close modal on outside click
+        document.getElementById('forgotModal').addEventListener('click', function(e) {
+            if (e.target === this) closeForgotModal();
+        });
+
+
+        // ════════════════════════════════════════
+        // REGISTER VALIDATION
+        // ════════════════════════════════════════
+
+        // ── NAME VALIDATION ──
+        function validateName() {
+            const input = document.getElementById('fullName');
+            const msg   = document.getElementById('nameMsg');
+            const val   = input.value.trim();
+            const nameRegex = /^[A-Za-z]+(\s[A-Za-z]+)+$/;
+
+            if (val === '') {
+                input.classList.remove('valid','invalid');
+                msg.className = 'val-msg'; msg.textContent = '';
+                return false;
+            }
+            if (!nameRegex.test(val)) {
+                input.classList.add('invalid'); input.classList.remove('valid');
+                if      (/\d/.test(val))       msg.textContent = 'Name must not contain numbers.';
+                else if (/[^A-Za-z\s]/.test(val)) msg.textContent = 'Name must not contain special characters.';
+                else if (val.split(' ').filter(w=>w).length < 2) msg.textContent = 'Please enter both first and last name.';
+                else    msg.textContent = 'Name must contain letters only.';
+                msg.className = 'val-msg error';
+                return false;
+            }
+            input.classList.add('valid'); input.classList.remove('invalid');
+            msg.textContent = '✓ Name looks good';
+            msg.className   = 'val-msg success';
+            return true;
+        }
+
+        // ── PASSWORD STRENGTH ──
+        function getPasswordStrength(pw) {
+            const checks = {
+                len    : pw.length >= 8,
+                upper  : /[A-Z]/.test(pw),
+                lower  : /[a-z]/.test(pw),
+                num    : /[0-9]/.test(pw),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)
+            };
+            return { checks, score: Object.values(checks).filter(Boolean).length };
+        }
+
+        function validatePassword() {
+            const input        = document.getElementById('regPassword');
+            const pw           = input.value;
+            const strengthWrap = document.getElementById('strengthWrap');
+            const strengthBar  = document.getElementById('strengthBar');
+            const strengthLabel= document.getElementById('strengthLabel');
+            const pwReqs       = document.getElementById('pwReqs');
+
+            if (!pw.length) {
+                strengthWrap.style.display = 'none';
+                pwReqs.style.display       = 'none';
+                input.classList.remove('valid','invalid');
+                return false;
+            }
+
+            strengthWrap.style.display = 'block';
+            pwReqs.style.display       = 'block';
+
+            const { checks, score } = getPasswordStrength(pw);
+            document.getElementById('req-len').className     = checks.len     ? 'met' : '';
+            document.getElementById('req-upper').className   = checks.upper   ? 'met' : '';
+            document.getElementById('req-lower').className   = checks.lower   ? 'met' : '';
+            document.getElementById('req-num').className     = checks.num     ? 'met' : '';
+            document.getElementById('req-special').className = checks.special ? 'met' : '';
+
+            const levels = [
+                { pct:'20%', color:'#ef5350', label:'Very Weak'  },
+                { pct:'40%', color:'#ff7043', label:'Weak'       },
+                { pct:'60%', color:'#ffca28', label:'Fair'       },
+                { pct:'80%', color:'#66bb6a', label:'Strong'     },
+                { pct:'100%',color:'#4caf50', label:'Very Strong'}
+            ];
+            const lvl = levels[score-1] || levels[0];
+            strengthBar.style.width      = lvl.pct;
+            strengthBar.style.background = lvl.color;
+            strengthLabel.textContent    = lvl.label;
+            strengthLabel.style.color    = lvl.color;
+
+            const allMet = score === 5;
+            input.classList.toggle('valid',   allMet);
+            input.classList.toggle('invalid', !allMet);
+
+            if (document.getElementById('confirmPw').value) validateConfirm();
+            return allMet;
+        }
+
+        function validateConfirm() {
+            const pw      = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('confirmPw');
+            const msg     = document.getElementById('confirmMsg');
+
+            if (!confirm.value) {
+                confirm.classList.remove('valid','invalid');
+                msg.className='val-msg'; msg.textContent='';
+                return false;
+            }
+            if (confirm.value !== pw) {
+                confirm.classList.add('invalid'); confirm.classList.remove('valid');
+                msg.textContent = 'Passwords do not match.';
+                msg.className   = 'val-msg error';
+                return false;
+            }
+            confirm.classList.add('valid'); confirm.classList.remove('invalid');
+            msg.textContent = '✓ Passwords match';
+            msg.className   = 'val-msg success';
+            return true;
+        }
+
+        function validateForm() {
+            if (!validateName()) {
+                alert('Please enter a valid full name (letters only, first and last name required).');
+                return false;
+            }
+            if (!validatePassword()) {
+                alert('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+                return false;
+            }
+            if (!validateConfirm()) {
+                alert('Passwords do not match.');
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+</body>
+</html>

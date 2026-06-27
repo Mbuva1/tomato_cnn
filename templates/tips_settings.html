@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TomatoGuard - Tip Settings</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a1a0a;
+            min-height: 100vh;
+            color: #e8f5e9;
+        }
+
+        nav {
+            background: rgba(5,15,5,0.95);
+            border-bottom: 2px solid rgba(76,175,80,0.3);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.3em; font-weight: bold; color: #4caf50; }
+        .nav-logo span { font-size: 1.5em; }
+
+        .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
+        .nav-link { color: #a5d6a7; text-decoration: none; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(76,175,80,0.3); transition: all 0.2s; }
+        .nav-link:hover, .nav-link.active { background: rgba(76,175,80,0.2); color: #4caf50; border-color: rgba(76,175,80,0.6); }
+        .btn-logout { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; padding: 6px 14px; border-radius: 20px; text-decoration: none; transition: all 0.2s; }
+        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+        .card {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.2);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            color: #81c784;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(76,175,80,0.15);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .setting-info h4 { color: #e8f5e9; margin-bottom: 5px; font-size: 1em; }
+        .setting-info p { color: #a5d6a7; font-size: 0.8em; }
+
+        /* Toggle Switch */
+        .toggle-switch { position: relative; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 34px;
+            transition: 0.3s;
+        }
+        .slider:before {
+            content: ""; position: absolute;
+            width: 20px; height: 20px;
+            left: 3px; bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        input:checked + .slider { background: #4caf50; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        select {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(76,175,80,0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: #e8f5e9;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .category-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .category-tag {
+            background: rgba(76,175,80,0.15);
+            border: 1px solid rgba(76,175,80,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85em;
+        }
+
+        .category-tag:hover { background: rgba(76,175,80,0.3); }
+        .category-tag.selected { background: #4caf50; color: white; border-color: #4caf50; }
+
+        .btn-save {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover { background: linear-gradient(135deg, #4caf50, #81c784); transform: translateY(-1px); }
+
+        .status-msg {
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success { background: rgba(46,125,50,0.2); color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
+        .error { background: rgba(211,47,47,0.2); color: #ef9a9a; border: 1px solid rgba(211,47,47,0.3); }
+
+        .info-box {
+            background: rgba(33,150,243,0.1);
+            border-left: 3px solid #2196f3;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            color: #90caf9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.2);
+            font-size: 0.78em;
+            border-top: 1px solid rgba(76,175,80,0.1);
+        }
+        footer span { color: #4caf50; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">🏠 Dashboard</a>
+            <a href="/stats" class="nav-link">📊 Statistics</a>
+            <a href="/notifications" class="nav-link">🔔 SMS</a>
+            <a href="#" class="nav-link active">💡 Tips</a>
+            <a href="/logout" class="btn-logout">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <span>💡</span>
+                <span>Proactive Farming Tips</span>
+            </div>
+
+            <div class="info-box">
+                🌱 Get daily farming tips to help prevent diseases before they happen. 
+                Choose the topics that interest you most.
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>📱 Show Daily Tips</h4>
+                    <p>Display a new farming tip on your dashboard every day</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="dailyToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>🌍 Tip Language</h4>
+                    <p>Choose your preferred language for farming tips</p>
+                </div>
+                <select id="languageSelect">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="sw">🇰🇪 Kiswahili</option>
+                </select>
+            </div>
+
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start;">
+                <div class="setting-info" style="margin-bottom: 15px;">
+                    <h4>📚 Tip Categories</h4>
+                    <p>Select which topics you want to see</p>
+                </div>
+                <div class="category-group" id="categories">
+                    <span data-cat="general" class="category-tag selected">🌿 General</span>
+                    <span data-cat="disease" class="category-tag selected">🦠 Disease Prevention</span>
+                    <span data-cat="irrigation" class="category-tag selected">💧 Irrigation</span>
+                    <span data-cat="soil" class="category-tag selected">🌱 Soil Health</span>
+                    <span data-cat="pest" class="category-tag selected">🐛 Pest Control</span>
+                </div>
+            </div>
+
+            <button class="btn-save" onclick="savePreferences()">💾 Save Preferences</button>
+            <div id="status" class="status-msg"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🍅 TomatoGuard | <span>Proactive Tips</span> | Prevention is better than cure</p>
+    </footer>
+
+    <script>
+        let selectedCategories = ['general', 'disease', 'irrigation', 'soil', 'pest'];
+
+        // Load saved preferences from localStorage
+        function loadPreferences() {
+            const saved = localStorage.getItem('tipPreferences');
+            if (saved) {
+                const prefs = JSON.parse(saved);
+                document.getElementById('dailyToggle').checked = prefs.daily !== false;
+                document.getElementById('languageSelect').value = prefs.language || 'en';
+                if (prefs.categories) {
+                    selectedCategories = prefs.categories;
+                    updateCategoryUI();
+                }
+            }
+        }
+
+        // Update category UI based on selected categories
+        function updateCategoryUI() {
+            document.querySelectorAll('.category-tag').forEach(tag => {
+                const cat = tag.dataset.cat;
+                if (selectedCategories.includes(cat)) {
+                    tag.classList.add('selected');
+                } else {
+                    tag.classList.remove('selected');
+                }
+            });
+        }
+
+        // Category selection handler
+        document.querySelectorAll('.category-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const cat = tag.dataset.cat;
+                if (selectedCategories.includes(cat)) {
+                    selectedCategories = selectedCategories.filter(c => c !== cat);
+                    tag.classList.remove('selected');
+                } else {
+                    selectedCategories.push(cat);
+                    tag.classList.add('selected');
+                }
+            });
+        });
+
+        // Save preferences to localStorage
+        function savePreferences() {
+            const preferences = {
+                daily: document.getElementById('dailyToggle').checked,
+                language: document.getElementById('languageSelect').value,
+                categories: selectedCategories
+            };
+
+            localStorage.setItem('tipPreferences', JSON.stringify(preferences));
+
+            // Show success message
+            const status = document.getElementById('status');
+            status.textContent = '✅ Preferences saved successfully! Your tips will now be customized.';
+            status.className = 'status-msg success';
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load preferences on page load
+        loadPreferences();
+    </script>
+</body>
+</html>

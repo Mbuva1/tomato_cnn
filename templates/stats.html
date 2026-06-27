@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TomatoGuard — My Statistics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a1a0a; min-height: 100vh; color: #e8f5e9;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(5,15,5,0.95);
+            border-bottom: 2px solid rgba(76,175,80,0.3);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.3em; font-weight: bold; color: #4caf50; letter-spacing: 2px;
+        }
+
+        .nav-logo span { font-size: 1.5em; }
+        .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-farmer { color: #a5d6a7; font-size: 0.9em; }
+        .nav-farmer strong { color: #4caf50; }
+
+        .lang-toggle {
+            display: flex; align-items: center;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; overflow: hidden;
+        }
+
+        .lang-btn {
+            padding: 5px 12px; font-size: 0.8em; cursor: pointer;
+            border: none; background: transparent; color: #a5d6a7;
+            transition: all 0.2s ease; font-weight: bold;
+        }
+
+        .lang-btn.active { background: #4caf50; color: white; border-radius: 20px; }
+        .lang-btn:hover:not(.active) { color: #4caf50; }
+
+        .nav-link {
+            color: #a5d6a7; text-decoration: none; font-size: 0.82em;
+            padding: 6px 12px; border-radius: 20px;
+            border: 1px solid rgba(76,175,80,0.3);
+            transition: all 0.2s ease; white-space: nowrap; cursor: pointer;
+        }
+
+        .nav-link:hover { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .nav-link.active-page { background: rgba(76,175,80,0.2); color: #4caf50; border-color: #4caf50; }
+
+        .btn-logout {
+            background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4);
+            color: #ef9a9a; padding: 6px 14px; border-radius: 20px; font-size: 0.82em;
+            cursor: pointer; text-decoration: none; transition: all 0.3s ease; white-space: nowrap;
+        }
+
+        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
+
+        /* ── PAGE HEADER ── */
+        .page-header { text-align: center; padding: 40px 20px 20px; }
+        .page-header h1 { font-size: 2em; color: #4caf50; margin-bottom: 8px; }
+        .page-header p  { color: #a5d6a7; font-size: 0.95em; opacity: 0.8; }
+
+        /* ── LOADING ── */
+        .loading-state { text-align: center; padding: 60px 20px; color: #a5d6a7; }
+
+        .big-spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(76,175,80,0.2);
+            border-top: 4px solid #4caf50; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 15px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ── CONTENT ── */
+        .content { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; }
+
+        /* ── SUMMARY ── */
+        .summary-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .summary-card {
+            background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.2);
+            border-radius: 14px; padding: 20px; text-align: center; transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            border-color: rgba(76,175,80,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+
+        .summary-icon  { font-size: 2em; margin-bottom: 8px; }
+        .summary-value { font-size: 2em; font-weight: bold; color: #4caf50; }
+        .summary-label { font-size: 0.78em; color: #a5d6a7; margin-top: 4px; }
+
+        /* ── CHART GRID ── */
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+        @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } }
+
+        .chart-card {
+            background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.2);
+            border-radius: 14px; padding: 20px;
+        }
+
+        .chart-card.full-width { grid-column: 1 / -1; }
+
+        .chart-title {
+            font-size: 1em; color: #81c784; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 1px solid rgba(76,175,80,0.15); padding-bottom: 10px;
+        }
+
+        .chart-wrap    { position: relative; height: 240px; }
+        .chart-wrap-lg { position: relative; height: 280px; }
+
+        /* ── SEVERITY ── */
+        .severity-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+        .sev-item {
+            flex: 1; min-width: 80px; padding: 12px;
+            border-radius: 10px; text-align: center; border: 1px solid;
+        }
+
+        .sev-item .sev-val { font-size: 1.6em; font-weight: bold; }
+        .sev-item .sev-lbl { font-size: 0.72em; margin-top: 3px; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state { text-align: center; padding: 60px 20px; color: #a5d6a7; opacity: 0.6; }
+        .empty-state div { font-size: 3em; margin-bottom: 12px; }
+
+        /* ── FOOTER ── */
+        footer {
+            text-align: center; padding: 20px; color: rgba(255,255,255,0.2); font-size: 0.78em;
+            border-top: 1px solid rgba(76,175,80,0.1);
+        }
+
+        footer span { color: #4caf50; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
+        <div class="nav-right">
+            <div class="nav-farmer">
+                <span data-en="Welcome," data-sw="Karibu,">Welcome,</span>
+                <strong>{{ farmer_name }}</strong> 👨‍🌾
+            </div>
+
+            <div class="lang-toggle">
+                <button class="lang-btn active" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+                <button class="lang-btn"        id="btnSW" onclick="setLang('sw')">🇰🇪 SW</button>
+            </div>
+
+            <a href="/dashboard" class="nav-link"
+               data-en="🏠 Dashboard" data-sw="🏠 Dashibodi">🏠 Dashboard</a>
+
+            <a href="/stats" class="nav-link active-page"
+               data-en="📊 Statistics" data-sw="📊 Takwimu">📊 Statistics</a>
+
+            <!-- FIXED: window.open opens report in new tab so Close button works -->
+            <a href="#" class="nav-link" onclick="openReport(event)"
+               data-en="📄 Report" data-sw="📄 Ripoti">📄 Report</a>
+
+            <a href="/logout" class="btn-logout"
+               data-en="🚪 Logout" data-sw="🚪 Toka">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 data-en="📊 My Farm Statistics" data-sw="📊 Takwimu za Shamba Langu">
+            📊 My Farm Statistics</h1>
+        <p data-en="Overview of your tomato disease detection history"
+           data-sw="Muhtasari wa historia yako ya utambuzi wa magonjwa ya nyanya">
+            Overview of your tomato disease detection history</p>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-state" id="loadingState">
+        <div class="big-spinner"></div>
+        <p data-en="Loading your statistics..." data-sw="Inapakia takwimu zako...">
+            Loading your statistics...</p>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content" id="mainContent" style="display:none;">
+
+        <!-- SUMMARY -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon">🔍</div>
+                <div class="summary-value" id="statTotal">0</div>
+                <div class="summary-label" data-en="Total Scans" data-sw="Jumla ya Uchunguzi">Total Scans</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">✅</div>
+                <div class="summary-value" id="statHealthy" style="color:#4caf50;">0</div>
+                <div class="summary-label" data-en="Healthy Plants" data-sw="Mimea Yenye Afya">Healthy Plants</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">⚠️</div>
+                <div class="summary-value" id="statDiseased" style="color:#ffb74d;">0</div>
+                <div class="summary-label" data-en="Diseased Plants" data-sw="Mimea Yenye Ugonjwa">Diseased Plants</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">🎯</div>
+                <div class="summary-value" id="statAvgConf" style="color:#81c784;">0%</div>
+                <div class="summary-label" data-en="Avg. Confidence" data-sw="Uhakika wa Wastani">Avg. Confidence</div>
+            </div>
+        </div>
+
+        <!-- ROW 1 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title"
+                     data-en="🌿 Healthy vs Diseased"
+                     data-sw="🌿 Zenye Afya dhidi ya Zenye Ugonjwa">🌿 Healthy vs Diseased</div>
+                <div id="noDataPie" class="empty-state" style="display:none;">
+                    <div>🍃</div>
+                    <p data-en="No data yet" data-sw="Bado hakuna data">No data yet</p>
+                </div>
+                <div class="chart-wrap" id="wrapPie"><canvas id="chartPie"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"
+                     data-en="🎚️ Severity Breakdown"
+                     data-sw="🎚️ Mgawanyo wa Ukali">🎚️ Severity Breakdown</div>
+                <div class="severity-row">
+                    <div class="sev-item" style="color:#66bb6a; border-color:#66bb6a; background:rgba(102,187,106,0.1);">
+                        <div class="sev-val" id="sevMild">0</div>
+                        <div class="sev-lbl" data-en="🟢 Mild" data-sw="🟢 Kidogo">🟢 Mild</div>
+                    </div>
+                    <div class="sev-item" style="color:#ffca28; border-color:#ffca28; background:rgba(255,202,40,0.1);">
+                        <div class="sev-val" id="sevModerate">0</div>
+                        <div class="sev-lbl" data-en="🟡 Moderate" data-sw="🟡 Ya Wastani">🟡 Moderate</div>
+                    </div>
+                    <div class="sev-item" style="color:#ef5350; border-color:#ef5350; background:rgba(239,83,80,0.1);">
+                        <div class="sev-val" id="sevSevere">0</div>
+                        <div class="sev-lbl" data-en="🔴 Severe" data-sw="🔴 Kali Sana">🔴 Severe</div>
+                    </div>
+                </div>
+                <div class="chart-wrap" style="margin-top:15px;"><canvas id="chartSeverity"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-title"
+                     data-en="🦠 Disease Breakdown"
+                     data-sw="🦠 Mgawanyo wa Magonjwa">🦠 Disease Breakdown</div>
+                <div id="noDataBar" class="empty-state" style="display:none;">
+                    <div>🍃</div>
+                    <p data-en="No disease data yet" data-sw="Bado hakuna data ya ugonjwa">No disease data yet</p>
+                </div>
+                <div class="chart-wrap-lg" id="wrapBar"><canvas id="chartBar"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ROW 3 -->
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-title"
+                     data-en="📅 Detections — Last 7 Days"
+                     data-sw="📅 Utambuzi — Siku 7 Zilizopita">📅 Detections — Last 7 Days</div>
+                <div id="noDataLine" class="empty-state" style="display:none;">
+                    <div>📅</div>
+                    <p data-en="No recent activity" data-sw="Hakuna shughuli za hivi karibuni">No recent activity</p>
+                </div>
+                <div class="chart-wrap-lg" id="wrapLine"><canvas id="chartLine"></canvas></div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>🍅 TomatoGuard |
+           <span data-en="Built with" data-sw="Imejengwa na">Built with</span>
+           <span>CNN from Scratch</span> | Pure Python + NumPy</p>
+    </footer>
+
+    <script>
+        let currentLang = localStorage.getItem('tomatoguard_lang') || 'en';
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+            document.getElementById('btnSW').classList.toggle('active', lang === 'sw');
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) el.textContent = text;
+            });
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
+        if (currentLang === 'sw') setLang('sw');
+
+        // FIXED: window.open so the tab is owned by JS and window.close() works on report page
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+        }
+
+        Chart.defaults.color       = '#a5d6a7';
+        Chart.defaults.borderColor = 'rgba(76,175,80,0.15)';
+
+        fetch('/api/stats')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display  = 'block';
+
+            document.getElementById('statTotal').textContent    = data.total;
+            document.getElementById('statHealthy').textContent  = data.healthy_count;
+            document.getElementById('statDiseased').textContent = data.diseased_count;
+            document.getElementById('statAvgConf').textContent  = data.avg_confidence + '%';
+            document.getElementById('sevMild').textContent      = data.severity.mild;
+            document.getElementById('sevModerate').textContent  = data.severity.moderate;
+            document.getElementById('sevSevere').textContent    = data.severity.severe;
+
+            // Pie
+            if (data.total === 0) {
+                document.getElementById('noDataPie').style.display = 'block';
+                document.getElementById('wrapPie').style.display   = 'none';
+            } else {
+                new Chart(document.getElementById('chartPie').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [currentLang==='sw'?'Yenye Afya':'Healthy', currentLang==='sw'?'Yenye Ugonjwa':'Diseased'],
+                        datasets: [{ data: [data.healthy_count, data.diseased_count],
+                            backgroundColor: ['rgba(76,175,80,0.7)','rgba(255,111,0,0.7)'],
+                            borderColor: ['#4caf50','#ff6f00'], borderWidth: 2 }]
+                    },
+                    options: { responsive:true, maintainAspectRatio:false,
+                        plugins: { legend: { position:'bottom', labels:{color:'#a5d6a7',padding:15} } } }
+                });
+            }
+
+            // Severity bar
+            new Chart(document.getElementById('chartSeverity').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [currentLang==='sw'?'Kidogo':'Mild', currentLang==='sw'?'Ya Wastani':'Moderate', currentLang==='sw'?'Kali Sana':'Severe'],
+                    datasets: [{ label: currentLang==='sw'?'Idadi':'Count',
+                        data: [data.severity.mild, data.severity.moderate, data.severity.severe],
+                        backgroundColor: ['rgba(102,187,106,0.6)','rgba(255,202,40,0.6)','rgba(239,83,80,0.6)'],
+                        borderColor: ['#66bb6a','#ffca28','#ef5350'], borderWidth:2, borderRadius:6 }]
+                },
+                options: { responsive:true, maintainAspectRatio:false,
+                    plugins:{legend:{display:false}},
+                    scales:{ y:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, x:{ticks:{color:'#a5d6a7'}} } }
+            });
+
+            // Disease bar
+            if (!data.disease_labels.length) {
+                document.getElementById('noDataBar').style.display = 'block';
+                document.getElementById('wrapBar').style.display   = 'none';
+            } else {
+                const colors = ['rgba(76,175,80,0.6)','rgba(255,111,0,0.6)','rgba(239,83,80,0.6)',
+                    'rgba(255,202,40,0.6)','rgba(33,150,243,0.6)','rgba(156,39,176,0.6)',
+                    'rgba(0,188,212,0.6)','rgba(255,87,34,0.6)','rgba(96,125,139,0.6)',
+                    'rgba(121,85,72,0.6)','rgba(158,158,158,0.6)'];
+                new Chart(document.getElementById('chartBar').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.disease_labels,
+                        datasets: [{ label: currentLang==='sw'?'Idadi ya Utambuzi':'Detection Count',
+                            data: data.disease_counts,
+                            backgroundColor: data.disease_labels.map((_,i)=>colors[i%colors.length]),
+                            borderColor: data.disease_labels.map((_,i)=>colors[i%colors.length].replace('0.6','1')),
+                            borderWidth:2, borderRadius:6 }]
+                    },
+                    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
+                        plugins:{legend:{display:false}},
+                        scales:{ x:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, y:{ticks:{color:'#a5d6a7',font:{size:11}}} } }
+                });
+            }
+
+            // Timeline
+            if (!data.timeline_labels.length) {
+                document.getElementById('noDataLine').style.display = 'block';
+                document.getElementById('wrapLine').style.display   = 'none';
+            } else {
+                new Chart(document.getElementById('chartLine').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.timeline_labels,
+                        datasets: [{ label: currentLang==='sw'?'Utambuzi':'Detections',
+                            data: data.timeline_counts,
+                            borderColor:'#4caf50', backgroundColor:'rgba(76,175,80,0.15)',
+                            borderWidth:2, fill:true, tension:0.4,
+                            pointBackgroundColor:'#4caf50', pointRadius:5 }]
+                    },
+                    options: { responsive:true, maintainAspectRatio:false,
+                        plugins:{legend:{display:false}},
+                        scales:{ y:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, x:{ticks:{color:'#a5d6a7'}} } }
+                });
+            }
+        })
+        .catch(err => {
+            document.getElementById('loadingState').innerHTML =
+                `<p style="color:#ef9a9a;">Error loading statistics: ${err}</p>`;
+        });
+    </script>
+
+</body>
+</html>

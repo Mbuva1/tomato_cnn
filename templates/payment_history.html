@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - TomatoGuard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a1a0a;
+            color: #e8f5e9;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ─── BACK BUTTON ─── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #81c784;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(76,175,80,0.05);
+            border: 1px solid rgba(76,175,80,0.15);
+        }
+        .back-link:hover {
+            color: #4caf50;
+            background: rgba(76,175,80,0.15);
+            border-color: rgba(76,175,80,0.3);
+        }
+
+        /* ─── HEADER ─── */
+        .page-header {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(76,175,80,0.15);
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-header p {
+            color: #a5d6a7;
+            font-size: 0.95rem;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        /* ─── SUBSCRIPTION CARD ─── */
+        .sub-card {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.2);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            transition: all 0.3s ease;
+        }
+        .sub-card:hover {
+            border-color: rgba(76,175,80,0.4);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+        .sub-card .sub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .sub-card .sub-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sub-card .sub-icon {
+            font-size: 2rem;
+        }
+        .sub-card .sub-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .sub-card .sub-info h3.active { color: #4caf50; }
+        .sub-card .sub-info h3.inactive { color: #ef9a9a; }
+        .sub-card .sub-info p {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+        .sub-card .sub-status {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sub-status.active {
+            background: rgba(46,125,50,0.25);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.3);
+        }
+        .sub-status.inactive {
+            background: rgba(211,47,47,0.2);
+            color: #ef9a9a;
+            border: 1px solid rgba(211,47,47,0.3);
+        }
+        .sub-status.expired {
+            background: rgba(255,152,0,0.2);
+            color: #ffb74d;
+            border: 1px solid rgba(255,152,0,0.3);
+        }
+        .sub-plan-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+        }
+        .sub-plan-badge.starter {
+            background: rgba(76,175,80,0.15);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.2);
+        }
+        .sub-plan-badge.pro {
+            background: rgba(255,193,7,0.15);
+            color: #ffca28;
+            border: 1px solid rgba(255,193,7,0.2);
+        }
+        .sub-plan-badge.trial {
+            background: rgba(33,150,243,0.15);
+            color: #90caf9;
+            border: 1px solid rgba(33,150,243,0.2);
+        }
+
+        /* ─── SECTION TITLE ─── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #81c784;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #4caf50;
+            padding-left: 14px;
+        }
+
+        /* ─── TABLE ─── */
+        .table-wrap {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .table-wrap:hover {
+            border-color: rgba(76,175,80,0.3);
+        }
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-wrap th {
+            background: rgba(76,175,80,0.08);
+            padding: 14px 18px;
+            text-align: left;
+            color: #81c784;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid rgba(76,175,80,0.1);
+        }
+        .table-wrap td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #c8e6c9;
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+        .table-wrap tr:last-child td {
+            border-bottom: none;
+        }
+        .table-wrap tr:hover td {
+            background: rgba(76,175,80,0.04);
+        }
+
+        /* ─── STATUS BADGES ─── */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-badge.completed {
+            background: rgba(46,125,50,0.2);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.2);
+        }
+        .status-badge.pending {
+            background: rgba(255,193,7,0.15);
+            color: #ffca28;
+            border: 1px solid rgba(255,193,7,0.2);
+        }
+        .status-badge.failed {
+            background: rgba(211,47,47,0.2);
+            color: #ef9a9a;
+            border: 1px solid rgba(211,47,47,0.2);
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a5d6a7;
+        }
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            color: #81c784;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* ─── SUBSCRIBE BUTTON ─── */
+        .btn-subscribe {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-subscribe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.3);
+        }
+
+        .btn-subscribe-small {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-subscribe-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .page-header h1 { font-size: 1.5rem; }
+            .sub-card .sub-header { flex-direction: column; align-items: flex-start; }
+            .table-wrap { overflow-x: auto; }
+            .table-wrap table { min-width: 500px; }
+            .table-wrap th, .table-wrap td { padding: 10px 14px; font-size: 0.8rem; }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 { font-size: 1.2rem; }
+            .sub-card { padding: 18px; }
+            .sub-card .sub-title { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ─── BACK BUTTON ─── -->
+    <a href="/dashboard" class="back-link">
+        ← Back to Dashboard
+    </a>
+
+    <!-- ─── HEADER ─── -->
+    <div class="page-header">
+        <h1>
+            💰 Payment & Subscription History
+        </h1>
+        <p>View your payment history and manage your subscription</p>
+    </div>
+
+    <!-- ─── ACTIVE SUBSCRIPTION ─── -->
+    <div class="sub-card">
+        <div class="sub-header">
+            <div class="sub-title">
+                <span class="sub-icon">
+                    {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                        ✅
+                    {% else %}
+                        🔒
+                    {% endif %}
+                </span>
+                <div class="sub-info">
+                    <h3 class="{% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}active{% else %}inactive{% endif %}">
+                        {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                            Active Subscription
+                            {% if subscriptions[0].plan_id %}
+                                <span class="sub-plan-badge {{ subscriptions[0].plan_id }}">
+                                    {{ subscriptions[0].plan_id|title }}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            No Active Subscription
+                        {% endif %}
+                    </h3>
+                    <p>
+                        {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                            {% if subscriptions[0].expires_at %}
+                                Expires: {{ subscriptions[0].expires_at.strftime('%d %B %Y') }}
+                            {% else %}
+                                Unlimited access
+                            {% endif %}
+                            {% if subscriptions[0].plan_id == 'starter' %}
+                                · 50 scans per month
+                            {% elif subscriptions[0].plan_id == 'pro' %}
+                                · Unlimited scans
+                            {% endif %}
+                        {% else %}
+                            Subscribe to unlock unlimited disease detection
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div>
+                {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                    <span class="sub-status active">✅ Active</span>
+                {% elif subscriptions and subscriptions[0] and not subscriptions[0].is_active %}
+                    <span class="sub-status expired">⏰ Expired</span>
+                {% else %}
+                    <span class="sub-status inactive">❌ Inactive</span>
+                    <a href="/payment/starter" class="btn-subscribe" style="margin-left: 12px;">
+                        🚀 Subscribe Now
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── TRANSACTION HISTORY ─── -->
+    <h2 class="section-title">📋 Transaction History</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at else '-' }}</td>
+                        <td>
+                            {% if t.plan_id == 'starter' %}
+                                📋 Starter
+                            {% elif t.plan_id == 'pro' %}
+                                ⭐ Pro
+                            {% else %}
+                                {{ t.plan_id|title }}
+                            {% endif %}
+                        </td>
+                        <td><strong>KSh {{ t.amount }}</strong></td>
+                        <td>
+                            <span class="status-badge {{ t.status }}">
+                                {% if t.status == 'completed' %}✅ Completed
+                                {% elif t.status == 'pending' %}⏳ Pending
+                                {% elif t.status == 'failed' %}❌ Failed
+                                {% else %}{{ t.status|title }}
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="icon">💳</div>
+                                <h3>No transactions yet</h3>
+                                <p>Make your first payment to unlock premium features</p>
+                                <a href="/payment/starter" class="btn-subscribe" style="margin-top: 16px;">
+                                    🚀 Subscribe Now
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ─── FOOTER ─── -->
+    <div style="text-align: center; margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <p style="color: rgba(255,255,255,0.15); font-size: 0.75rem;">
+            🍅 TomatoGuard · Secure payments powered by M-Pesa
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

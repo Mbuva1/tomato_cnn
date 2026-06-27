@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TomatoGuard — Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a1a0a; min-height: 100vh; color: #e8f5e9;
+        }
+
+        .tomato {
+            position: fixed; animation: floatTomato linear infinite;
+            opacity: 0.07; z-index: 0; pointer-events: none;
+        }
+
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0;   }
+            10%  { opacity: 0.07; }
+            90%  { opacity: 0.07; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0;   }
+        }
+
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(5,15,5,0.95);
+            border-bottom: 2px solid rgba(76,175,80,0.3);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.3em; font-weight: bold; color: #4caf50; letter-spacing: 2px; }
+        .nav-logo span { font-size: 1.5em; }
+        .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-farmer { color: #a5d6a7; font-size: 0.9em; }
+        .nav-farmer strong { color: #4caf50; }
+
+        .lang-toggle { display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; overflow: hidden; }
+        .lang-btn { padding: 5px 12px; font-size: 0.8em; cursor: pointer; border: none; background: transparent; color: #a5d6a7; transition: all 0.2s ease; font-weight: bold; }
+        .lang-btn.active { background: #4caf50; color: white; border-radius: 20px; }
+        .lang-btn:hover:not(.active) { color: #4caf50; }
+
+        .nav-link { color: #a5d6a7; text-decoration: none; font-size: 0.82em; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(76,175,80,0.3); transition: all 0.2s ease; white-space: nowrap; cursor: pointer; }
+        .nav-link:hover { background: rgba(76,175,80,0.2); color: #4caf50; }
+
+        .btn-logout { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; padding: 6px 14px; border-radius: 20px; font-size: 0.82em; cursor: pointer; text-decoration: none; transition: all 0.3s ease; white-space: nowrap; }
+        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
+
+        /* ─── SUBSCRIPTION BANNER ─── */
+        .sub-banner {
+            max-width: 1100px;
+            margin: 0 auto 20px auto;
+            padding: 0 20px;
+        }
+        .sub-banner .card {
+            background: linear-gradient(135deg, rgba(46,125,50,0.25), rgba(76,175,80,0.1));
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 16px;
+            padding: 20px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+        .sub-banner .card:hover {
+            border-color: rgba(76,175,80,0.6);
+            box-shadow: 0 4px 30px rgba(76,175,80,0.1);
+        }
+        .sub-banner .card.trial {
+            border-color: rgba(255, 193, 7, 0.4);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.08));
+        }
+        .sub-banner .card.no-access {
+            border-color: rgba(211,47,47,0.3);
+            background: linear-gradient(135deg, rgba(211,47,47,0.1), rgba(211,47,47,0.05));
+        }
+        .sub-left { display: flex; align-items: center; gap: 16px; }
+        .sub-icon { font-size: 2.2em; }
+        .sub-info h3 { color: #4caf50; font-size: 1.1em; font-weight: 700; }
+        .sub-info h3.trial-title { color: #ffca28; }
+        .sub-info h3.no-access-title { color: #ef9a9a; }
+        .sub-info p { color: #a5d6a7; font-size: 0.85em; margin-top: 2px; }
+        .sub-info .scan-count { 
+            display: inline-block; 
+            background: rgba(76,175,80,0.2); 
+            padding: 2px 14px; 
+            border-radius: 50px; 
+            font-size: 0.78em; 
+            margin-top: 4px;
+            color: #81c784;
+        }
+        .sub-info .scan-count.trial-count {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffca28;
+        }
+        .progress-bar-wrap {
+            margin-top: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50px;
+            height: 6px;
+            width: 100%;
+            max-width: 200px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.5s ease;
+        }
+        .progress-bar-fill.trial-fill {
+            background: linear-gradient(90deg, #ffca28, #ff6f00);
+        }
+        .progress-bar-fill.sub-fill {
+            background: linear-gradient(90deg, #2e7d32, #4caf50);
+        }
+        .sub-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .btn-subscribe {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.88em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-subscribe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.3);
+        }
+        .btn-subscribe.trial-btn {
+            background: linear-gradient(135deg, #f57f17, #ffca28);
+            color: #1a2e1a;
+        }
+        .btn-subscribe.trial-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 202, 40, 0.3);
+        }
+        .btn-upgrade {
+            background: linear-gradient(135deg, #f57f17, #ffca28);
+            color: #1a2e1a;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.88em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 202, 40, 0.3);
+        }
+        .plan-badge {
+            background: rgba(76,175,80,0.2);
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.3);
+        }
+        .plan-badge.pro { 
+            background: rgba(255, 202, 40, 0.15); 
+            border-color: #ffca28; 
+            color: #ffca28; 
+        }
+        .plan-badge.trial-badge {
+            background: rgba(255, 193, 7, 0.15);
+            border-color: #ffca28;
+            color: #ffca28;
+        }
+        .days-left {
+            color: #a5d6a7;
+            font-size: 0.85em;
+        }
+        .days-left.trial-days {
+            color: #ffca28;
+        }
+
+        .hero { position: relative; text-align: center; padding: 50px 20px 30px; overflow: hidden; z-index: 1; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(76,175,80,0.1) 0%, transparent 70%); z-index: -1; }
+        .hero h1 { font-size: 2.5em; color: #4caf50; text-shadow: 0 0 30px rgba(76,175,80,0.5); margin-bottom: 10px; }
+        .hero p { color: #a5d6a7; font-size: 1em; opacity: 0.8; }
+
+        .stats-bar { display: flex; justify-content: center; gap: 20px; padding: 20px; flex-wrap: wrap; z-index: 1; position: relative; }
+        .stat-item { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.2); border-radius: 12px; padding: 15px 25px; text-align: center; min-width: 130px; }
+        .stat-value { font-size: 1.8em; font-weight: bold; color: #4caf50; }
+        .stat-label { font-size: 0.75em; color: #a5d6a7; margin-top: 4px; }
+
+        .tips-card { margin: 0 auto 20px auto; max-width: 1100px; }
+        .tips-card .card { background: linear-gradient(135deg, rgba(46,125,50,0.2), rgba(76,175,80,0.1)); border-left: 4px solid #4caf50; }
+        .tips-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .tips-left { display: flex; align-items: center; gap: 12px; }
+        .tips-icon { font-size: 2em; }
+        .tips-title { color: #4caf50; margin-bottom: 5px; font-size: 1em; }
+        .tips-text { color: #c8e6c9; font-size: 0.9em; line-height: 1.5; }
+        .btn-new-tip { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; padding: 6px 14px; border-radius: 20px; color: #81c784; cursor: pointer; font-size: 0.8em; transition: all 0.2s; }
+        .btn-new-tip:hover { background: rgba(76,175,80,0.4); color: white; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; position: relative; z-index: 1; }
+
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 1.6em; } .nav-right { gap: 6px; } }
+
+        .card { background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.2); border-radius: 16px; padding: 25px; backdrop-filter: blur(5px); transition: all 0.3s ease; }
+        .card:hover { border-color: rgba(76,175,80,0.5); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        .card-title { font-size: 1.1em; color: #81c784; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(76,175,80,0.15); padding-bottom: 12px; }
+
+        .method-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .method-tab { flex: 1; padding: 9px; background: rgba(0,0,0,0.3); border: 1px solid rgba(76,175,80,0.2); border-radius: 8px; color: #a5d6a7; font-size: 0.85em; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .method-tab.active { background: rgba(76,175,80,0.2); border-color: #4caf50; color: #4caf50; font-weight: bold; }
+        .method-tab:hover { border-color: #4caf50; color: #4caf50; }
+
+        .upload-area { border: 2px dashed rgba(76,175,80,0.4); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px; }
+        .upload-area:hover, .upload-area.dragover { border-color: #4caf50; background: rgba(76,175,80,0.08); transform: scale(1.01); }
+        .upload-icon-big { font-size: 3em; margin-bottom: 10px; }
+        .upload-area p { color: #a5d6a7; font-size: 0.9em; }
+
+        .camera-section { display: none; margin-bottom: 15px; }
+        #cameraFeed { width: 100%; border-radius: 12px; border: 2px solid rgba(76,175,80,0.3); background: #000; display: block; max-height: 220px; object-fit: cover; }
+        .camera-controls { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-camera { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 0.88em; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
+        .btn-snap { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; }
+        .btn-snap:hover { background: linear-gradient(135deg, #4caf50, #81c784); }
+        .btn-stop-cam { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; }
+        .btn-stop-cam:hover { background: rgba(211,47,47,0.4); color: white; }
+
+        #preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 10px; border: 2px solid rgba(76,175,80,0.3); }
+        #fileInput { display: none; }
+
+        .btn-clear { width: 100%; padding: 8px; background: rgba(211,47,47,0.15); border: 1px solid rgba(211,47,47,0.35); color: #ef9a9a; border-radius: 8px; cursor: pointer; font-size: 0.85em; margin-bottom: 10px; transition: all 0.2s ease; display: none; }
+        .btn-clear:hover { background: rgba(211,47,47,0.35); color: white; }
+
+        .btn-detect { width: 100%; padding: 13px; background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: all 0.3s ease; display: none; letter-spacing: 1px; }
+        .btn-detect:hover { background: linear-gradient(135deg, #4caf50, #81c784); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(76,175,80,0.3); }
+
+        .loading { display: none; text-align: center; padding: 20px; }
+        .spinner { width: 45px; height: 45px; border: 4px solid rgba(76,175,80,0.2); border-top: 4px solid #4caf50; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .result-section { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .disease-badge { display: inline-block; padding: 8px 18px; border-radius: 20px; font-weight: bold; font-size: 1.1em; margin-bottom: 8px; }
+        .badge-healthy  { background: rgba(46,125,50,0.3);  border: 1px solid #4caf50; color: #81c784; }
+        .badge-diseased { background: rgba(230,81,0,0.3);   border: 1px solid #ff6f00; color: #ffb74d; }
+        .badge-rejected { background: rgba(211,47,47,0.3);  border: 1px solid #d32f2f; color: #ef9a9a; }
+
+        .severity-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 0.85em; font-weight: bold; margin-bottom: 12px; margin-left: 8px; border: 1px solid; }
+        .conf-label { color: #a5d6a7; font-size: 0.85em; margin-bottom: 6px; }
+        .conf-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 18px; }
+        .conf-bar { height: 100%; background: linear-gradient(90deg, #2e7d32, #4caf50, #81c784); border-radius: 8px; transition: width 1.2s ease; width: 0%; }
+        .conf-bar-rejected { background: linear-gradient(90deg, #b71c1c, #d32f2f, #f44336); }
+        .severity-info { display: none; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 0.83em; border-left: 3px solid; }
+
+        .treatment-box { background: rgba(0,0,0,0.3); border-left: 3px solid #4caf50; border-radius: 0 10px 10px 0; padding: 15px; margin-top: 10px; }
+        .treatment-box h4 { color: #81c784; font-size: 0.9em; margin-bottom: 8px; }
+        .treatment-box p  { color: #c8e6c9; font-size: 0.85em; line-height: 1.8; white-space: pre-line; }
+
+        .feedback-section {
+            margin-top: 18px;
+            border-top: 1px solid rgba(76,175,80,0.15);
+            padding-top: 16px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .feedback-title {
+            font-size: 0.88em; color: #81c784; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .accuracy-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+
+        .acc-btn {
+            flex: 1; padding: 9px; border-radius: 8px;
+            border: 1px solid rgba(76,175,80,0.3);
+            background: rgba(0,0,0,0.2); color: #a5d6a7;
+            font-size: 0.85em; cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .acc-btn:hover { border-color: #4caf50; color: #4caf50; }
+        .acc-btn.selected-yes { background: rgba(46,125,50,0.3); border-color: #4caf50; color: #81c784; }
+        .acc-btn.selected-no  { background: rgba(211,47,47,0.2); border-color: #ef5350; color: #ef9a9a; }
+
+        .star-row { display: flex; gap: 6px; margin-bottom: 14px; }
+        .star { font-size: 1.6em; cursor: pointer; color: rgba(255,255,255,0.25); transition: color 0.15s ease; user-select: none; }
+        .star.lit { color: #ffca28; }
+
+        .feedback-comment {
+            width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(76,175,80,0.2); border-radius: 8px;
+            color: #e8f5e9; font-size: 0.85em; resize: vertical;
+            min-height: 70px; font-family: inherit; margin-bottom: 12px;
+        }
+
+        .feedback-comment:focus { outline: none; border-color: #4caf50; }
+        .feedback-comment::placeholder { color: rgba(255,255,255,0.25); }
+
+        .btn-submit-feedback {
+            width: 100%; padding: 10px; background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: white; border: none; border-radius: 8px;
+            font-size: 0.88em; font-weight: bold; cursor: pointer;
+            transition: all 0.2s ease; letter-spacing: 0.5px;
+        }
+
+        .btn-submit-feedback:hover { background: linear-gradient(135deg, #1976d2, #42a5f5); transform: translateY(-1px); }
+
+        .feedback-success {
+            display: none; margin-top: 10px; padding: 10px 14px;
+            background: rgba(46,125,50,0.2); border: 1px solid rgba(76,175,80,0.4);
+            border-radius: 8px; color: #81c784; font-size: 0.83em; text-align: center;
+        }
+
+        .feedback-already {
+            display: none; margin-top: 10px; padding: 10px 14px;
+            background: rgba(33,150,243,0.1); border: 1px solid rgba(33,150,243,0.3);
+            border-radius: 8px; color: #90caf9; font-size: 0.83em; text-align: center;
+        }
+
+        .history-card { grid-column: 1 / -1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(76,175,80,0.15); padding: 10px 12px; text-align: left; color: #81c784; font-size: 0.82em; letter-spacing: 1px; text-transform: uppercase; }
+        td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8e6c9; font-size: 0.88em; }
+        tr:hover td { background: rgba(76,175,80,0.05); }
+
+        .tag-healthy  { background: rgba(46,125,50,0.3);  color: #81c784;  padding: 3px 10px; border-radius: 10px; font-size: 0.8em; }
+        .tag-diseased { background: rgba(230,81,0,0.3);   color: #ffb74d;  padding: 3px 10px; border-radius: 10px; font-size: 0.8em; }
+
+        .btn-view, .btn-delete { padding: 5px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8em; font-weight: bold; transition: all 0.2s ease; }
+        .btn-view { background: rgba(76,175,80,0.2); border: 1px solid rgba(76,175,80,0.4); color: #81c784; margin-right: 6px; }
+        .btn-view:hover { background: rgba(76,175,80,0.4); color: white; }
+        .btn-delete { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; }
+        .btn-delete:hover { background: rgba(211,47,47,0.4); color: white; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: rgba(10,30,10,0.97); border: 1px solid rgba(76,175,80,0.4); border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; position: relative; animation: fadeIn 0.3s ease; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 0.85em; }
+        .modal-close:hover { background: rgba(211,47,47,0.5); color: white; }
+        .modal h3 { color: #4caf50; margin-bottom: 20px; font-size: 1.2em; }
+        .modal-image { width: 100%; border-radius: 10px; margin-bottom: 15px; border: 2px solid rgba(76,175,80,0.3); max-height: 220px; object-fit: cover; }
+        .modal-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.88em; }
+        .modal-row .label { color: #a5d6a7; }
+        .modal-row .value { color: #e8f5e9; text-align: right; max-width: 60%; }
+        .modal-treatment { margin-top: 15px; background: rgba(0,0,0,0.3); border-left: 3px solid #4caf50; border-radius: 0 10px 10px 0; padding: 12px; font-size: 0.85em; color: #c8e6c9; line-height: 1.7; }
+
+        .confirm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; }
+        .confirm-overlay.active { display: flex; }
+        .confirm-box { background: rgba(10,20,10,0.98); border: 1px solid rgba(211,47,47,0.4); border-radius: 16px; padding: 30px; max-width: 380px; width: 90%; text-align: center; animation: fadeIn 0.3s ease; }
+        .confirm-box h3 { color: #ef9a9a; margin-bottom: 10px; font-size: 1.1em; }
+        .confirm-box p  { color: #a5d6a7; font-size: 0.88em; margin-bottom: 20px; }
+        .confirm-buttons { display: flex; gap: 12px; justify-content: center; }
+        .btn-confirm-delete { padding: 10px 24px; background: rgba(211,47,47,0.4); border: 1px solid rgba(211,47,47,0.6); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+        .btn-confirm-delete:hover { background: rgba(211,47,47,0.7); }
+        .btn-confirm-cancel { padding: 10px 24px; background: rgba(76,175,80,0.2); border: 1px solid rgba(76,175,80,0.4); color: #81c784; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+        .btn-confirm-cancel:hover { background: rgba(76,175,80,0.4); color: white; }
+
+        footer { text-align: center; padding: 20px; color: rgba(255,255,255,0.2); font-size: 0.78em; border-top: 1px solid rgba(76,175,80,0.1); position: relative; z-index: 1; }
+        footer span { color: #4caf50; }
+        #snapCanvas { display: none; }
+
+        @media (max-width: 600px) {
+            .sub-banner .card { flex-direction: column; text-align: center; padding: 20px; }
+            .sub-left { flex-direction: column; text-align: center; }
+            .sub-actions { justify-content: center; width: 100%; }
+            .btn-subscribe, .btn-upgrade { width: 100%; justify-content: center; }
+            .progress-bar-wrap { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tomatoContainer"></div>
+    <canvas id="snapCanvas"></canvas>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
+        <div class="nav-right">
+            <div class="nav-farmer">
+                <span data-en="Welcome," data-sw="Karibu,">Welcome,</span>
+                <strong>{{ farmer_name }}</strong> 👨‍🌾
+            </div>
+            <div class="lang-toggle">
+                <button class="lang-btn active" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+                <button class="lang-btn"        id="btnSW" onclick="setLang('sw')">🇰🇪 SW</button>
+            </div>
+            <a href="/stats" class="nav-link" data-en="📊 Statistics" data-sw="📊 Takwimu">📊 Statistics</a>
+            <a href="/payment/history" class="nav-link" data-en="💰 Payment" data-sw="💰 Malipo">💰 Payment</a>
+            <a href="/notifications" class="nav-link" data-en="🔔 Notifications" data-sw="🔔 Arifa">🔔 Notifications</a>
+            <a href="/tips_settings" class="nav-link" data-en="💡 Tips" data-sw="💡 Vidokezo">💡 Tips</a>
+            <a href="#" class="nav-link" onclick="openReport(event)" data-en="📄 Report" data-sw="📄 Ripoti">📄 Report</a>
+            <a href="/logout" class="btn-logout" data-en="🚪 Logout" data-sw="🚪 Toka">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <!-- ─── SUBSCRIPTION / TRIAL BANNER ─── -->
+    <div class="sub-banner">
+        {% if access_type == 'subscription' %}
+        <div class="card">
+            <div class="sub-left">
+                <span class="sub-icon">
+                    {% if subscription and subscription.plan == 'pro' %}🌟{% else %}✅{% endif %}
+                </span>
+                <div class="sub-info">
+                    <h3>
+                        {% if subscription and subscription.plan == 'pro' %}
+                            🌟 Pro Plan Active
+                        {% elif subscription and subscription.plan == 'starter' %}
+                            📋 Starter Plan Active
+                        {% else %}
+                            Active Subscription
+                        {% endif %}
+                    </h3>
+                    <p>
+                        {% if subscription and subscription.expires_at %}
+                            Expires: {{ subscription.expires_at.strftime('%d %b %Y') }}
+                        {% else %}
+                            Unlimited access
+                        {% endif %}
+                        {% if subscription and subscription.plan == 'starter' %}
+                            <span class="scan-count">
+                                📊 {{ scan_count }}/50 scans used this month
+                            </span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="sub-actions">
+                {% if subscription and subscription.plan == 'starter' %}
+                    <a href="/payment/pro" class="btn-upgrade">⭐ Upgrade to Pro</a>
+                    <span class="plan-badge">Starter</span>
+                {% elif subscription and subscription.plan == 'pro' %}
+                    <span class="plan-badge pro">🌟 Pro</span>
+                {% else %}
+                    <span class="plan-badge">Active</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% elif access_type == 'trial' %}
+        <div class="card trial">
+            <div class="sub-left">
+                <span class="sub-icon">🎯</span>
+                <div class="sub-info">
+                    <h3 class="trial-title">Free Trial Active</h3>
+                    <p id="trialInfoText">
+                        <strong style="color: #ffca28;">{{ trial_info.scans_remaining }}</strong> free scans remaining
+                        ({{ trial_info.scans_used }}/{{ trial_info.scan_limit }} used)
+                        {% if trial_info.days_left > 0 %}
+                        · <span class="days-left trial-days">{{ trial_info.days_left }} days left</span>
+                        {% endif %}
+                    </p>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill trial-fill" id="trialProgressBar" style="width: {{ (trial_info.scans_used / trial_info.scan_limit * 100)|round(0) }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sub-actions">
+                <span class="days-left trial-days">⏳ {{ trial_info.days_left }} days left</span>
+                <a href="/payment/starter" class="btn-subscribe trial-btn">🚀 Subscribe Now</a>
+                <span class="plan-badge trial-badge">Trial</span>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="card no-access">
+            <div class="sub-left">
+                <span class="sub-icon">🔒</span>
+                <div class="sub-info">
+                    <h3 class="no-access-title">Subscription Required</h3>
+                    <p>
+                        {% if trial_info and trial_info.scans_used %}
+                            You have used all {{ trial_info.scan_limit }} free scans.
+                        {% else %}
+                            Subscribe to unlock unlimited disease detection.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="sub-actions">
+                <a href="/payment/starter" class="btn-subscribe">🚀 Subscribe Now</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+        <h1 data-en="🌿 Tomato Disease Detection" data-sw="🌿 Utambuzi wa Magonjwa ya Nyanya">🌿 Tomato Disease Detection</h1>
+        <p data-en="Upload a tomato leaf image for instant AI-powered disease detection"
+           data-sw="Pakia picha ya jani la nyanya kwa utambuzi wa haraka wa ugonjwa">
+            Upload a tomato leaf image for instant AI-powered disease detection</p>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value">10</div>
+            <div class="stat-label" data-en="Disease Classes" data-sw="Aina za Magonjwa">Disease Classes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">93%</div>
+            <div class="stat-label" data-en="Model Accuracy" data-sw="Usahihi wa Mfano">Model Accuracy</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalDetections">0</div>
+            <div class="stat-label" data-en="Total Detections" data-sw="Jumla ya Utambuzi">Total Detections</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">CNN</div>
+            <div class="stat-label" data-en="Convolutional Neural Network" data-sw="Mtandao wa Neural wa Convolutional">Convolutional Neural Network</div>
+        </div>
+    </div>
+
+    <!-- PROACTIVE TIPS WIDGET -->
+    <div class="tips-card" id="tipsWidget" style="display: block;">
+        <div class="card">
+            <div class="tips-content">
+                <div class="tips-left">
+                    <div class="tips-icon">💡</div>
+                    <div>
+                        <h3 class="tips-title" data-en="Proactive Farming Tip" data-sw="Kidokezo cha Kilimo cha Kuzuia">Proactive Farming Tip</h3>
+                        <p class="tips-text" id="tipContent">Loading tip...</p>
+                    </div>
+                </div>
+                <button class="btn-new-tip" onclick="refreshTip()" data-en="🔄 New Tip" data-sw="🔄 Kidokezo Kipya">🔄 New Tip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+        <!-- UPLOAD CARD -->
+        <div class="card">
+            <div class="card-title" data-en="📤 Upload Leaf Image" data-sw="📤 Pakia Picha ya Jani">📤 Upload Leaf Image</div>
+            <div class="method-tabs">
+                <div class="method-tab active" id="tabUpload" onclick="switchMethod('upload')" data-en="📁 Upload File" data-sw="📁 Pakia Faili">📁 Upload File</div>
+                <div class="method-tab" id="tabCamera" onclick="switchMethod('camera')" data-en="📷 Use Camera" data-sw="📷 Tumia Kamera">📷 Use Camera</div>
+            </div>
+            <div id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon-big">🌿</div>
+                    <p><strong style="color:#4caf50;" data-en="Click to upload" data-sw="Bonyeza kupakia">Click to upload</strong><span data-en=" or drag & drop" data-sw=" au buruta na uweke"> or drag & drop</span></p>
+                    <p style="margin-top:5px; opacity:0.6;" data-en="JPG, PNG supported" data-sw="JPG, PNG inakubaliwa">JPG, PNG supported</p>
+                </div>
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png">
+            </div>
+            <div class="camera-section" id="cameraSection">
+                <video id="cameraFeed" autoplay playsinline muted></video>
+                <div class="camera-controls">
+                    <button class="btn-camera btn-snap" onclick="snapPhoto()" data-en="📸 Take Photo" data-sw="📸 Piga Picha">📸 Take Photo</button>
+                    <button class="btn-camera btn-stop-cam" onclick="stopCamera()" data-en="✕ Stop Camera" data-sw="✕ Simamisha Kamera">✕ Stop Camera</button>
+                </div>
+            </div>
+            <img id="preview" src="" alt="Preview">
+            <button class="btn-clear" id="clearBtn" onclick="clearImage()" data-en="✕ Clear Image" data-sw="✕ Futa Picha">✕ Clear Image</button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="color:#a5d6a7; font-size:0.9em;" data-en="Analyzing leaf..." data-sw="Inachunguza jani...">Analyzing leaf...</p>
+            </div>
+            <button class="btn-detect" id="detectBtn" onclick="detectDisease()" data-en="🔍 DETECT DISEASE" data-sw="🔍 TAMBUA UGONJWA">🔍 DETECT DISEASE</button>
+        </div>
+
+        <!-- RESULT CARD -->
+        <div class="card">
+            <div class="card-title" data-en="🔬 Detection Result" data-sw="🔬 Matokeo ya Utambuzi">🔬 Detection Result</div>
+
+            <div id="resultPlaceholder" style="text-align:center; padding:40px 0; opacity:0.4;">
+                <div style="font-size:3em;">🍃</div>
+                <p style="margin-top:10px; color:#a5d6a7;" data-en="Results will appear here after detection" data-sw="Matokeo yataonekana hapa baada ya utambuzi">Results will appear here after detection</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div id="diseaseBadge" class="disease-badge badge-diseased"></div>
+                <span class="severity-badge" id="severityBadge" style="display:none;"></span>
+                <br>
+                <div class="severity-info" id="severityInfo"></div>
+                <div class="conf-label" id="confLabel"></div>
+                <div class="conf-bar-wrap"><div class="conf-bar" id="confBar"></div></div>
+                <div class="treatment-box">
+                    <h4 data-en="💊 Treatment Recommendations" data-sw="💊 Mapendekezo ya Matibabu">💊 Treatment Recommendations</h4>
+                    <p id="treatmentText"></p>
+                </div>
+
+                <div class="feedback-section" id="feedbackSection">
+                    <div class="feedback-title">💬 <span data-en="Was this diagnosis helpful?" data-sw="Je, utambuzi huu ulikuwa wa msaada?">Was this diagnosis helpful?</span></div>
+
+                    <div class="accuracy-btns">
+                        <button class="acc-btn" id="btnYes" onclick="selectAccuracy(1)"
+                                data-en="👍 Yes, correct" data-sw="👍 Ndiyo, sahihi">👍 Yes, correct</button>
+                        <button class="acc-btn" id="btnNo"  onclick="selectAccuracy(0)"
+                                data-en="👎 No, incorrect" data-sw="👎 Hapana, si sahihi">👎 No, incorrect</button>
+                    </div>
+
+                    <p style="font-size:0.8em; color:#a5d6a7; margin-bottom:8px;" data-en="Rate your experience:" data-sw="Kadiria uzoefu wako:">Rate your experience:</p>
+                    <div class="star-row" id="starRow">
+                        <span class="star" onclick="selectStar(1)">★</span>
+                        <span class="star" onclick="selectStar(2)">★</span>
+                        <span class="star" onclick="selectStar(3)">★</span>
+                        <span class="star" onclick="selectStar(4)">★</span>
+                        <span class="star" onclick="selectStar(5)">★</span>
+                    </div>
+
+                    <textarea class="feedback-comment" id="feedbackComment"
+                        data-en-placeholder="Optional: Tell us more about your experience..."
+                        data-sw-placeholder="Hiari: Tuambie zaidi kuhusu uzoefu wako..."
+                        placeholder="Optional: Tell us more about your experience..."></textarea>
+
+                    <button class="btn-submit-feedback" onclick="submitFeedback()"
+                            data-en="📨 Submit Feedback" data-sw="📨 Wasilisha Maoni">📨 Submit Feedback</button>
+
+                    <div class="feedback-success" id="feedbackSuccess">
+                        ✅ <span data-en="Thank you! Your feedback helps improve the system." data-sw="Asante! Maoni yako yanasaidia kuboresha mfumo.">Thank you! Your feedback helps improve the system.</span>
+                    </div>
+                    <div class="feedback-already" id="feedbackAlready">
+                        ℹ️ <span data-en="You have already submitted feedback for this diagnosis." data-sw="Tayari umewasilisha maoni kwa utambuzi huu.">You have already submitted feedback for this diagnosis.</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- HISTORY CARD -->
+        <div class="card history-card">
+            <div class="card-title" data-en="📋 Recent Detections" data-sw="📋 Utambuzi wa Hivi Karibuni">📋 Recent Detections</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-en="#" data-sw="#">#</th>
+                            <th data-en="Image" data-sw="Picha">Image</th>
+                            <th data-en="Disease" data-sw="Ugonjwa">Disease</th>
+                            <th data-en="Confidence" data-sw="Uhakika">Confidence</th>
+                            <th data-en="Severity" data-sw="Ukali">Severity</th>
+                            <th data-en="Date & Time" data-sw="Tarehe & Saa">Date & Time</th>
+                            <th data-en="Actions" data-sw="Vitendo">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        {% for r in recent %}
+                        <tr id="row-{{ r.id }}">
+                            <td>{{ loop.index }}</td>
+                            <td>{{ r.image_name[:20] }}...</td>
+                            <td>
+                                <span class="{% if 'healthy' in r.predicted_disease.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">
+                                    {{ r.predicted_disease.replace('Tomato_','').replace('Tomato__','').replace('_',' ') }}
+                                </span>
+                            </td>
+                            <td>{{ "%.2f"|format(r.confidence * 100) }}%</td>
+                            <td>
+                                {% if 'healthy' in r.predicted_disease.lower() %}—
+                                {% elif r.confidence >= 0.92 %}<span style="color:#ef5350;">🔴 Severe</span>
+                                {% elif r.confidence >= 0.83 %}<span style="color:#ffca28;">🟡 Moderate</span>
+                                {% else %}<span style="color:#66bb6a;">🟢 Mild</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ r.created_at }}</td>
+                            <td>
+                                <button class="btn-view"   onclick="viewPrediction({{ r.id }})" data-en="👁 View"   data-sw="👁 Tazama">👁 View</button>
+                                <button class="btn-delete" onclick="confirmDelete({{ r.id }})"  data-en="🗑 Delete" data-sw="🗑 Futa">🗑 Delete</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:30px; opacity:0.5;"
+                                data-en="No detections yet — upload your first image! 🌿"
+                                data-sw="Bado hakuna utambuzi — pakia picha yako ya kwanza! 🌿">
+                                No detections yet — upload your first image! 🌿
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>🍅 TomatoGuard | <span data-en="Built with" data-sw="Imejengwa na">Built with</span> <span>CNN from Scratch</span> | Pure Python + NumPy | Deep Learning</p>
+    </footer>
+
+    <!-- VIEW MODAL -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()" data-en="✕ Close" data-sw="✕ Funga">✕ Close</button>
+            <h3 data-en="🔬 Prediction Details" data-sw="🔬 Maelezo ya Utambuzi">🔬 Prediction Details</h3>
+            <img class="modal-image" id="modalImage" src="" alt="Leaf image" onerror="this.style.display='none'">
+            <div class="modal-row"><span class="label" data-en="Disease"    data-sw="Ugonjwa">Disease</span><span class="value" id="modalDisease"></span></div>
+            <div class="modal-row"><span class="label" data-en="Confidence" data-sw="Uhakika">Confidence</span><span class="value" id="modalConfidence"></span></div>
+            <div class="modal-row"><span class="label" data-en="Severity"   data-sw="Ukali">Severity</span><span class="value" id="modalSeverity"></span></div>
+            <div class="modal-row"><span class="label" data-en="Image File" data-sw="Faili la Picha">Image File</span><span class="value" id="modalImageName"></span></div>
+            <div class="modal-row"><span class="label" data-en="Date & Time" data-sw="Tarehe & Saa">Date & Time</span><span class="value" id="modalDate"></span></div>
+            <div class="modal-treatment" id="modalTreatment"></div>
+        </div>
+    </div>
+
+    <!-- CONFIRM DELETE -->
+    <div class="confirm-overlay" id="confirmModal">
+        <div class="confirm-box">
+            <h3 data-en="🗑 Delete Prediction?" data-sw="🗑 Futa Utambuzi?">🗑 Delete Prediction?</h3>
+            <p data-en="This will permanently delete this prediction and its image. This cannot be undone."
+               data-sw="Hii itafuta utambuzi huu na picha yake kabisa. Haiwezi kutenduliwa.">
+               This will permanently delete this prediction and its image. This cannot be undone.</p>
+            <div class="confirm-buttons">
+                <button class="btn-confirm-cancel" onclick="closeConfirm()" data-en="Cancel" data-sw="Ghairi">Cancel</button>
+                <button class="btn-confirm-delete" onclick="executeDelete()" data-en="Delete" data-sw="Futa">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingDeleteId  = null;
+        let cameraStream     = null;
+        let capturedBlob     = null;
+        let currentLang      = 'en';
+        let currentPredId    = null;
+        let selectedAccuracy = null;
+        let selectedRating   = 0;
+
+        // Tips organized by category
+        const tipsByCategory = {
+            general: [
+                { en: "🌿 Inspect your tomato plants weekly for early signs of disease.", sw: "🌿 Kagua mimea yako ya nyanya kila wiki kwa ishara za mapema za ugonjwa." },
+                { en: "🍅 Remove infected leaves immediately when you see first signs of disease.", sw: "🍅 Ondoa majani yaliyoathiriwa mara unapoona dalili za kwanza za ugonjwa." },
+                { en: "📝 Keep a farming journal to track disease patterns each season.", sw: "📝 Weka shajara ya kilimo kufuatilia mifumo ya magonjwa kila msimu." }
+            ],
+            disease: [
+                { en: "🦠 Water at the base in the morning - wet leaves overnight promote fungal diseases.", sw: "🦠 Mwagilia kwenye msingi asubuhi - majani yenye unyevu usiku huleta magonjwa ya kuvu." },
+                { en: "⚠️ Remove bottom leaves to improve air circulation and reduce disease risk.", sw: "⚠️ Ondoa majani ya chini kuboresha mzunguko wa hewa na kupunguza hatari ya magonjwa." },
+                { en: "🔄 Rotate tomato crops every 2-3 years to prevent soil-borne diseases.", sw: "🔄 Zungusha mazao ya nyanya kila miaka 2-3 kuzuia magonjwa ya udongo." },
+                { en: "🧼 Clean pruning tools with alcohol between plants to prevent disease spread.", sw: "🧼 Safisha zana za kupogoa kwa pombe kati ya mimea kuzuia kuenea kwa magonjwa." }
+            ],
+            irrigation: [
+                { en: "💧 Water tomatoes at the base, not from above - this prevents fungal spores from splashing.", sw: "💧 Mwagilia nyanya kwenye msingi, si kutoka juu - hii inazuia spores za kuvu kuruka." },
+                { en: "⏰ Water consistently - irregular watering stresses plants and invites disease.", sw: "⏰ Mwagilia mara kwa mara - kumwagilia kwa utaratibu usio wa kawaida kunasisitiza mimea." },
+                { en: "☀️ Water in the morning so leaves dry during the day, preventing fungal growth.", sw: "☀️ Mwagilia asubuhi ili majani yakauke mchana, kuzuia ukuaji wa kuvu." }
+            ],
+            soil: [
+                { en: "🌱 Add compost to your soil before planting for healthier, disease-resistant plants.", sw: "🌱 Ongeza mboji kwenye udongo kabla ya kupanda kwa mimea yenye afya." },
+                { en: "🌾 Mulch around plants to prevent soil from splashing onto leaves.", sw: "🌾 Weka matandazo karibu na mimea kuzuia udongo kuruka kwenye majani." },
+                { en: "🔄 Never plant tomatoes in the same spot two years in a row - rotate with beans or maize.", sw: "🔄 Usipande nyanya mahali pamoja miaka miwili mfululizo - zungusha na maharagwe au mahindi." }
+            ],
+            pest: [
+                { en: "🐛 Check under leaves weekly for small green aphids - spray with soapy water.", sw: "🐛 Angalia chini ya majani kila wiki kwa wadudu wadogo wa kijani - nyunyizia maji ya sabuni." },
+                { en: "🕷️ Mites love dry conditions - keep plants well-watered and mist leaves occasionally.", sw: "🕷️ Sarafu wanapenda hali kavu - weka mimea ikiwa na maji vizuri na nyunyizia maji kwenye majani." },
+                { en: "🌿 Plant basil or marigolds near tomatoes to repel pests naturally.", sw: "🌿 Panda basil au marigold karibu na nyanya kufukuza wadudu kiasili." }
+            ]
+        };
+
+        let currentTipIndex = 0;
+        let currentTipsList = [];
+
+        function loadTipPreferences() {
+            const saved = localStorage.getItem('tipPreferences');
+            if (saved) {
+                const prefs = JSON.parse(saved);
+                if (prefs.daily === false) {
+                    document.getElementById('tipsWidget').style.display = 'none';
+                    return false;
+                }
+                document.getElementById('tipsWidget').style.display = 'block';
+                const categories = prefs.categories || ['general', 'disease', 'irrigation', 'soil', 'pest'];
+                currentTipsList = [];
+                categories.forEach(cat => {
+                    if (tipsByCategory[cat]) {
+                        currentTipsList.push(...tipsByCategory[cat]);
+                    }
+                });
+                if (currentTipsList.length === 0) {
+                    currentTipsList = [...tipsByCategory.general, ...tipsByCategory.disease, ...tipsByCategory.irrigation, ...tipsByCategory.soil, ...tipsByCategory.pest];
+                }
+                return true;
+            }
+            document.getElementById('tipsWidget').style.display = 'block';
+            currentTipsList = [...tipsByCategory.general, ...tipsByCategory.disease, ...tipsByCategory.irrigation, ...tipsByCategory.soil, ...tipsByCategory.pest];
+            return true;
+        }
+
+        function loadTip() {
+            if (currentTipsList.length === 0) {
+                loadTipPreferences();
+            }
+            if (currentTipsList.length === 0) return;
+            currentTipIndex = Math.floor(Math.random() * currentTipsList.length);
+            const tip = currentTipsList[currentTipIndex];
+            const tipText = tip[currentLang] || tip.en;
+            document.getElementById('tipContent').textContent = tipText;
+        }
+
+        function refreshTip() {
+            if (currentTipsList.length === 0) {
+                loadTipPreferences();
+            }
+            if (currentTipsList.length === 0) return;
+            currentTipIndex = (currentTipIndex + 1) % currentTipsList.length;
+            const tip = currentTipsList[currentTipIndex];
+            const tipText = tip[currentLang] || tip.en;
+            document.getElementById('tipContent').textContent = tipText;
+        }
+
+        // ── FLOATING TOMATOES ──
+        const emojis = ['🍅','🌿','🍃','🌱','🌾'];
+        for (let i = 0; i < 15; i++) {
+            const el = document.createElement('div');
+            el.className = 'tomato';
+            el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (1.5 + Math.random() * 3) + 'em';
+            el.style.animationDuration = (10 + Math.random() * 20) + 's';
+            el.style.animationDelay    = (Math.random() * 15) + 's';
+            document.getElementById('tomatoContainer').appendChild(el);
+        }
+
+        // ── LANGUAGE ──
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+            document.getElementById('btnSW').classList.toggle('active', lang === 'sw');
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) el.textContent = text;
+            });
+            document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+                const ph = el.getAttribute(`data-${lang}-placeholder`);
+                if (ph) el.placeholder = ph;
+            });
+            localStorage.setItem('tomatoguard_lang', lang);
+            loadTip();
+        }
+
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
+        else loadTip();
+
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+        }
+
+        // ── CAMERA ──
+        function switchMethod(method) {
+            document.getElementById('tabUpload').classList.toggle('active', method === 'upload');
+            document.getElementById('tabCamera').classList.toggle('active', method === 'camera');
+            document.getElementById('uploadSection').style.display = method === 'upload' ? 'block' : 'none';
+            document.getElementById('cameraSection').style.display = method === 'camera' ? 'block' : 'none';
+            if (method === 'camera') startCamera(); else stopCamera();
+        }
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert(currentLang === 'sw' ? 'Kamera haiungi mkono kivinjari hiki.' : 'Camera not supported.');
+                switchMethod('upload'); return;
+            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => { cameraStream = stream; document.getElementById('cameraFeed').srcObject = stream; })
+            .catch(err => { alert('Camera error: ' + err.message); switchMethod('upload'); });
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null; document.getElementById('cameraFeed').srcObject = null;
+            }
+            if (document.getElementById('tabCamera').classList.contains('active')) {
+                document.getElementById('tabUpload').classList.add('active');
+                document.getElementById('tabCamera').classList.remove('active');
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('cameraSection').style.display = 'none';
+            }
+        }
+
+        function snapPhoto() {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.getElementById('snapCanvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.toBlob(blob => {
+                capturedBlob = blob;
+                showPreviewFromURL(URL.createObjectURL(blob));
+                stopCamera();
+            }, 'image/jpeg', 0.92);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) { capturedBlob = null; showPreview(file); }
+        });
+
+        document.getElementById('uploadArea').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragenter', e => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragover',  e => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', e => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.remove('dragover'); });
+        uploadArea.addEventListener('drop', e => {
+            e.preventDefault(); e.stopPropagation(); uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+                capturedBlob = null;
+                const dt = new DataTransfer(); dt.items.add(file);
+                document.getElementById('fileInput').files = dt.files;
+                showPreview(file);
+            } else {
+                alert(currentLang === 'sw' ? 'Tafadhali buruta picha ya JPG au PNG.' : 'Please drop a JPG or PNG image.');
+            }
+        });
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = e => showPreviewFromURL(e.target.result);
+            reader.readAsDataURL(file);
+        }
+
+        function showPreviewFromURL(url) {
+            document.getElementById('preview').src = url;
+            document.getElementById('preview').style.display           = 'block';
+            document.getElementById('uploadArea').style.display        = 'none';
+            document.getElementById('clearBtn').style.display          = 'block';
+            document.getElementById('detectBtn').style.display         = 'block';
+            document.getElementById('resultSection').style.display     = 'none';
+            document.getElementById('resultPlaceholder').style.display = 'block';
+        }
+
+        function clearImage() {
+            document.getElementById('preview').style.display           = 'none';
+            document.getElementById('preview').src                     = '';
+            document.getElementById('clearBtn').style.display          = 'none';
+            document.getElementById('detectBtn').style.display         = 'none';
+            document.getElementById('uploadArea').style.display        = 'block';
+            document.getElementById('resultSection').style.display     = 'none';
+            document.getElementById('resultPlaceholder').style.display = 'block';
+            document.getElementById('fileInput').value = '';
+            capturedBlob = null; currentPredId = null;
+        }
+
+        // ── UPDATE STATS ──
+        function updateStats() {
+            fetch('/api/stats')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('totalDetections').textContent = data.total || 0;
+            })
+            .catch(err => console.error('Stats error:', err));
+        }
+
+        // ── UPDATE TRIAL COUNT ──
+        function updateTrialCount(remaining) {
+            const trialBanner = document.querySelector('.sub-banner .card.trial');
+            if (!trialBanner) return;
+            
+            const infoText = document.getElementById('trialInfoText');
+            if (infoText) {
+                const match = infoText.textContent.match(/(\d+)\/(\d+)/);
+                if (match) {
+                    const used = parseInt(match[1]);
+                    const limit = parseInt(match[2]);
+                    const newUsed = used + 1;
+                    const newRemaining = limit - newUsed;
+                    
+                    // Get days left text
+                    const daysSpan = infoText.querySelector('.days-left');
+                    const daysText = daysSpan ? daysSpan.textContent : '';
+                    
+                    // Update text
+                    infoText.innerHTML = `
+                        <strong style="color: #ffca28;">${newRemaining}</strong> free scans remaining
+                        (${newUsed}/${limit} used)
+                        ${daysText ? '· <span class="days-left trial-days">' + daysText + '</span>' : ''}
+                    `;
+                    
+                    // Update progress bar
+                    const progressBar = document.getElementById('trialProgressBar');
+                    if (progressBar) {
+                        const pct = (newUsed / limit * 100);
+                        progressBar.style.width = Math.min(pct, 100) + '%';
+                    }
+                }
+            }
+        }
+
+        // ── DETECT ──
+        function detectDisease() {
+            const fileInput = document.getElementById('fileInput');
+            let fileToSend  = capturedBlob
+                ? new File([capturedBlob], 'camera_capture.jpg', { type: 'image/jpeg' })
+                : fileInput.files[0];
+
+            if (!fileToSend) {
+                alert(currentLang === 'sw' ? 'Tafadhali chagua au piga picha kwanza!' : 'Please select or capture an image first!');
+                return;
+            }
+
+            document.getElementById('loading').style.display           = 'block';
+            document.getElementById('detectBtn').style.display         = 'none';
+            document.getElementById('clearBtn').style.display          = 'none';
+            document.getElementById('resultSection').style.display     = 'none';
+            document.getElementById('feedbackSection').style.display   = 'none';
+
+            const formData = new FormData();
+            formData.append('file', fileToSend);
+            formData.append('lang', currentLang);
+
+            fetch('/predict', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('loading').style.display   = 'none';
+                document.getElementById('detectBtn').style.display = 'block';
+                document.getElementById('clearBtn').style.display  = 'block';
+
+                document.getElementById('severityBadge').style.display = 'none';
+                document.getElementById('severityInfo').style.display  = 'none';
+
+                // Handle subscription/trial errors
+                if (data.error === 'no_access' || data.error === 'trial_expired') {
+                    alert(data.message || 'Please subscribe to continue.');
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                    return;
+                }
+
+                if (data.success === false || data.error === 'rejected' || data.error === 'low_confidence') {
+                    const badge = document.getElementById('diseaseBadge');
+                    badge.textContent = data.disease || (currentLang === 'sw' ? '❌ Si Jani la Nyanya' : '❌ Not a Valid Tomato Leaf');
+                    badge.className   = 'disease-badge badge-rejected';
+                    const confBar = document.getElementById('confBar');
+                    if (data.confidence && data.confidence > 0) {
+                        document.getElementById('confLabel').textContent = (currentLang === 'sw' ? 'Uhakika: ' : 'Confidence: ') + data.confidence + '%';
+                        confBar.style.width = data.confidence + '%';
+                        confBar.classList.add('conf-bar-rejected');
+                    } else {
+                        document.getElementById('confLabel').textContent = '';
+                        confBar.style.width = '0%';
+                    }
+                    document.getElementById('treatmentText').innerHTML     = data.treatment || '';
+                    document.getElementById('resultPlaceholder').style.display = 'none';
+                    document.getElementById('resultSection').style.display     = 'block';
+                    document.getElementById('feedbackSection').style.display   = 'none';
+                    
+                    // Update stats even on rejection
+                    updateStats();
+                    refreshHistory();
+                    return;
+                }
+
+                if (data.success === true) {
+                    currentPredId = data.prediction_id;
+                    resetFeedbackUI();
+
+                    const isHealthy = data.disease.toLowerCase().includes('healthy') ||
+                                      data.disease.toLowerCase().includes('afya');
+                    const badge = document.getElementById('diseaseBadge');
+                    badge.textContent = (isHealthy ? '✅ ' : '⚠️ ') + data.disease;
+                    badge.className   = 'disease-badge ' + (isHealthy ? 'badge-healthy' : 'badge-diseased');
+
+                    if (data.severity) {
+                        const sev   = data.severity;
+                        const level = currentLang === 'sw' ? sev.level_sw : sev.level_en;
+                        const desc  = currentLang === 'sw' ? sev.desc_sw  : sev.desc_en;
+                        const sevBadge = document.getElementById('severityBadge');
+                        sevBadge.textContent      = sev.emoji + ' ' + level;
+                        sevBadge.style.display    = 'inline-flex';
+                        sevBadge.style.color      = sev.color;
+                        sevBadge.style.borderColor= sev.color;
+                        sevBadge.style.background = sev.color + '22';
+                        const sevInfo = document.getElementById('severityInfo');
+                        sevInfo.textContent      = sev.emoji + '  ' + desc;
+                        sevInfo.style.display    = 'block';
+                        sevInfo.style.color      = sev.color;
+                        sevInfo.style.borderColor= sev.color;
+                        sevInfo.style.background = sev.color + '15';
+                    }
+
+                    document.getElementById('confLabel').textContent = (currentLang === 'sw' ? 'Uhakika: ' : 'Confidence: ') + data.confidence + '%';
+                    const confBar = document.getElementById('confBar');
+                    confBar.style.width = data.confidence + '%';
+                    confBar.classList.remove('conf-bar-rejected');
+                    document.getElementById('treatmentText').innerHTML = data.treatment;
+
+                    document.getElementById('resultPlaceholder').style.display = 'none';
+                    document.getElementById('resultSection').style.display     = 'block';
+
+                    document.getElementById('feedbackSection').style.display = 'block';
+                    checkExistingFeedback(currentPredId);
+
+                    // --- UPDATE STATS AND HISTORY IN REAL-TIME ---
+                    updateStats();
+                    refreshHistory();
+                    
+                    // --- UPDATE TRIAL COUNT WITHOUT REFRESH ---
+                    if (data.access_type === 'trial' && data.trial_remaining !== null) {
+                        updateTrialCount(data.trial_remaining);
+                    }
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading').style.display   = 'none';
+                document.getElementById('detectBtn').style.display = 'block';
+                document.getElementById('clearBtn').style.display  = 'block';
+                alert('Error: ' + err);
+            });
+        }
+
+        // ── FEEDBACK FUNCTIONS ──
+        function resetFeedbackUI() {
+            selectedAccuracy = null;
+            selectedRating   = 0;
+            document.getElementById('btnYes').className = 'acc-btn';
+            document.getElementById('btnNo').className  = 'acc-btn';
+            document.querySelectorAll('.star').forEach(s => s.classList.remove('lit'));
+            document.getElementById('feedbackComment').value = '';
+            document.getElementById('feedbackSuccess').style.display = 'none';
+            document.getElementById('feedbackAlready').style.display = 'none';
+        }
+
+        function checkExistingFeedback(predId) {
+            if (!predId) return;
+            fetch(`/feedback/${predId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.exists) {
+                    document.getElementById('feedbackAlready').style.display = 'block';
+                    document.querySelector('.btn-submit-feedback').style.display = 'none';
+                    document.querySelector('.accuracy-btns').style.opacity = '0.4';
+                    document.getElementById('starRow').style.opacity = '0.4';
+                    if (data.is_correct === 1) selectAccuracy(1, true);
+                    else if (data.is_correct === 0) selectAccuracy(0, true);
+                    if (data.rating) selectStar(data.rating, true);
+                    if (data.comment) document.getElementById('feedbackComment').value = data.comment;
+                }
+            })
+            .catch(() => {});
+        }
+
+        function selectAccuracy(val, readOnly) {
+            if (!readOnly) selectedAccuracy = val;
+            document.getElementById('btnYes').className = 'acc-btn' + (val === 1 ? ' selected-yes' : '');
+            document.getElementById('btnNo').className  = 'acc-btn' + (val === 0 ? ' selected-no'  : '');
+        }
+
+        function selectStar(n, readOnly) {
+            if (!readOnly) selectedRating = n;
+            document.querySelectorAll('.star').forEach((s, i) => {
+                s.classList.toggle('lit', i < n);
+            });
+        }
+
+        function submitFeedback() {
+            if (!currentPredId) return;
+            const comment = document.getElementById('feedbackComment').value.trim();
+
+            fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prediction_id: currentPredId,
+                    is_correct   : selectedAccuracy,
+                    rating       : selectedRating || null,
+                    comment      : comment,
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('feedbackSuccess').style.display = 'block';
+                    document.querySelector('.btn-submit-feedback').style.display = 'none';
+                    setTimeout(() => {
+                        document.getElementById('feedbackSuccess').style.display = 'none';
+                    }, 5000);
+                }
+            })
+            .catch(err => alert('Error submitting feedback: ' + err));
+        }
+
+        // ── VIEW PREDICTION ──
+        function viewPrediction(id) {
+            fetch(`/prediction/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { alert(data.error); return; }
+                const disease   = data.predicted_disease.replace('Tomato__','').replace('Tomato_','').replace(/_/g,' ');
+                const isHealthy = data.predicted_disease.toLowerCase().includes('healthy');
+                const conf      = data.confidence;
+                let severityText = '—';
+                if (!isHealthy) {
+                    if      (conf >= 0.92) severityText = currentLang === 'sw' ? '🔴 Kali Sana'  : '🔴 Severe';
+                    else if (conf >= 0.83) severityText = currentLang === 'sw' ? '🟡 Ya Wastani' : '🟡 Moderate';
+                    else                   severityText = currentLang === 'sw' ? '🟢 Kidogo'     : '🟢 Mild';
+                }
+                document.getElementById('modalDisease').textContent    = (isHealthy ? '✅ ' : '⚠️ ') + disease;
+                document.getElementById('modalConfidence').textContent = (conf * 100).toFixed(2) + '%';
+                document.getElementById('modalSeverity').textContent   = severityText;
+                document.getElementById('modalImageName').textContent  = data.image_name;
+                document.getElementById('modalDate').textContent       = data.created_at;
+                document.getElementById('modalTreatment').textContent  = data.treatment;
+                const img = document.getElementById('modalImage');
+                img.src = `/static/uploads/${data.image_name}`;
+                img.style.display = 'block';
+                document.getElementById('viewModal').classList.add('active');
+            })
+            .catch(err => alert('Could not load prediction: ' + err));
+        }
+
+        function closeModal() { document.getElementById('viewModal').classList.remove('active'); }
+
+        // ── DELETE ──
+        function confirmDelete(id) { pendingDeleteId = id; document.getElementById('confirmModal').classList.add('active'); }
+        function closeConfirm()    { pendingDeleteId = null; document.getElementById('confirmModal').classList.remove('active'); }
+
+        function executeDelete() {
+            if (!pendingDeleteId) return;
+            fetch(`/prediction/${pendingDeleteId}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            .then(r => r.json())
+            .then(data => {
+                closeConfirm();
+                if (data.success) {
+                    const row = document.getElementById(`row-${pendingDeleteId}`);
+                    if (row) { row.style.transition = 'opacity 0.4s ease'; row.style.opacity = '0'; setTimeout(() => { row.remove(); refreshHistory(); }, 400); }
+                    pendingDeleteId = null;
+                } else { alert(data.error || 'Failed to delete.'); }
+            })
+            .catch(err => { closeConfirm(); alert('Error: ' + err); });
+        }
+
+        document.getElementById('viewModal').addEventListener('click',    function(e) { if (e.target === this) closeModal(); });
+        document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) closeConfirm(); });
+
+        // ── REFRESH HISTORY ──
+        function refreshHistory() {
+            fetch('/history')
+            .then(r => r.json())
+            .then(data => {
+                // Update total detections count
+                document.getElementById('totalDetections').textContent = data.length;
+                
+                const tbody = document.getElementById('historyBody');
+                tbody.innerHTML = '';
+                if (!data.length) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;opacity:0.5;">${currentLang === 'sw' ? 'Bado hakuna utambuzi 🌿' : 'No detections yet 🌿'}</td></tr>`;
+                    return;
+                }
+                data.forEach((r, index) => {
+                    const disease   = r.predicted_disease.replace('Tomato__','').replace('Tomato_','').replace(/_/g,' ');
+                    const isHealthy = r.predicted_disease.toLowerCase().includes('healthy');
+                    const conf      = r.confidence;
+                    let sevHTML = '—';
+                    if (!isHealthy) {
+                        if      (conf >= 0.92) sevHTML = `<span style="color:#ef5350;">🔴 ${currentLang==='sw'?'Kali Sana':'Severe'}</span>`;
+                        else if (conf >= 0.83) sevHTML = `<span style="color:#ffca28;">🟡 ${currentLang==='sw'?'Ya Wastani':'Moderate'}</span>`;
+                        else                   sevHTML = `<span style="color:#66bb6a;">🟢 ${currentLang==='sw'?'Kidogo':'Mild'}</span>`;
+                    }
+                    const viewTxt = currentLang === 'sw' ? '👁 Tazama' : '👁 View';
+                    const delTxt  = currentLang === 'sw' ? '🗑 Futa'   : '🗑 Delete';
+                    tbody.innerHTML += `
+                        <tr id="row-${r.id}">
+                            <td>${index + 1}</td>
+                            <td>${r.image_name.substring(0,20)}...</td>
+                            <td><span class="${isHealthy?'tag-healthy':'tag-diseased'}">${disease}</span></td>
+                            <td>${(conf*100).toFixed(2)}%</td>
+                            <td>${sevHTML}</td>
+                            <td>${r.created_at}</td>
+                            <td>
+                                <button class="btn-view"   onclick="viewPrediction(${r.id})">${viewTxt}</button>
+                                <button class="btn-delete" onclick="confirmDelete(${r.id})">${delTxt}</button>
+                            </td>
+                        </tr>`;
+                });
+            })
+            .catch(err => console.error('History error:', err));
+        }
+
+        // Initialize tips on page load
+        loadTipPreferences();
+        setTimeout(loadTip, 100);
+        refreshHistory();
+        updateStats();
+    </script>
+
+</body>
+</html>

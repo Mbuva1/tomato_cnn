@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TomatoGuard - AI Disease Detection for Tomatoes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a1a0a; color: #e8f5e9; min-height: 100vh; overflow-x: hidden; }
+
+        .floating-tomato {
+            position: fixed; animation: floatTomato linear infinite; opacity: 0.04; z-index: 0; pointer-events: none; font-size: 8rem;
+        }
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg) scale(1); opacity: 0; }
+            10%  { opacity: 0.04; }
+            90%  { opacity: 0.04; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(0.8); opacity: 0; }
+        }
+
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(5,15,5,0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(76,175,80,0.15);
+            padding: 16px 48px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 800; color: #4caf50; text-decoration: none; }
+        .logo-icon { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .logo span { color: #e8f5e9; }
+        .nav-links { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+        .nav-links a { color: #a5d6a7; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: #4caf50; }
+        .btn-nav { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white !important; padding: 10px 28px; border-radius: 50px; font-weight: 600 !important; transition: all 0.3s ease; }
+        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.3); }
+
+        .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; padding: 100px 48px 80px; max-width: 1280px; margin: 0 auto; align-items: center; min-height: 100vh; position: relative; z-index: 1; }
+        .hero-content h1 { font-size: 3.2rem; font-weight: 900; line-height: 1.2; margin-bottom: 20px; color: #e8f5e9; }
+        .hero-content h1 .highlight { background: linear-gradient(135deg, #4caf50, #81c784); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-content p { font-size: 1.2rem; color: #a5d6a7; margin-bottom: 32px; max-width: 500px; line-height: 1.7; }
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+        .btn-primary { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; padding: 16px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(76,175,80,0.35); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: #a5d6a7; padding: 16px 32px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1.05rem; border: 2px solid rgba(76,175,80,0.3); transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-secondary:hover { background: rgba(76,175,80,0.1); border-color: #4caf50; transform: translateY(-3px); }
+
+        .hero-image { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 1/1; background: linear-gradient(135deg, #0d1f0d, #1a3a1a); box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: 1px solid rgba(76,175,80,0.15); transition: box-shadow 0.5s ease, transform 0.5s ease; }
+        .hero-image:hover { box-shadow: 0 30px 80px rgba(76,175,80,0.25), 0 20px 60px rgba(0,0,0,0.7); transform: translateY(-4px); }
+        .carousel-container { width: 100%; height: 100%; position: relative; }
+        .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; }
+        .carousel-slide.active { opacity: 1; }
+        .carousel-slide img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.5s ease; transform-origin: center; }
+        .hero-image:hover .carousel-slide.active img { transform: scale(1.12); filter: brightness(1.08) saturate(1.1); }
+        .carousel-slide .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px 24px; background: linear-gradient(to top, rgba(5,15,5,0.92), transparent); }
+        .carousel-slide .overlay .disease-name { font-size: 1.2rem; font-weight: 700; color: #4caf50; }
+        .carousel-slide .overlay .disease-desc { font-size: 0.85rem; color: #a5d6a7; margin-top: 2px; }
+        .carousel-slide .severity-tag { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(76,175,80,0.2); z-index: 5; display: flex; align-items: center; gap: 6px; }
+        .carousel-slide .image-counter { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; color: #a5d6a7; border: 1px solid rgba(76,175,80,0.15); z-index: 5; }
+        .carousel-slide .image-counter span { color: #4caf50; }
+
+        .carousel-indicators { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; flex-wrap: wrap; justify-content: center; max-width: 90%; }
+        .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; cursor: pointer; transition: all 0.3s ease; }
+        .carousel-dot.active { background: #4caf50; width: 20px; border-radius: 4px; }
+        .carousel-dot:hover { background: rgba(76,175,80,0.6); }
+
+        .stats-banner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1280px; margin: -40px auto 60px; padding: 0 48px; position: relative; z-index: 2; }
+        .stat-card { background: rgba(10,30,10,0.9); padding: 24px 20px; border-radius: 16px; text-align: center; border: 1px solid rgba(76,175,80,0.1); backdrop-filter: blur(8px); transition: all 0.3s ease; }
+        .stat-card:hover { border-color: rgba(76,175,80,0.3); transform: translateY(-4px); }
+        .stat-card .number { font-size: 2rem; font-weight: 800; color: #4caf50; }
+        .stat-card .label { color: #a5d6a7; font-size: 0.85rem; margin-top: 4px; }
+
+        .features { padding: 60px 48px 80px; max-width: 1280px; margin: 0 auto; scroll-margin-top: 80px; }
+        .features h2 { text-align: center; font-size: 2.4rem; font-weight: 800; margin-bottom: 12px; color: #e8f5e9; }
+        .features .subtitle { text-align: center; color: #a5d6a7; font-size: 1.1rem; margin-bottom: 48px; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .feature-card { background: rgba(10,30,10,0.85); padding: 32px 28px; border-radius: 16px; border: 1px solid rgba(76,175,80,0.1); transition: all 0.3s ease; text-align: center; }
+        .feature-card:hover { transform: translateY(-6px); border-color: rgba(76,175,80,0.3); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .feature-card .icon { font-size: 2.8rem; margin-bottom: 16px; }
+        .feature-card h3 { font-size: 1.1rem; color: #e8f5e9; margin-bottom: 8px; }
+        .feature-card p { color: #a5d6a7; font-size: 0.9rem; line-height: 1.6; }
+
+        .pricing { padding: 60px 48px 80px; max-width: 1280px; margin: 0 auto; scroll-margin-top: 80px; background: rgba(5,15,5,0.3); border-radius: 24px; border-top: 1px solid rgba(76,175,80,0.05); border-bottom: 1px solid rgba(76,175,80,0.05); }
+        .pricing h2 { text-align: center; font-size: 2.4rem; font-weight: 800; margin-bottom: 12px; color: #e8f5e9; }
+        .pricing .subtitle { text-align: center; color: #a5d6a7; font-size: 1.1rem; margin-bottom: 48px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .pricing-card { background: rgba(10,30,10,0.85); padding: 32px 28px; border-radius: 16px; border: 1px solid rgba(76,175,80,0.1); transition: all 0.3s ease; text-align: center; position: relative; }
+        .pricing-card:hover { transform: translateY(-6px); border-color: rgba(76,175,80,0.3); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .pricing-card.popular { border-color: #4caf50; background: rgba(10,30,10,0.95); }
+        .pricing-card .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; padding: 4px 20px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pricing-card .plan-name { font-size: 1.1rem; font-weight: 700; color: #81c784; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .pricing-card .price { font-size: 2.8rem; font-weight: 800; color: #e8f5e9; margin: 8px 0; }
+        .pricing-card .price span { font-size: 1rem; font-weight: 400; color: #a5d6a7; }
+        .pricing-card .description { color: #a5d6a7; font-size: 0.9rem; margin-bottom: 20px; }
+        .pricing-card ul { list-style: none; padding: 0; margin: 0 0 24px 0; text-align: left; }
+        .pricing-card ul li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: #c8e6c9; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+        .pricing-card ul li::before { content: "✅"; }
+        .btn-pricing { display: inline-block; padding: 12px 40px; border-radius: 50px; font-weight: 700; text-decoration: none; transition: all 0.3s ease; width: 100%; }
+        .btn-pricing.primary { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; }
+        .btn-pricing.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.3); }
+        .btn-pricing.secondary { background: rgba(76,175,80,0.15); color: #81c784; border: 1px solid rgba(76,175,80,0.2); }
+        .btn-pricing.secondary:hover { background: rgba(76,175,80,0.25); transform: translateY(-2px); }
+
+        /* ─── SUPPORT SERVICES ─── */
+        .support {
+            padding: 40px 48px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .support-card {
+            background: rgba(10,30,10,0.7);
+            padding: 24px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(76,175,80,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .support-card:hover {
+            border-color: rgba(76,175,80,0.2);
+            transform: translateY(-4px);
+            background: rgba(10,30,10,0.9);
+        }
+        .support-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .support-card h4 {
+            color: #81c784;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .support-card p {
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        .support-card a {
+            color: #4caf50;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        .support-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            background: rgba(5,15,5,0.95);
+            border-top: 1px solid rgba(76,175,80,0.08);
+            padding: 30px 48px;
+            text-align: center;
+        }
+        .footer p {
+            color: rgba(255,255,255,0.2);
+            font-size: 0.8rem;
+        }
+        .footer span { color: #4caf50; }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 1024px) {
+            .hero { grid-template-columns: 1fr; padding: 140px 24px 60px; text-align: center; }
+            .hero-content p { margin: 0 auto 32px; }
+            .hero-buttons { justify-content: center; }
+            .hero-image { max-width: 500px; margin: 0 auto; aspect-ratio: 1/1; }
+            .stats-banner { grid-template-columns: repeat(2, 1fr); padding: 0 20px; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+            .support-grid { grid-template-columns: repeat(2, 1fr); }
+            .navbar { padding: 12px 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding-top: 120px; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .hero-image { max-width: 100%; }
+            .features { padding: 40px 20px; }
+            .pricing { padding: 40px 20px; }
+            .support { padding: 30px 20px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+            .support-grid { grid-template-columns: 1fr 1fr; }
+            .stats-banner { grid-template-columns: 1fr 1fr; }
+            .nav-links { gap: 12px; }
+            .btn-nav { padding: 8px 20px; font-size: 0.85rem; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-banner { grid-template-columns: 1fr; }
+            .support-grid { grid-template-columns: 1fr; }
+            .hero-content h1 { font-size: 1.8rem; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    {% for i in range(10) %}
+    <div class="floating-tomato" style="left: {{ (i * 11) + 2 }}%; animation-delay: {{ (i * 2) }}s; animation-duration: {{ 15 + (i * 3) }}s; font-size: {{ 4 + (i % 3) * 2 }}rem;">
+        🍅
+    </div>
+    {% endfor %}
+
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <span class="logo-icon">🍅</span>
+            Tomato<span>Guard</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="/register" class="btn-nav">Get Started →</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>
+                AI-Powered<br>
+                <span class="highlight">Tomato Disease</span><br>
+                Detection
+            </h1>
+            <p>
+                Protect your tomato farm with our state-of-the-art AI.
+                Detect 10 diseases in seconds — just upload a photo of the leaf.
+            </p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn-primary">🚀 Start Free Trial</a>
+                <a href="#features" class="btn-secondary">📖 Learn More</a>
+            </div>
+        </div>
+
+        <div class="hero-image" id="heroImage">
+            <div class="carousel-container">
+                <div id="carouselSlides"></div>
+                <div class="carousel-indicators" id="indicators"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-banner">
+        <div class="stat-card"><div class="number">10</div><div class="label">Diseases Detected</div></div>
+        <div class="stat-card"><div class="number">93%</div><div class="label">Detection Accuracy</div></div>
+        <div class="stat-card"><div class="number">2s</div><div class="label">Average Scan Time</div></div>
+        <div class="stat-card"><div class="number">1000+</div><div class="label">Farmers Using</div></div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Why TomatoGuard?</h2>
+        <p class="subtitle">Smart, fast, and accurate disease detection for tomato farmers</p>
+        <div class="features-grid">
+            <div class="feature-card"><div class="icon">📸</div><h3>Instant Detection</h3><p>Upload a photo of a tomato leaf and get results in under 2 seconds.</p></div>
+            <div class="feature-card"><div class="icon">🔬</div><h3>10 Disease Types</h3><p>Detects Early Blight, Late Blight, Bacterial Spot, Mosaic Virus, and more.</p></div>
+            <div class="feature-card"><div class="icon">📱</div><h3>Mobile-Friendly</h3><p>Use on your phone right in the field — no app download needed.</p></div>
+            <div class="feature-card"><div class="icon">📊</div><h3>Farm Analytics</h3><p>Track disease patterns, get weekly reports, and monitor farm health.</p></div>
+            <div class="feature-card"><div class="icon">📲</div><h3>SMS Alerts</h3><p>Get instant SMS alerts when disease is detected on your farm.</p></div>
+            <div class="feature-card"><div class="icon">🌍</div><h3>Bilingual Support</h3><p>Available in English and Swahili for all farmers.</p></div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <h2>Simple, Transparent Pricing</h2>
+        <p class="subtitle">Choose the plan that fits your farm</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="plan-name">Free Trial</div>
+                <div class="price">KSh 0</div>
+                <div class="description">Perfect for trying it out</div>
+                <ul>
+                    <li>10 free scans</li>
+                    <li>All 10 diseases</li>
+                    <li>Email reports</li>
+                    <li>Basic analytics</li>
+                    <li>7 days trial</li>
+                </ul>
+                <a href="/register" class="btn-pricing secondary">Try Now</a>
+            </div>
+            <div class="pricing-card popular">
+                <div class="popular-badge">⭐ Most Popular</div>
+                <div class="plan-name">Starter</div>
+                <div class="price">KSh 500<span>/mo</span></div>
+                <div class="description">For small to medium farms</div>
+                <ul>
+                    <li>50 scans per month</li>
+                    <li>All 10 diseases</li>
+                    <li>Mobile + Web access</li>
+                    <li>Full analytics dashboard</li>
+                    <li>SMS alerts</li>
+                    <li>Weekly reports</li>
+                </ul>
+                <a href="/payment/starter" class="btn-pricing primary">Subscribe Now</a>
+            </div>
+            <div class="pricing-card">
+                <div class="plan-name">Pro</div>
+                <div class="price">KSh 1,200<span>/mo</span></div>
+                <div class="description">For large farms &amp; cooperatives</div>
+                <ul>
+                    <li>Unlimited scans</li>
+                    <li>All 10 diseases</li>
+                    <li>Multi-user access</li>
+                    <li>Advanced analytics</li>
+                    <li>Priority SMS alerts</li>
+                    <li>Custom reports</li>
+                    <li>24/7 support</li>
+                </ul>
+                <a href="/payment/pro" class="btn-pricing secondary">Subscribe Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── SUPPORT SERVICES ─── -->
+    <section class="support" id="support">
+        <div class="support-grid">
+            <div class="support-card">
+                <div class="icon">📧</div>
+                <h4>Email Support</h4>
+                <p>support@tomatoguard.com</p>
+                <p style="font-size:0.7rem;color:#666;margin-top:4px;">Response within 24 hours</p>
+            </div>
+            <div class="support-card">
+                <div class="icon">📞</div>
+                <h4>Phone Support</h4>
+                <p>+254 700 123 456</p>
+                <p style="font-size:0.7rem;color:#666;margin-top:4px;">Mon-Fri 8am-6pm</p>
+            </div>
+            <div class="support-card">
+                <div class="icon">💬</div>
+                <h4>Live Chat</h4>
+                <p>Chat with our team</p>
+                <a href="#" onclick="alert('Chat support coming soon!')">Start Chat →</a>
+            </div>
+            <div class="support-card">
+                <div class="icon">📚</div>
+                <h4>Help Center</h4>
+                <p>FAQs &amp; Guides</p>
+                <a href="#" onclick="alert('Help Center coming soon!')">Visit Help Center →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── FOOTER ─── -->
+    <footer class="footer">
+        <p>🍅 TomatoGuard | <span>Convolutional Neural Network</span> from Scratch | Pure Python + NumPy</p>
+        <p style="margin-top:8px;font-size:0.7rem;color:rgba(255,255,255,0.12);">
+            © 2026 TomatoGuard. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+        // ============================================================
+        // HOMEPAGE CAROUSEL IMAGES
+        // Currently hotlinked from Unsplash (free to use, no attribution
+        // required). Swap any `src` for your own photo URL or a local
+        // path like 'static/images/yourfile.jpg' once you have real
+        // farm photos you want to use instead.
+        // ============================================================
+        const carouselSlides = [
+            {
+                src: 'https://images.unsplash.com/photo-1714024970118-fef04c8773bf?auto=format&fit=crop&w=1200&q=80',
+                name: '🌱 Vine Growth',
+                desc: 'Green tomatoes developing before they ripen'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1723580864433-b6b95a6d8393?auto=format&fit=crop&w=1200&q=80',
+                name: '🌿 Plant Inspection',
+                desc: 'Checking tomato foliage closely for early symptoms'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1622676539556-4ca051344fba?auto=format&fit=crop&w=1200&q=80',
+                name: '🍅 Growing Clusters',
+                desc: 'Clusters of tomatoes forming on the vine'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1723580864350-48ee935c57f8?auto=format&fit=crop&w=1200&q=80',
+                name: '🌾 Cluster Development',
+                desc: 'Fruit clusters developing along the stem'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1723580864774-e84bb9770695?auto=format&fit=crop&w=1200&q=80',
+                name: '🌳 Branch Growth',
+                desc: 'Tomatoes maturing on a sturdy branch'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1703589535874-4fbb03d93479?auto=format&fit=crop&w=1200&q=80',
+                name: '🍅 Healthy Plantation',
+                desc: 'Thriving rows of well-tended tomato plants'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1686278895718-26a2331d7297?auto=format&fit=crop&w=1200&q=80',
+                name: '🌿 Vine-Ripened Crop',
+                desc: 'Tomatoes ripening naturally on the vine'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1471194402529-8e0f5a675de6?auto=format&fit=crop&w=1200&q=80',
+                name: '☀️ Ripening Tomatoes',
+                desc: 'Fruit reaching peak color and ripeness'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1730114871875-7c2f524cb23a?auto=format&fit=crop&w=1200&q=80',
+                name: '🔍 Quality Inspection',
+                desc: 'A close look at fruit condition and color'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1508094427028-b1e27931dddb?auto=format&fit=crop&w=1200&q=80',
+                name: '✋ Hand-Picked Harvest',
+                desc: 'Carefully picking ripe tomatoes by hand'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1629398781739-9caec1eb9409?auto=format&fit=crop&w=1200&q=80',
+                name: '🧺 Harvest Sorting',
+                desc: 'Sorting and grading freshly picked tomatoes'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1618254676841-71055a17efc2?auto=format&fit=crop&w=1200&q=80',
+                name: '📦 Crate Sorting',
+                desc: 'Grading tomatoes into crates by quality'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1618807543816-96d6df00de29?auto=format&fit=crop&w=1200&q=80',
+                name: '📦 Packed for Market',
+                desc: 'Graded tomatoes ready for distribution'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1567375698463-b8dabb1319cf?auto=format&fit=crop&w=1200&q=80',
+                name: '✅ Quality Check',
+                desc: 'Only the best tomatoes make the cut'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1444731961956-751ed90465a5?auto=format&fit=crop&w=1200&q=80',
+                name: '🥗 Fresh Produce',
+                desc: 'From farm to table, disease-free and fresh'
+            }
+        ];
+
+        let allSlides = [];
+        let currentSlide = 0;
+        let autoSlideInterval;
+
+        // ============================================================
+        // BUILD CAROUSEL
+        // ============================================================
+        function buildCarousel(slides) {
+            const container = document.getElementById('carouselSlides');
+            const indicators = document.getElementById('indicators');
+
+            allSlides = slides;
+            container.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'carousel-slide' + (index === 0 ? ' active' : '');
+                slideDiv.dataset.index = index;
+
+                slideDiv.innerHTML = `
+                    <img src="${slide.src}"
+                         alt="${slide.name}"
+                         loading="lazy"
+                         onerror="this.style.display='none';this.parentElement.innerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2a1a,#0d1f0d);><div style=text-align:center;><div style=font-size:4rem;>🍅</div><div style=font-size:1.1rem;font-weight:600;color:#81c784;>${slide.name}</div><div style=font-size:0.85rem;color:#a5d6a7;margin-top:6px;>${slide.desc}</div></div></div>'">
+                    <div class="overlay">
+                        <div class="disease-name">${slide.name}</div>
+                        <div class="disease-desc">${slide.desc}</div>
+                    </div>
+                    <div class="image-counter">📍 <span>${index + 1}</span>/${slides.length}</div>
+                `;
+
+                container.appendChild(slideDiv);
+            });
+
+            indicators.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('button');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                indicators.appendChild(dot);
+            });
+
+            currentSlide = 0;
+            updateSlide(0);
+            startAutoPlay();
+        }
+
+        // ============================================================
+        // CAROUSEL CONTROLS
+        // ============================================================
+        function updateSlide(index) {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+
+            slides.forEach((s, i) => s.classList.toggle('active', i === index));
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+
+            currentSlide = index;
+        }
+
+        function goToSlide(index) {
+            stopAutoPlay();
+            updateSlide(index);
+            setTimeout(startAutoPlay, 5000);
+        }
+
+        function nextSlide() {
+            const total = allSlides.length;
+            if (total === 0) return;
+            updateSlide((currentSlide + 1) % total);
+        }
+
+        function startAutoPlay() {
+            if (autoSlideInterval) clearInterval(autoSlideInterval);
+            if (allSlides.length > 1) {
+                autoSlideInterval = setInterval(nextSlide, 4000); // change interval here (ms)
+            }
+        }
+
+        function stopAutoPlay() {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = null;
+            }
+        }
+
+        // ============================================================
+        // KEYBOARD NAVIGATION
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                stopAutoPlay();
+                nextSlide();
+                setTimeout(startAutoPlay, 5000);
+            } else if (e.key === 'ArrowLeft') {
+                stopAutoPlay();
+                const total = allSlides.length;
+                if (total > 0) {
+                    updateSlide((currentSlide - 1 + total) % total);
+                }
+                setTimeout(startAutoPlay, 5000);
+            }
+        });
+
+        // ============================================================
+        // PAUSE AUTOPLAY ON HOVER (image also pops via CSS :hover)
+        // ============================================================
+        const heroImage = document.getElementById('heroImage');
+        if (heroImage) {
+            heroImage.addEventListener('mouseenter', stopAutoPlay);
+            heroImage.addEventListener('mouseleave', startAutoPlay);
+        }
+
+        // ============================================================
+        // START
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            buildCarousel(carouselSlides);
+        });
+    </script>
+
+</body>
+</html>

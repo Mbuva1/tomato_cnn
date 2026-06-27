@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - TomatoGuard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fdf8;
+            color: #1a2e1a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .container {
+            background: white;
+            max-width: 520px;
+            width: 100%;
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { text-decoration: underline; }
+        
+        .plan-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 12px 0 4px;
+        }
+        .price {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #2e7d32;
+            margin: 8px 0;
+        }
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #4a5a4a;
+        }
+        .description {
+            color: #4a5a4a;
+            margin-bottom: 24px;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 28px 0;
+        }
+        .features-list li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f0f7f0;
+            font-size: 0.95rem;
+        }
+        .features-list li::before { content: "✅"; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #2d3e2d;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e8f5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: #4a5a4a;
+            margin-top: 4px;
+        }
+        
+        .btn-pay {
+            width: 100%;
+            padding: 16px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-pay:hover { background: #1b5e20; }
+        .btn-pay:active { transform: scale(0.98); }
+        .btn-pay:disabled {
+            background: #a5d6a7;
+            cursor: not-allowed;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .status-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+        }
+        .status-box.show { display: block; }
+        .status-box.success { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+        .status-box.error { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+        .status-box.info { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+        
+        .mpesa-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f5f9f5;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .mpesa-logo img {
+            height: 32px;
+        }
+        .mpesa-logo span {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+        .mpesa-logo .badge {
+            margin-left: auto;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .secure-badge {
+            text-align: center;
+            color: #4a5a4a;
+            font-size: 0.8rem;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to Home</a>
+
+    <div class="plan-badge">{{ plan.name }} Plan</div>
+    <h1>Complete Payment</h1>
+    <div class="price">KSh {{ plan.price }}<span>/mo</span></div>
+    <p class="description">Pay securely via M-Pesa to activate your subscription.</p>
+
+    <ul class="features-list">
+        <li>{{ plan.scans }} scans per month</li>
+        {% for feature in plan.features %}
+        <li>{{ feature }}</li>
+        {% endfor %}
+    </ul>
+
+    <div class="mpesa-logo">
+        <span>💳</span>
+        <span>Pay with M-Pesa</span>
+        <span class="badge">SAFE</span>
+    </div>
+
+    <form id="paymentForm">
+        <div class="form-group">
+            <label for="phone">📱 M-Pesa Phone Number</label>
+            <input 
+                type="tel" 
+                id="phone" 
+                placeholder="0712345678" 
+                value="{{ session.get('phone', '') }}"
+                required
+            >
+            <div class="hint">Enter the number registered with M-Pesa</div>
+        </div>
+
+        <button type="submit" class="btn-pay" id="payBtn">
+            💳 Pay KSh {{ plan.price }} via M-Pesa
+        </button>
+    </form>
+
+    <div id="statusBox" class="status-box"></div>
+
+    <div class="secure-badge">
+        🔒 Secured by Safaricom M-Pesa API
+    </div>
+</div>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const phone = document.getElementById('phone').value.trim();
+    const payBtn = document.getElementById('payBtn');
+    const statusBox = document.getElementById('statusBox');
+    
+    if (!phone) {
+        showStatus('error', 'Please enter your M-Pesa phone number.');
+        return;
+    }
+    
+    // Disable button and show loading
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<span class="loader"></span> Processing...';
+    statusBox.className = 'status-box';
+    statusBox.style.display = 'none';
+    
+    try {
+        const response = await fetch('/payment/api/initiate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                plan_id: '{{ plan_id }}',
+                phone: phone
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showStatus('success', 
+                '✅ M-Pesa payment initiated! Check your phone for the prompt.\n' +
+                'Enter your M-Pesa PIN to complete the payment.'
+            );
+            
+            // Poll for status update
+            const checkoutId = data.checkout_request_id;
+            pollPaymentStatus(checkoutId);
+            
+        } else {
+            showStatus('error', '❌ ' + (data.error || 'Payment initiation failed. Please try again.'));
+            payBtn.disabled = false;
+            payBtn.innerHTML = '💳 Pay KSh {{ plan.price }} via M-Pesa';
+        }
+        
+    } catch (error) {
+        showStatus('error', '❌ Network error. Please check your connection and try again.');
+        payBtn.disabled = false;
+        payBtn.innerHTML = '💳 Pay KSh {{ plan.price }} via M-Pesa';
+    }
+});
+
+async function pollPaymentStatus(checkoutId) {
+    let attempts = 0;
+    const maxAttempts = 30; // 30 * 5s = 2.5 minutes
+    
+    const poll = setInterval(async () => {
+        attempts++;
+        
+        try {
+            const response = await fetch(`/payment/status/${checkoutId}`);
+            const data = await response.json();
+            
+            if (data.status === 'completed') {
+                clearInterval(poll);
+                showStatus('success', 
+                    '🎉 Payment successful! Your subscription is now active.\n' +
+                    'Redirecting to dashboard...'
+                );
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 3000);
+                
+            } else if (data.status === 'failed') {
+                clearInterval(poll);
+                showStatus('error', '❌ Payment failed: ' + (data.message || 'Please try again.'));
+                document.getElementById('payBtn').disabled = false;
+                document.getElementById('payBtn').innerHTML = '💳 Pay KSh {{ plan.price }} via M-Pesa';
+                
+            } else if (attempts >= maxAttempts) {
+                clearInterval(poll);
+                showStatus('info', 
+                    '⏳ Still waiting for payment confirmation. ' +
+                    'If you completed payment, please refresh the page.'
+                );
+                document.getElementById('payBtn').disabled = false;
+                document.getElementById('payBtn').innerHTML = '💳 Check Status';
+                document.getElementById('payBtn').onclick = function() {
+                    window.location.reload();
+                };
+            }
+        } catch (error) {
+            console.error('Polling error:', error);
+        }
+    }, 5000);
+}
+
+function showStatus(type, message) {
+    const statusBox = document.getElementById('statusBox');
+    statusBox.className = 'status-box show ' + type;
+    statusBox.textContent = message;
+    statusBox.style.display = 'block';
+}
+</script>
+
+</body>
+</html>
