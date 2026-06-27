@@ -103,38 +103,70 @@ CREATE TABLE free_trials (
 =============================================================
 """
 
-import mysql.connector
 import os
+import mysql.connector
+from urllib.parse import urlparse
 
 
 # ─────────────────────────────────────────────
 # DATABASE CONFIGURATION
 # ─────────────────────────────────────────────
-# Railway's MySQL plugin injects MYSQLHOST / MYSQLUSER / MYSQLPASSWORD /
-# MYSQLDATABASE / MYSQLPORT automatically (when the services are linked).
-# We check those first, then fall back to the old DB_* names (handy for
-# local development / docker-compose / other hosts), then to hardcoded
-# local defaults as a last resort.
 
-DB_CONFIG = {
-    'host': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', 'localhost')),
-    'user': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
-    'password': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', 'root123')),
-    'database': os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'tomato_cnn')),
-    'port': int(os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', 3306))),
-}
+def get_db_config():
+    """
+    Get database configuration from environment variables.
+    Priority:
+    1. MYSQL_URL (Railway provides this)
+    2. DATABASE_URL (fallback)
+    3. Individual MYSQL_* variables (Railway)
+    4. Individual DB_* variables (local development)
+    5. Hardcoded defaults (last resort)
+    """
+    # Try MYSQL_URL first (Railway provides this)
+    mysql_url = os.environ.get('MYSQL_URL') or os.environ.get('DATABASE_URL')
+    
+    if mysql_url:
+        try:
+            parsed = urlparse(mysql_url)
+            return {
+                'host': parsed.hostname,
+                'user': parsed.username,
+                'password': parsed.password,
+                'database': parsed.path.lstrip('/'),
+                'port': parsed.port or 3306,
+            }
+        except Exception as e:
+            print(f"[Database] Error parsing MYSQL_URL: {e}")
+            # Fall through to individual variables
+    
+    # Fallback to individual variables
+    return {
+        'host': os.environ.get('MYSQL_HOST') or 
+                os.environ.get('MYSQLHOST') or 
+                os.environ.get('DB_HOST', 'localhost'),
+        'user': os.environ.get('MYSQL_USER') or 
+                os.environ.get('MYSQLUSER') or 
+                os.environ.get('DB_USER', 'root'),
+        'password': os.environ.get('MYSQL_PASSWORD') or 
+                    os.environ.get('MYSQLPASSWORD') or 
+                    os.environ.get('DB_PASSWORD', 'root123'),
+        'database': os.environ.get('MYSQL_DATABASE') or 
+                    os.environ.get('MYSQLDATABASE') or 
+                    os.environ.get('DB_NAME', 'tomato_cnn'),
+        'port': int(os.environ.get('MYSQL_PORT') or 
+                    os.environ.get('MYSQLPORT') or 
+                    os.environ.get('DB_PORT', 3306)),
+    }
+
+
+DB_CONFIG = get_db_config()
 
 
 def get_connection():
     try:
         return mysql.connector.connect(**DB_CONFIG)
     except mysql.connector.Error as e:
-        # NOTE: don't f-string the exception directly — mysql.connector's
-        # Error objects can contain unfilled C-style format placeholders
-        # (e.g. '%-.100s:%u') in their message, and running that through
-        # Python's own string formatting can raise a second, confusing
-        # TypeError that masks the real error. Passing it as a separate
-        # print() argument (or via str(e)) avoids that.
+        # Don't f-string the exception directly — it can cause formatting errors
         print("[Database] Connection error:", str(e))
         return None
     except Exception as e:
