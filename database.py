@@ -120,7 +120,7 @@ def get_db_config():
     """
     Get database configuration from environment variables.
     Priority:
-    1. MYSQL_PUBLIC_URL (Railway - works from anywhere) ← FIXED
+    1. MYSQL_PUBLIC_URL (Railway - works from anywhere)
     2. MYSQL_URL (Railway - internal, only works in same project)
     3. DATABASE_URL (fallback)
     4. Individual MYSQL_* variables (Railway)
@@ -519,14 +519,139 @@ def get_predictions_with_feedback(farmer_id, limit=None):
         return []
 
 
-def create_free_trials_table():
-    """Create the free_trials table if it doesn't exist."""
+# ─────────────────────────────────────────────
+# TABLE SETUP (FIXED - CREATES TABLES IN CORRECT ORDER)
+# ─────────────────────────────────────────────
+
+def setup_all_tables():
+    """Setup all database tables in correct order (parents first, then children)."""
     conn = get_connection()
     if not conn:
+        logger.error("[Database] Could not connect to setup tables")
         return False
     
     try:
         cursor = conn.cursor()
+        
+        # ============================================
+        # 1. Create farmers table (NO foreign keys)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS farmers (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                full_name VARCHAR(100) NOT NULL,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                password VARCHAR(64) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        logger.info("[Database] ✅ farmers table ready")
+        
+        # ============================================
+        # 2. Create predictions table (references farmers)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                farmer_id INT NOT NULL,
+                image_name VARCHAR(255),
+                predicted_disease VARCHAR(100),
+                confidence FLOAT,
+                treatment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE
+            )
+        """)
+        logger.info("[Database] ✅ predictions table ready")
+        
+        # ============================================
+        # 3. Create feedback table (references predictions & farmers)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS feedback (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                prediction_id INT NOT NULL,
+                farmer_id INT NOT NULL,
+                is_correct TINYINT(1) DEFAULT NULL,
+                rating INT DEFAULT NULL,
+                comment TEXT DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (prediction_id) REFERENCES predictions(id) ON DELETE CASCADE,
+                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_feedback (prediction_id, farmer_id)
+            )
+        """)
+        logger.info("[Database] ✅ feedback table ready")
+        
+        # ============================================
+        # 4. Create transactions table (references farmers)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                farmer_id INT NOT NULL,
+                plan_id VARCHAR(20) NOT NULL,
+                amount INT NOT NULL,
+                phone VARCHAR(20) NOT NULL,
+                checkout_request_id VARCHAR(50) UNIQUE,
+                merchant_request_id VARCHAR(50),
+                status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+                result_code VARCHAR(10),
+                result_desc VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE,
+                INDEX idx_transactions_farmer (farmer_id),
+                INDEX idx_transactions_checkout (checkout_request_id)
+            )
+        """)
+        logger.info("[Database] ✅ transactions table ready")
+        
+        # ============================================
+        # 5. Create subscriptions table (references farmers)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                farmer_id INT NOT NULL UNIQUE,
+                plan_id VARCHAR(20) NOT NULL,
+                is_active TINYINT(1) DEFAULT 1,
+                expires_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE,
+                INDEX idx_subscriptions_active (is_active),
+                INDEX idx_subscriptions_expiry (expires_at)
+            )
+        """)
+        logger.info("[Database] ✅ subscriptions table ready")
+        
+        # ============================================
+        # 6. Create notification_settings table (references farmers)
+        # ============================================
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS notification_settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                farmer_id INT NOT NULL UNIQUE,
+                phone1 VARCHAR(20),
+                phone2 VARCHAR(20),
+                email VARCHAR(100) DEFAULT NULL,
+                lang VARCHAR(5) DEFAULT 'en',
+                notify_disease TINYINT(1) DEFAULT 1,
+                notify_healthy TINYINT(1) DEFAULT 0,
+                notify_weekly TINYINT(1) DEFAULT 0,
+                min_severity VARCHAR(20) DEFAULT 'mild',
+                send_time VARCHAR(20) DEFAULT 'instant',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE
+            )
+        """)
+        logger.info("[Database] ✅ notification_settings table ready")
+        
+        # ============================================
+        # 7. Create free_trials table (references farmers)
+        # ============================================
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS free_trials (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -539,26 +664,24 @@ def create_free_trials_table():
                 INDEX idx_free_trials_farmer (farmer_id)
             )
         """)
+        logger.info("[Database] ✅ free_trials table ready")
+        
         conn.commit()
         cursor.close()
         conn.close()
-        logger.info("[Database] Free trials table ready")
+        logger.info("[Database] ✅ All tables setup complete!")
         return True
+        
     except mysql.connector.Error as e:
-        logger.error(f"[Database] Error creating free_trials table: {e}")
+        logger.error(f"[Database] Error setting up tables: {e}")
         if conn:
             conn.close()
         return False
 
 
-def setup_all_tables():
-    """Setup all database tables."""
-    logger.info("[Database] Setting up all tables...")
-    create_free_trials_table()
-    logger.info("[Database] Table setup complete!")
-
-
-# ── Email Settings Functions ──
+# ─────────────────────────────────────────────
+# EMAIL SETTINGS FUNCTIONS
+# ─────────────────────────────────────────────
 
 def get_farmer_email(farmer_id):
     """Get farmer's email from database."""
