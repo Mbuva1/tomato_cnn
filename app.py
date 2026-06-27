@@ -18,7 +18,7 @@ load_dotenv()
 from module1_image_loader import load_image, resize_image, TOMATO_CLASSES
 from module4_forward_pass import TomatoCNN
 from module8_rejection import TomatoRejector
-from database import save_prediction, get_recent_predictions, get_connection
+from database import save_prediction, get_recent_predictions, get_connection, setup_all_tables
 
 # ── Import Payment Module ──
 from payment_routes import register_payment_routes, setup_payment_tables
@@ -51,34 +51,6 @@ IMAGE_SIZE = (64, 64)
 
 FREE_TRIAL_SCANS = 10
 FREE_TRIAL_DAYS = 7
-
-
-def setup_free_trials_table():
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS free_trials (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                farmer_id INT NOT NULL UNIQUE,
-                scans_used INT DEFAULT 0,
-                max_scans INT DEFAULT 10,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (farmer_id) REFERENCES farmers(id) ON DELETE CASCADE,
-                INDEX idx_free_trials_farmer (farmer_id)
-            )
-        """)
-        conn.commit()
-        cursor.close()
-        conn.close()
-        print("[Database] Free trials table ready")
-        return True
-    except Exception as e:
-        print(f"[Database] Error creating free_trials table: {e}")
-        return False
 
 
 def get_free_trial_usage(farmer_id):
@@ -1402,11 +1374,20 @@ def delete_prediction(prediction_id):
 
 
 # ─────────────────────────────────────────────
-# INITIALIZE DATABASE TABLES
+# INITIALIZE DATABASE TABLES (FIXED - CORRECT ORDER)
 # ─────────────────────────────────────────────
 
-setup_free_trials_table()
+print("[App] Setting up database tables...")
+
+# ✅ FIXED: Call setup_all_tables() which creates tables in correct order
+# This creates: farmers → predictions → feedback → transactions → 
+# subscriptions → notification_settings → free_trials
+setup_all_tables()
+
+# Setup payment tables (they reference farmers too)
 setup_payment_tables()
+
+print("[App] ✅ Database tables ready!")
 
 # Print email status
 if EMAIL_CONFIGURED:
