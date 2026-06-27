@@ -78,6 +78,7 @@ CREATE TABLE notification_settings (
     farmer_id INT NOT NULL UNIQUE,
     phone1 VARCHAR(20),
     phone2 VARCHAR(20),
+    email VARCHAR(100) DEFAULT NULL,
     lang VARCHAR(5) DEFAULT 'en',
     notify_disease TINYINT(1) DEFAULT 1,
     notify_healthy TINYINT(1) DEFAULT 0,
@@ -106,11 +107,16 @@ import mysql.connector
 import os
 
 
+# ─────────────────────────────────────────────
+# DATABASE CONFIGURATION
+# ─────────────────────────────────────────────
+
 DB_CONFIG = {
-    'host'    : os.environ.get('DB_HOST',     'localhost'),
-    'user'    : os.environ.get('DB_USER',     'root'),
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
     'password': os.environ.get('DB_PASSWORD', 'root123'),
-    'database': os.environ.get('DB_NAME',     'tomato_cnn'),
+    'database': os.environ.get('DB_NAME', 'tomato_cnn'),
+    'port': int(os.environ.get('DB_PORT', 3306)),  # ← FIXED: Convert to int
 }
 
 
@@ -332,8 +338,8 @@ def create_free_trials_table():
 
 def setup_all_tables():
     """Setup all database tables."""
-    # This function is called from app.py
     create_free_trials_table()
+
 
 # ── Email Settings Functions ──
 
