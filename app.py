@@ -1401,6 +1401,11 @@ else:
 # ─────────────────────────────────────────────
 
 if __name__ == '__main__':
-    import webbrowser
-    webbrowser.open('http://localhost:5000')
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+
+    if debug_mode:
+        import webbrowser
+        webbrowser.open(f'http://localhost:{port}')
+
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
