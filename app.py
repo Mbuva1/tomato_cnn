@@ -15,7 +15,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from dotenv import load_dotenv
 load_dotenv()
 
-# ── ReportLab for PDF ──
+# ── ReportLab for PDF (Pure Python, no external dependencies) ──
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer

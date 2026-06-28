@@ -4,6 +4,4 @@ numpy==1.26.4
 Pillow==10.1.0
 python-dotenv==1.0.0
 requests==2.31.0
-xhtml2pdf==0.2.11
-flask-mail==0.9.1
 reportlab==4.0.4
