@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TomatoGuard — Statistics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a1a0a;
@@ -44,6 +46,13 @@
             align-items: center;
             backdrop-filter: blur(12px);
         }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
         .nav-logo {
             display: flex;
             align-items: center;
@@ -55,6 +64,7 @@
         }
         .nav-logo span { font-size: 1.5rem; }
         .nav-logo .logo-text { color: #e8f5e9; }
+
         .nav-right {
             display: flex;
             align-items: center;
@@ -101,20 +111,20 @@
         .mobile-menu {
             position: fixed;
             top: 0;
-            right: -100%;
+            left: -100%;
             width: 300px;
             height: 100vh;
             background: rgba(5,15,5,0.98);
             backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(76,175,80,0.08);
+            border-right: 1px solid rgba(76,175,80,0.08);
             padding: 80px 28px 30px;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
-        .mobile-menu.open { right: 0; }
+        .mobile-menu.open { left: 0; }
 
         .mobile-menu .menu-header {
             display: flex;
@@ -234,17 +244,17 @@
             pointer-events: all;
         }
 
-        /* ─── HERO ─── */
-        .hero {
+        /* ─── PAGE HEADER ─── */
+        .page-header {
             text-align: center;
-            padding: 30px 20px 10px;
+            padding: 30px 20px 20px;
         }
-        .hero h1 {
+        .page-header h1 {
             font-size: 2rem;
             color: #4caf50;
             margin-bottom: 4px;
         }
-        .hero p {
+        .page-header p {
             color: #a5d6a7;
             font-size: 1rem;
             opacity: 0.7;
@@ -255,7 +265,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
-            max-width: 1100px;
+            max-width: 800px;
             margin: 20px auto;
             padding: 0 20px;
         }
@@ -280,25 +290,19 @@
             margin-top: 4px;
         }
 
-        /* ─── CHARTS SECTION ─── */
-        .charts-section {
-            max-width: 1100px;
+        /* ─── SEVERITY SECTION ─── */
+        .severity-section {
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 20px 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
         }
-        @media (max-width: 700px) {
-            .charts-section { grid-template-columns: 1fr; }
-        }
-        .chart-card {
+        .severity-card {
             background: rgba(10,30,10,0.85);
             border: 1px solid rgba(76,175,80,0.06);
             border-radius: 14px;
             padding: 20px 22px;
         }
-        .chart-card h3 {
+        .severity-card h3 {
             color: #81c784;
             font-size: 0.95rem;
             font-weight: 600;
@@ -306,57 +310,6 @@
             border-bottom: 1px solid rgba(76,175,80,0.06);
             padding-bottom: 10px;
         }
-
-        /* ─── PIE CHART ─── */
-        .pie-chart {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            margin: 0 auto 16px;
-            background: conic-gradient(#4caf50 0% 0%, #ff6f00 0% 100%);
-        }
-        .pie-chart .center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(10,30,10,0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-size: 0.75rem;
-            color: #a5d6a7;
-        }
-        .pie-chart .center .big {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #e8f5e9;
-        }
-
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            font-size: 0.8rem;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .legend-item .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        /* ─── SEVERITY BREAKDOWN ─── */
         .severity-item {
             display: flex;
             justify-content: space-between;
@@ -369,19 +322,13 @@
             font-weight: 600;
             color: #e8f5e9;
         }
-        .severity-bar {
-            height: 6px;
-            border-radius: 4px;
-            margin-top: 4px;
-            transition: width 0.5s ease;
-        }
 
+        /* ─── EMPTY STATE ─── */
         .empty-state {
             text-align: center;
-            padding: 30px 0;
+            padding: 40px 20px;
             color: #a5d6a7;
-            opacity: 0.5;
-            font-size: 0.9rem;
+            opacity: 0.4;
         }
 
         /* ─── FOOTER ─── */
@@ -391,7 +338,7 @@
             color: rgba(255,255,255,0.1);
             font-size: 0.75rem;
             border-top: 1px solid rgba(76,175,80,0.03);
-            max-width: 1100px;
+            max-width: 800px;
             margin: 0 auto;
         }
         footer span { color: #4caf50; }
@@ -399,18 +346,17 @@
         /* ─── RESPONSIVE ─── */
         @media (max-width: 480px) {
             body { font-size: 16px; }
-            .hero h1 { font-size: 1.5rem; }
+            .page-header h1 { font-size: 1.5rem; }
             .stat-card .number { font-size: 1.8rem; }
-            .chart-card { padding: 14px 16px; }
             .mobile-menu { width: 260px; padding: 70px 20px 20px; }
-        }
-        @media (min-width: 769px) {
-            .hamburger { display: none; }
-            .mobile-menu { display: none; }
-            .menu-overlay { display: none; }
         }
         @media (max-width: 768px) {
             .nav-farmer { display: none; }
+        }
+
+        /* Hamburger visible on ALL screen sizes */
+        .hamburger {
+            display: flex;
         }
     </style>
 </head>
@@ -423,17 +369,19 @@
 
     <!-- ─── NAVBAR ─── -->
     <nav>
-        <a href="/dashboard" class="nav-logo">
-            <span>🍅</span>
-            <span class="logo-text">TomatoGuard</span>
-        </a>
-        <div class="nav-right">
-            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        <div class="nav-left">
             <button class="hamburger" id="hamburger" onclick="toggleMenu()">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
         </div>
     </nav>
 
@@ -490,8 +438,8 @@
         </div>
     </div>
 
-    <!-- ─── HERO ─── -->
-    <div class="hero">
+    <!-- ─── PAGE HEADER ─── -->
+    <div class="page-header">
         <h1>📊 My Farm Statistics</h1>
         <p>Overview of your tomato disease detection history</p>
     </div>
@@ -503,28 +451,22 @@
             <div class="label">Total Scans</div>
         </div>
         <div class="stat-card">
-            <div class="number" id="healthyCount">0</div>
+            <div class="number" id="healthyCount" style="color:#4caf50;">0</div>
             <div class="label">Healthy Plants</div>
         </div>
         <div class="stat-card">
-            <div class="number" id="diseasedCount">0</div>
+            <div class="number" id="diseasedCount" style="color:#ffb74d;">0</div>
             <div class="label">Diseased Plants</div>
         </div>
         <div class="stat-card">
-            <div class="number" id="avgConfidence">0%</div>
-            <div class="label">Avg Confidence</div>
+            <div class="number" id="avgConfidence" style="color:#81c784;">0%</div>
+            <div class="label">Avg. Confidence</div>
         </div>
     </div>
 
-    <!-- ─── CHARTS ─── -->
-    <div class="charts-section">
-        <div class="chart-card">
-            <h3>🟢 Healthy vs Diseased</h3>
-            <div id="pieContainer">
-                <div class="empty-state">No data yet — upload your first image!</div>
-            </div>
-        </div>
-        <div class="chart-card">
+    <!-- ─── SEVERITY BREAKDOWN ─── -->
+    <div class="severity-section">
+        <div class="severity-card">
             <h3>📊 Severity Breakdown</h3>
             <div id="severityContainer">
                 <div class="severity-item">
@@ -615,37 +557,8 @@
                     document.getElementById('mildCount').textContent = data.severity?.mild || 0;
                     document.getElementById('moderateCount').textContent = data.severity?.moderate || 0;
                     document.getElementById('severeCount').textContent = data.severity?.severe || 0;
-
-                    updatePieChart(data.healthy_count || 0, data.diseased_count || 0);
                 })
                 .catch(err => console.error('Stats error:', err));
-        }
-
-        // ─── PIE CHART ───
-        function updatePieChart(healthy, diseased) {
-            const container = document.getElementById('pieContainer');
-            const total = healthy + diseased;
-
-            if (total === 0) {
-                container.innerHTML = `<div class="empty-state">No data yet — upload your first image!</div>`;
-                return;
-            }
-
-            const healthyPct = (healthy / total * 100);
-            const diseasedPct = (diseased / total * 100);
-
-            container.innerHTML = `
-                <div class="pie-chart" style="background: conic-gradient(#4caf50 0% ${healthyPct}%, #ff6f00 ${healthyPct}% 100%);">
-                    <div class="center">
-                        <span class="big">${total}</span>
-                        <span>Total</span>
-                    </div>
-                </div>
-                <div class="legend">
-                    <span class="legend-item"><span class="dot" style="background:#4caf50;"></span> Healthy (${healthy})</span>
-                    <span class="legend-item"><span class="dot" style="background:#ff6f00;"></span> Diseased (${diseased})</span>
-                </div>
-            `;
         }
 
         // ─── CLOSE MENU ON LINK CLICK ───
