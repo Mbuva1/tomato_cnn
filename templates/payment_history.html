@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment History - TomatoGuard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,7 +23,6 @@
             padding: 20px;
         }
 
-        /* ─── FLOATING TOMATOES ─── */
         .tomato {
             position: fixed;
             animation: floatTomato linear infinite;
@@ -39,7 +38,6 @@
             100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
 
-        /* ─── NAVBAR ─── */
         nav {
             position: sticky;
             top: 0;
@@ -56,7 +54,7 @@
         .nav-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .nav-logo {
@@ -82,7 +80,6 @@
         }
         .nav-farmer strong { color: #4caf50; }
 
-        /* ─── HAMBURGER ─── */
         .hamburger {
             display: flex;
             flex-direction: column;
@@ -113,7 +110,6 @@
             transform: rotate(-45deg) translate(5px, -6px);
         }
 
-        /* ─── MOBILE MENU ─── */
         .mobile-menu {
             position: fixed;
             top: 0;
@@ -250,7 +246,6 @@
             pointer-events: all;
         }
 
-        /* ─── BACK BUTTON ─── */
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -271,7 +266,6 @@
             border-color: rgba(76,175,80,0.15);
         }
 
-        /* ─── HEADER ─── */
         .page-header {
             margin-bottom: 24px;
             padding-bottom: 16px;
@@ -292,7 +286,6 @@
             opacity: 0.7;
         }
 
-        /* ─── SUBSCRIPTION CARD ─── */
         .sub-card {
             background: rgba(10,30,10,0.85);
             border: 1px solid rgba(76,175,80,0.08);
@@ -388,7 +381,6 @@
             box-shadow: 0 6px 20px rgba(76,175,80,0.15);
         }
 
-        /* ─── SECTION TITLE ─── */
         .section-title {
             font-size: 1.1rem;
             font-weight: 700;
@@ -401,7 +393,6 @@
             padding-left: 14px;
         }
 
-        /* ─── TABLE ─── */
         .table-wrap {
             background: rgba(10,30,10,0.85);
             border: 1px solid rgba(76,175,80,0.06);
@@ -433,7 +424,6 @@
         .table-wrap tr:last-child td { border-bottom: none; }
         .table-wrap tr:hover td { background: rgba(76,175,80,0.02); }
 
-        /* ─── STATUS BADGES ─── */
         .status-badge {
             display: inline-block;
             padding: 4px 14px;
@@ -459,7 +449,6 @@
             border: 1px solid rgba(211,47,47,0.08);
         }
 
-        /* ─── EMPTY STATE ─── */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -469,7 +458,6 @@
         .empty-state h3 { color: #81c784; font-size: 1.1rem; margin-bottom: 4px; }
         .empty-state p { font-size: 0.85rem; opacity: 0.6; }
 
-        /* ─── FOOTER ─── */
         footer {
             text-align: center;
             padding: 20px;
@@ -480,7 +468,6 @@
         }
         footer span { color: #4caf50; }
 
-        /* ─── RESPONSIVE ─── */
         @media (max-width: 480px) {
             body { font-size: 16px; }
             .container { padding: 12px; }
@@ -492,12 +479,10 @@
             .table-wrap th, .table-wrap td { padding: 8px 10px; font-size: 0.75rem; }
             .mobile-menu { width: 260px; padding: 70px 20px 20px; }
         }
-
         @media (max-width: 768px) {
             .nav-farmer { display: none; }
         }
 
-        /* Hamburger visible on ALL screen sizes */
         .hamburger {
             display: flex;
         }
@@ -507,28 +492,25 @@
 
     <div id="tomatoContainer"></div>
 
-    <!-- ─── OVERLAY ─── -->
     <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-    <!-- ─── NAVBAR ─── -->
     <nav>
         <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
             <button class="hamburger" id="hamburger" onclick="toggleMenu()">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <a href="/dashboard" class="nav-logo">
-                <span>🍅</span>
-                <span class="logo-text">TomatoGuard</span>
-            </a>
         </div>
         <div class="nav-right">
             <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
         </div>
     </nav>
 
-    <!-- ─── MOBILE MENU ─── -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="menu-header">
             <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
@@ -581,7 +563,6 @@
         </div>
     </div>
 
-    <!-- ─── MAIN CONTENT ─── -->
     <div class="container">
 
         <a href="/dashboard" class="back-link">← Back to Dashboard</a>
@@ -591,7 +572,6 @@
             <p>View your payment history and manage your subscription</p>
         </div>
 
-        <!-- ─── SUBSCRIPTION CARD ─── -->
         <div class="sub-card">
             <div class="sub-header">
                 <div class="sub-title">
@@ -648,7 +628,6 @@
             </div>
         </div>
 
-        <!-- ─── TRANSACTION HISTORY ─── -->
         <h2 class="section-title">📋 Transaction History</h2>
 
         <div class="table-wrap">
@@ -714,7 +693,6 @@
     <script>
         let currentLang = 'en';
 
-        // ─── MENU ───
         function toggleMenu() {
             const menu = document.getElementById('mobileMenu');
             const overlay = document.getElementById('menuOverlay');
@@ -752,7 +730,6 @@
             localStorage.setItem('tomatoguard_lang', lang);
         }
 
-        // ─── FLOATING TOMATOES ───
         const emojis = ['🍅', '🌿', '🍃', '🌱'];
         for (let i = 0; i < 10; i++) {
             const el = document.createElement('div');
@@ -765,7 +742,6 @@
             document.getElementById('tomatoContainer').appendChild(el);
         }
 
-        // ─── CLOSE MENU ON LINK CLICK ───
         document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (this.getAttribute('href') !== '#') {
@@ -774,7 +750,6 @@
             });
         });
 
-        // ─── INIT ───
         const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
         if (savedLang === 'sw') setLang('sw');
     </script>

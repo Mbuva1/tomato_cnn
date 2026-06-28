@@ -17,7 +17,6 @@
             line-height: 1.6;
         }
 
-        /* ─── FLOATING TOMATOES ─── */
         .tomato {
             position: fixed;
             animation: floatTomato linear infinite;
@@ -33,7 +32,6 @@
             100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
 
-        /* ─── NAVBAR ─── */
         nav {
             position: sticky;
             top: 0;
@@ -46,6 +44,13 @@
             align-items: center;
             backdrop-filter: blur(12px);
         }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .nav-logo {
             display: flex;
             align-items: center;
@@ -69,7 +74,6 @@
         }
         .nav-farmer strong { color: #4caf50; }
 
-        /* ─── HAMBURGER ─── */
         .hamburger {
             display: flex;
             flex-direction: column;
@@ -100,24 +104,23 @@
             transform: rotate(-45deg) translate(5px, -6px);
         }
 
-        /* ─── MOBILE MENU ─── */
         .mobile-menu {
             position: fixed;
             top: 0;
-            right: -100%;
+            left: -100%;
             width: 300px;
             height: 100vh;
             background: rgba(5,15,5,0.98);
             backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(76,175,80,0.08);
+            border-right: 1px solid rgba(76,175,80,0.08);
             padding: 80px 28px 30px;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
-        .mobile-menu.open { right: 0; }
+        .mobile-menu.open { left: 0; }
 
         .mobile-menu .menu-header {
             display: flex;
@@ -237,7 +240,6 @@
             pointer-events: all;
         }
 
-        /* ─── SUBSCRIPTION BANNER ─── */
         .sub-banner {
             max-width: 1100px;
             margin: 14px auto;
@@ -314,7 +316,6 @@
             font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.2s ease;
         }
         .btn-subscribe.trial-btn {
             background: linear-gradient(135deg, #f57f17, #ffca28);
@@ -347,7 +348,6 @@
             color: #ffca28;
         }
 
-        /* ─── HERO ─── */
         .hero {
             text-align: center;
             padding: 30px 20px 20px;
@@ -363,7 +363,6 @@
             opacity: 0.7;
         }
 
-        /* ─── STATS BAR ─── */
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -395,7 +394,6 @@
             margin-top: 2px;
         }
 
-        /* ─── TIPS ─── */
         .tips-card {
             margin: 0 20px 16px;
             max-width: 800px;
@@ -445,7 +443,6 @@
             white-space: nowrap;
         }
 
-        /* ─── MAIN GRID ─── */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -478,7 +475,6 @@
             font-weight: 600;
         }
 
-        /* ─── UPLOAD ─── */
         .method-tabs {
             display: flex;
             gap: 8px;
@@ -494,7 +490,6 @@
             font-size: 0.85rem;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
             font-weight: 500;
         }
         .method-tab.active {
@@ -510,11 +505,9 @@
             padding: 30px 16px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
             margin-bottom: 12px;
         }
-        .upload-area:hover,
-        .upload-area.dragover {
+        .upload-area:hover {
             border-color: #4caf50;
             background: rgba(76,175,80,0.04);
         }
@@ -557,11 +550,9 @@
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: none;
             letter-spacing: 0.5px;
         }
-        .btn-detect:active { transform: scale(0.98); }
 
         .loading {
             display: none;
@@ -579,12 +570,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .loading p {
-            color: #a5d6a7;
-            font-size: 0.9rem;
-        }
-
-        /* ─── RESULT ─── */
         .result-section { display: none; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -654,7 +639,6 @@
             white-space: pre-line;
         }
 
-        /* ─── FEEDBACK ─── */
         .feedback-section {
             margin-top: 14px;
             border-top: 1px solid rgba(76,175,80,0.06);
@@ -680,7 +664,6 @@
             color: #a5d6a7;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.2s;
         }
         .acc-btn.selected-yes {
             background: rgba(46,125,50,0.1);
@@ -721,7 +704,6 @@
             margin-bottom: 8px;
         }
         .feedback-comment:focus { outline: none; border-color: #4caf50; }
-        .feedback-comment::placeholder { color: rgba(255,255,255,0.15); }
 
         .btn-submit-feedback {
             width: 100%;
@@ -734,30 +716,7 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .feedback-success {
-            display: none;
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: rgba(46,125,50,0.08);
-            border: 1px solid rgba(76,175,80,0.12);
-            border-radius: 8px;
-            color: #81c784;
-            font-size: 0.8rem;
-            text-align: center;
-        }
-        .feedback-already {
-            display: none;
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: rgba(33,150,243,0.06);
-            border: 1px solid rgba(33,150,243,0.1);
-            border-radius: 8px;
-            color: #90caf9;
-            font-size: 0.8rem;
-            text-align: center;
-        }
 
-        /* ─── HISTORY TABLE ─── */
         .table-wrap { overflow-x: auto; }
         table {
             width: 100%;
@@ -814,7 +773,6 @@
             color: #ef9a9a;
         }
 
-        /* ─── MODAL ─── */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -879,7 +837,6 @@
             line-height: 1.6;
         }
 
-        /* ─── CONFIRM ─── */
         .confirm-overlay {
             display: none;
             position: fixed;
@@ -936,7 +893,6 @@
             font-size: 0.85rem;
         }
 
-        /* ─── CAMERA ─── */
         #cameraFeed {
             width: 100%;
             border-radius: 10px;
@@ -971,7 +927,6 @@
             color: #ef9a9a;
         }
 
-        /* ─── FOOTER ─── */
         footer {
             text-align: center;
             padding: 20px;
@@ -986,66 +941,20 @@
         #snapCanvas { display: none; }
         #fileInput { display: none; }
 
-        /* ─── RESPONSIVE ─── */
         @media (max-width: 480px) {
             body { font-size: 16px; }
             .nav-logo { font-size: 1.1rem; }
             .hero h1 { font-size: 1.5rem; }
             .stat-value { font-size: 1.3rem; }
             .card { padding: 14px 16px; }
-            .sub-banner .card { padding: 12px 16px; }
-            .sub-info h3 { font-size: 0.85rem; }
             .mobile-menu { width: 260px; padding: 70px 20px 20px; }
-            .upload-area { padding: 20px 12px; }
-            .upload-icon-big { font-size: 2rem; }
-            .main-grid { padding: 0 12px 20px; gap: 14px; }
-            .stats-bar { gap: 8px; padding: 0 12px 12px; }
-            .tips-card { margin: 0 12px 12px; }
-            .sub-banner { padding: 0 12px; }
         }
-
         @media (max-width: 768px) {
             .nav-farmer { display: none; }
         }
 
-        /* Hamburger visible on ALL screen sizes - FIXED */
         .hamburger {
             display: flex;
-        }
-
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 300px;
-            height: 100vh;
-            background: rgba(5,15,5,0.98);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(76,175,80,0.08);
-            padding: 80px 28px 30px;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 999;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .mobile-menu.open { right: 0; }
-
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 998;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .menu-overlay.show {
-            opacity: 1;
-            pointer-events: all;
         }
     </style>
 </head>
@@ -1054,26 +963,25 @@
     <div id="tomatoContainer"></div>
     <canvas id="snapCanvas"></canvas>
 
-    <!-- ─── OVERLAY ─── -->
     <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-    <!-- ─── NAVBAR ─── -->
     <nav>
-        <a href="/dashboard" class="nav-logo">
-            <span>🍅</span>
-            <span class="logo-text">TomatoGuard</span>
-        </a>
-        <div class="nav-right">
-            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
             <button class="hamburger" id="hamburger" onclick="toggleMenu()">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
         </div>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        </div>
     </nav>
 
-    <!-- ─── MOBILE MENU ─── -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="menu-header">
             <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
@@ -1131,13 +1039,10 @@
         {% if access_type == 'subscription' %}
         <div class="card">
             <div class="sub-left">
-                <span class="sub-icon">✅</span>
+                <span class="sub-icon">{% if subscription and subscription.plan == 'pro' %}🌟{% else %}✅{% endif %}</span>
                 <div class="sub-info">
                     <h3>{% if subscription and subscription.plan == 'pro' %}🌟 Pro Plan{% elif subscription and subscription.plan == 'starter' %}📋 Starter Plan{% else %}Active Subscription{% endif %}</h3>
-                    <p>
-                        {% if subscription and subscription.expires_at %}Expires: {{ subscription.expires_at.strftime('%d %b %Y') }}{% else %}Unlimited access{% endif %}
-                        {% if subscription and subscription.plan == 'starter' %}<span class="scan-count">📊 {{ scan_count }}/50 scans used</span>{% endif %}
-                    </p>
+                    <p>{% if subscription and subscription.expires_at %}Expires: {{ subscription.expires_at.strftime('%d %b %Y') }}{% else %}Unlimited access{% endif %}{% if subscription and subscription.plan == 'starter' %}<span class="scan-count">📊 {{ scan_count }}/50 scans used</span>{% endif %}</p>
                 </div>
             </div>
             <div class="sub-actions">
@@ -1158,13 +1063,8 @@
                 <span class="sub-icon">🎯</span>
                 <div class="sub-info">
                     <h3 class="trial-title">Free Trial Active</h3>
-                    <p id="trialInfoText">
-                        <strong style="color:#ffca28;">{{ trial_info.scans_remaining }}</strong> scans left ({{ trial_info.scans_used }}/{{ trial_info.scan_limit }})
-                        {% if trial_info.days_left > 0 %}· <span class="days-left" style="color:#ffca28;font-size:0.8rem;">{{ trial_info.days_left }} days left</span>{% endif %}
-                    </p>
-                    <div class="progress-bar-wrap">
-                        <div class="progress-bar-fill trial-fill" id="trialProgressBar" style="width: {{ (trial_info.scans_used / trial_info.scan_limit * 100)|round(0) }}%;"></div>
-                    </div>
+                    <p id="trialInfoText"><strong style="color:#ffca28;">{{ trial_info.scans_remaining }}</strong> scans left ({{ trial_info.scans_used }}/{{ trial_info.scan_limit }}){% if trial_info.days_left > 0 %}· <span class="days-left" style="color:#ffca28;font-size:0.8rem;">{{ trial_info.days_left }} days left</span>{% endif %}</p>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill trial-fill" id="trialProgressBar" style="width: {{ (trial_info.scans_used / trial_info.scan_limit * 100)|round(0) }}%;"></div></div>
                 </div>
             </div>
             <div class="sub-actions">
@@ -1322,19 +1222,9 @@
                         <tr id="row-{{ r.id }}">
                             <td>{{ loop.index }}</td>
                             <td style="font-size:0.75rem;color:#666;">{{ r.image_name[:15] }}...</td>
-                            <td>
-                                <span class="{% if 'healthy' in r.predicted_disease.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">
-                                    {{ r.predicted_disease.replace('Tomato_','').replace('Tomato__','').replace('_',' ')[:15] }}
-                                </span>
-                            </td>
+                            <td><span class="{% if 'healthy' in r.predicted_disease.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">{{ r.predicted_disease.replace('Tomato_','').replace('Tomato__','').replace('_',' ')[:15] }}</span></td>
                             <td>{{ "%.0f"|format(r.confidence * 100) }}%</td>
-                            <td>
-                                {% if 'healthy' in r.predicted_disease.lower() %}—
-                                {% elif r.confidence >= 0.92 %}<span style="color:#ef5350;">🔴 Severe</span>
-                                {% elif r.confidence >= 0.83 %}<span style="color:#ffca28;">🟡 Moderate</span>
-                                {% else %}<span style="color:#66bb6a;">🟢 Mild</span>
-                                {% endif %}
-                            </td>
+                            <td>{% if 'healthy' in r.predicted_disease.lower() %}—{% elif r.confidence >= 0.92 %}<span style="color:#ef5350;">🔴 Severe</span>{% elif r.confidence >= 0.83 %}<span style="color:#ffca28;">🟡 Moderate</span>{% else %}<span style="color:#66bb6a;">🟢 Mild</span>{% endif %}</td>
                             <td style="font-size:0.75rem;">{{ r.created_at.strftime('%d/%m/%Y') if r.created_at else '' }}</td>
                             <td>
                                 <button class="btn-view" onclick="viewPrediction({{ r.id }})">👁 View</button>
@@ -1343,9 +1233,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">
-                                No detections yet — upload your first image! 🌿
-                            </td>
+                            <td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">No detections yet — upload your first image! 🌿</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -1424,6 +1312,15 @@
             closeMenu();
         }
 
+        // ─── LANGUAGE ───
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
         // ─── TIPS ───
         const tipsByCategory = {
             general: [
@@ -1473,20 +1370,6 @@
             el.style.animationDelay = (Math.random() * 10) + 's';
             document.getElementById('tomatoContainer').appendChild(el);
         }
-
-        // ─── LANGUAGE ───
-        function setLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
-            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
-            localStorage.setItem('tomatoguard_lang', lang);
-            loadTip();
-        }
-
-        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
-        if (savedLang === 'sw') setLang('sw');
-        else loadTipPreferences();
 
         // ─── CAMERA ───
         function switchMethod(method) {
@@ -1591,6 +1474,41 @@
             currentPredId = null;
         }
 
+        // ─── UPDATE STATS ───
+        function updateStats() {
+            fetch('/api/stats')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('totalDetections').textContent = data.total || 0;
+                })
+                .catch(() => {});
+        }
+
+        // ─── UPDATE TRIAL COUNT ───
+        function updateTrialCount(remaining) {
+            const trialBanner = document.querySelector('.sub-banner .card.trial');
+            if (!trialBanner) return;
+
+            const infoText = document.getElementById('trialInfoText');
+            if (infoText) {
+                const match = infoText.textContent.match(/(\d+)\/(\d+)/);
+                if (match) {
+                    const used = parseInt(match[1]);
+                    const limit = parseInt(match[2]);
+                    const newUsed = used + 1;
+                    const newRemaining = limit - newUsed;
+                    const daysSpan = infoText.querySelector('.days-left');
+                    const daysText = daysSpan ? daysSpan.textContent : '';
+                    infoText.innerHTML = `<strong style="color: #ffca28;">${newRemaining}</strong> scans left (${newUsed}/${limit} used)${daysText ? '· <span class="days-left" style="color:#ffca28;font-size:0.8rem;">' + daysText + '</span>' : ''}`;
+                    const progressBar = document.getElementById('trialProgressBar');
+                    if (progressBar) {
+                        const pct = (newUsed / limit * 100);
+                        progressBar.style.width = Math.min(pct, 100) + '%';
+                    }
+                }
+            }
+        }
+
         // ─── DETECT ───
         function detectDisease() {
             const fileInput = document.getElementById('fileInput');
@@ -1672,6 +1590,10 @@
 
                         updateStats();
                         refreshHistory();
+
+                        if (data.access_type === 'trial' && data.trial_remaining !== null) {
+                            updateTrialCount(data.trial_remaining);
+                        }
                     }
                 })
                 .catch(err => {
@@ -1680,60 +1602,6 @@
                     document.getElementById('clearBtn').style.display = 'block';
                     alert('Error: ' + err);
                 });
-        }
-
-        // ─── STATS ───
-        function updateStats() {
-            fetch('/api/stats')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('totalDetections').textContent = data.total || 0;
-                })
-                .catch(() => {});
-        }
-
-        // ─── HISTORY ───
-        function refreshHistory() {
-            fetch('/history')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('totalDetections').textContent = data.length;
-                    const tbody = document.getElementById('historyBody');
-                    tbody.innerHTML = '';
-                    if (!data.length) {
-                        tbody.innerHTML =
-                            `<tr><td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">No detections yet — upload your first image! 🌿</td></tr>`;
-                        return;
-                    }
-                    data.forEach((r, index) => {
-                        const disease = r.predicted_disease.replace('Tomato__', '').replace('Tomato_', '').replace(/_/g,
-                            ' ').slice(0, 15);
-                        const isHealthy = r.predicted_disease.toLowerCase().includes('healthy');
-                        const conf = (r.confidence * 100).toFixed(0);
-                        let sevHTML = '—';
-                        if (!isHealthy) {
-                            if (r.confidence >= 0.92) sevHTML = '<span style="color:#ef5350;">🔴 Severe</span>';
-                            else if (r.confidence >= 0.83) sevHTML = '<span style="color:#ffca28;">🟡 Moderate</span>';
-                            else sevHTML = '<span style="color:#66bb6a;">🟢 Mild</span>';
-                        }
-                        const created = r.created_at ? new Date(r.created_at) : null;
-                        const dateStr = created ? created.toLocaleDateString('en-GB') : '';
-                        tbody.innerHTML += `
-                            <tr id="row-${r.id}">
-                                <td>${index + 1}</td>
-                                <td style="font-size:0.75rem;color:#666;">${r.image_name ? r.image_name.substring(0,15) + '...' : '-'}</td>
-                                <td><span class="${isHealthy ? 'tag-healthy' : 'tag-diseased'}">${disease}</span></td>
-                                <td>${conf}%</td>
-                                <td>${sevHTML}</td>
-                                <td style="font-size:0.75rem;">${dateStr}</td>
-                                <td>
-                                    <button class="btn-view" onclick="viewPrediction(${r.id})">👁 View</button>
-                                    <button class="btn-delete" onclick="confirmDelete(${r.id})">🗑 Delete</button>
-                                </td>
-                            </tr>`;
-                    });
-                })
-                .catch(() => {});
         }
 
         // ─── FEEDBACK ───
@@ -1812,8 +1680,7 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.error) { alert(data.error); return; }
-                    const disease = data.predicted_disease.replace('Tomato__', '').replace('Tomato_', '').replace(/_/g,
-                        ' ');
+                    const disease = data.predicted_disease.replace('Tomato__', '').replace('Tomato_', '').replace(/_/g, ' ');
                     const isHealthy = data.predicted_disease.toLowerCase().includes('healthy');
                     const conf = (data.confidence * 100).toFixed(2);
                     let severityText = '—';
@@ -1870,13 +1737,49 @@
             if (e.target === this) closeConfirm();
         });
 
-        // ─── INIT ───
-        loadTipPreferences();
-        setTimeout(loadTip, 100);
-        refreshHistory();
-        updateStats();
+        // ─── REFRESH HISTORY ───
+        function refreshHistory() {
+            fetch('/history')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('totalDetections').textContent = data.length;
+                    const tbody = document.getElementById('historyBody');
+                    tbody.innerHTML = '';
+                    if (!data.length) {
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">No detections yet — upload your first image! 🌿</td></tr>`;
+                        return;
+                    }
+                    data.forEach((r, index) => {
+                        const disease = r.predicted_disease.replace('Tomato__', '').replace('Tomato_', '').replace(/_/g, ' ').slice(0, 15);
+                        const isHealthy = r.predicted_disease.toLowerCase().includes('healthy');
+                        const conf = (r.confidence * 100).toFixed(0);
+                        let sevHTML = '—';
+                        if (!isHealthy) {
+                            if (r.confidence >= 0.92) sevHTML = '<span style="color:#ef5350;">🔴 Severe</span>';
+                            else if (r.confidence >= 0.83) sevHTML = '<span style="color:#ffca28;">🟡 Moderate</span>';
+                            else sevHTML = '<span style="color:#66bb6a;">🟢 Mild</span>';
+                        }
+                        const created = r.created_at ? new Date(r.created_at) : null;
+                        const dateStr = created ? created.toLocaleDateString('en-GB') : '';
+                        tbody.innerHTML += `
+                            <tr id="row-${r.id}">
+                                <td>${index + 1}</td>
+                                <td style="font-size:0.75rem;color:#666;">${r.image_name ? r.image_name.substring(0,15) + '...' : '-'}</td>
+                                <td><span class="${isHealthy ? 'tag-healthy' : 'tag-diseased'}">${disease}</span></td>
+                                <td>${conf}%</td>
+                                <td>${sevHTML}</td>
+                                <td style="font-size:0.75rem;">${dateStr}</td>
+                                <td>
+                                    <button class="btn-view" onclick="viewPrediction(${r.id})">👁 View</button>
+                                    <button class="btn-delete" onclick="confirmDelete(${r.id})">🗑 Delete</button>
+                                </td>
+                            </tr>`;
+                    });
+                })
+                .catch(() => {});
+        }
 
-        // Close menu when clicking a link inside it
+        // ─── CLOSE MENU ON LINK CLICK ───
         document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (this.getAttribute('href') !== '#') {
@@ -1884,6 +1787,16 @@
                 }
             });
         });
+
+        // ─── INIT ───
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
+        else loadTipPreferences();
+
+        loadTipPreferences();
+        setTimeout(loadTip, 100);
+        refreshHistory();
+        updateStats();
     </script>
 
 </body>
