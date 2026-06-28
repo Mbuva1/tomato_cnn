@@ -759,15 +759,14 @@ def feedback_summary():
 
 
 # ─────────────────────────────────────────────
-# PDF REPORT — REPORTLAB (UPDATED)
+# PDF REPORT — REPORTLAB (FIXED)
 # ─────────────────────────────────────────────
 
-def build_pdf_report(predictions, farmer_name, period_label, lang, total, healthy, diseased, sorted_diseases, recommendations, now):
+def build_pdf_report(predictions, farmer_name, period_label, lang, total, healthy, diseased, sorted_diseases, recommendations, summary_text, now):
     """
     Build and return a ReportLab PDF as bytes.
     Clean headings without brackets. Proper table widths.
     """
-
     # ── Labels (EN / SW) ──
     if lang == 'sw':
         title_txt        = "Ripoti ya Utambuzi wa Magonjwa ya Nyanya"
@@ -892,7 +891,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     story.append(Spacer(1, 0.15*inch))
 
     # ── SUMMARY SECTION ──
-    story.append(Paragraph(f"{summary_head}", heading_style))
+    story.append(Paragraph(summary_head, heading_style))
 
     summary_data = [
         [total_lbl,   healthy_lbl,  diseased_lbl],
@@ -919,12 +918,14 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     ]))
     story.append(summary_table)
     story.append(Spacer(1, 0.1*inch))
+    
+    # ── SUMMARY TEXT ──
     story.append(Paragraph(summary_text, normal_style))
     story.append(Spacer(1, 0.15*inch))
 
     # ── DISEASE DISTRIBUTION ──
     if sorted_diseases:
-        story.append(Paragraph(f"{dist_head}", heading_style))
+        story.append(Paragraph(dist_head, heading_style))
         max_count  = sorted_diseases[0][1] if sorted_diseases else 1
         dist_data  = [[col_disease_dist, col_count, col_pct]]
         for disease, count in sorted_diseases[:8]:
@@ -957,7 +958,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         story.append(Spacer(1, 0.15*inch))
 
     # ── RECOMMENDATIONS ──
-    story.append(Paragraph(f"{rec_head}", heading_style))
+    story.append(Paragraph(rec_head, heading_style))
     if recommendations:
         for rec in recommendations:
             story.append(Paragraph(f"• {rec}", normal_style))
@@ -966,7 +967,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     story.append(Spacer(1, 0.15*inch))
 
     # ── DETECTION HISTORY ──
-    story.append(Paragraph(f"{history_head}", heading_style))
+    story.append(Paragraph(history_head, heading_style))
 
     if predictions:
         MAX_ROWS   = 20
@@ -1173,6 +1174,7 @@ def download_report():
                 diseased       = diseased,
                 sorted_diseases= sorted_diseases,
                 recommendations= recommendations,
+                summary_text   = summary_text,
                 now            = now,
             )
             filename = f"TomatoGuard_Report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
