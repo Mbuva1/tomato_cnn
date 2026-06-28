@@ -18,12 +18,10 @@ load_dotenv()
 # ── ReportLab for PDF ──
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 import io
 
 from module1_image_loader import load_image, resize_image, TOMATO_CLASSES
@@ -306,7 +304,6 @@ def severity_label(confidence, predicted_class, lang='en'):
         return "Kidogo" if lang == 'sw' else "Mild"
 
 def truncate_name(name, max_len=28):
-    """Truncate filename safely, only adding ellipsis when actually truncated."""
     if len(name) > max_len:
         return name[:max_len] + "..."
     return name
@@ -762,15 +759,13 @@ def feedback_summary():
 
 
 # ─────────────────────────────────────────────
-# PDF REPORT — REPORTLAB (FIXED & COMPLETE)
+# PDF REPORT — REPORTLAB (UPDATED)
 # ─────────────────────────────────────────────
 
 def build_pdf_report(predictions, farmer_name, period_label, lang, total, healthy, diseased, sorted_diseases, recommendations, now):
     """
     Build and return a ReportLab PDF as bytes.
-    All emoji are stripped — ReportLab Helvetica is ASCII only.
-    Alternating row colours use a loop (not hardcoded per-row commands).
-    Kiswahili labels are fully applied when lang='sw'.
+    Clean headings without brackets. Proper table widths.
     """
 
     # ── Labels (EN / SW) ──
@@ -784,13 +779,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         total_lbl        = "Jumla ya Uchunguzi"
         healthy_lbl      = "Mimea Yenye Afya"
         diseased_lbl     = "Mimea Yenye Ugonjwa"
-        summary_text_fn  = lambda t, h, d: (
-            f"Katika kipindi kilichochaguliwa, uchunguzi {t} ulifanywa kwenye mimea yako ya nyanya. "
-            + (f"Mimea {h} ilipatikana na afya na mimea {d} ilionyesha dalili za ugonjwa." if h > 0 and d > 0 else
-               f"Mimea yote {h} ilipatikana na afya. Endelea na mazoea mazuri ya kilimo!" if d == 0 else
-               f"Mimea yote {d} ilionyesha dalili za ugonjwa. Tunashauri kuchukua hatua mara moja." if h == 0 else
-               "Hakuna uchunguzi uliofanywa katika kipindi hiki.")
-        )
         dist_head        = "Usambazaji wa Magonjwa"
         rec_head         = "Mapendekezo"
         rec_default      = "Endelea kufuatilia mimea yako mara kwa mara. Hakuna mapendekezo maalum kwa sasa."
@@ -816,13 +804,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         total_lbl        = "Total Scans"
         healthy_lbl      = "Healthy Plants"
         diseased_lbl     = "Diseased Plants"
-        summary_text_fn  = lambda t, h, d: (
-            f"Over the selected period, {t} scan(s) were performed on your tomato plants. "
-            + (f"{h} plant(s) were found healthy and {d} plant(s) showed signs of disease." if h > 0 and d > 0 else
-               f"All {h} plant(s) were found healthy. Continue your good farming practices!" if d == 0 else
-               f"All {d} plant(s) showed signs of disease. We recommend taking immediate action." if h == 0 else
-               "No scans were performed during this period.")
-        )
         dist_head        = "Disease Distribution"
         rec_head         = "Recommendations"
         rec_default      = "Continue monitoring your plants regularly. No specific recommendations at this time."
@@ -844,7 +825,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     GREEN_DARK   = colors.HexColor('#1b5e20')
     GREEN_MID    = colors.HexColor('#2e7d32')
     GREEN_LIGHT  = colors.HexColor('#c8e6c9')
-    GREEN_BG     = colors.HexColor('#f5faf5')
     WHITE        = colors.white
     GRAY_TEXT    = colors.HexColor('#555555')
     BLUE_VAL     = colors.HexColor('#1565c0')
@@ -894,7 +874,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     # ── TITLE ──
     story.append(Paragraph(title_txt, title_style))
     story.append(Paragraph(subtitle_txt, subtitle_style))
-    story.append(HRFlowable(width="100%", thickness=2, color=GREEN_MID, spaceAfter=10))
+    story.append(Spacer(1, 0.1*inch))
 
     # ── FARMER INFO TABLE ──
     info_data = [
@@ -902,7 +882,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         [Paragraph(f"{date_lbl}:",   label_style), Paragraph(now, value_style)],
         [Paragraph(f"{period_lbl_txt}:", label_style), Paragraph(period_label, value_style)],
     ]
-    info_table = Table(info_data, colWidths=[1.4*inch, 4.8*inch])
+    info_table = Table(info_data, colWidths=[1.2*inch, 4.6*inch])
     info_table.setStyle(TableStyle([
         ('VALIGN',  (0,0), (-1,-1), 'MIDDLE'),
         ('PADDING', (0,0), (-1,-1), 4),
@@ -912,7 +892,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
     story.append(Spacer(1, 0.15*inch))
 
     # ── SUMMARY SECTION ──
-    story.append(Paragraph(f"[ {summary_head} ]", heading_style))
+    story.append(Paragraph(f"{summary_head}", heading_style))
 
     summary_data = [
         [total_lbl,   healthy_lbl,  diseased_lbl],
@@ -935,25 +915,23 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         ('TEXTCOLOR',     (2,1), (2,1), RED_VAL),
         ('TOPPADDING',    (0,1), (-1,1), 10),
         ('BOTTOMPADDING', (0,1), (-1,1), 10),
-        ('GRID',          (0,0), (-1,-1), 0.5, GREEN_LIGHT),
+        ('GRID',          (0,0), (-1,-1), 1, GREEN_LIGHT),
     ]))
     story.append(summary_table)
     story.append(Spacer(1, 0.1*inch))
-    story.append(Paragraph(summary_text_fn(total, healthy, diseased), normal_style))
+    story.append(Paragraph(summary_text, normal_style))
     story.append(Spacer(1, 0.15*inch))
 
     # ── DISEASE DISTRIBUTION ──
     if sorted_diseases:
-        story.append(Paragraph(f"[ {dist_head} ]", heading_style))
+        story.append(Paragraph(f"{dist_head}", heading_style))
         max_count  = sorted_diseases[0][1] if sorted_diseases else 1
-        dist_data  = [[col_disease_dist, col_count, col_pct, "Chart"]]
+        dist_data  = [[col_disease_dist, col_count, col_pct]]
         for disease, count in sorted_diseases[:8]:
             pct        = round((count / total * 100), 1) if total > 0 else 0
-            bar_len    = int((count / max_count) * 25) if max_count > 0 else 0
-            bar        = '|' * bar_len + '.' * (25 - bar_len)
-            dist_data.append([disease[:28], str(count), f"{pct}%", bar])
+            dist_data.append([disease[:28], str(count), f"{pct}%"])
 
-        dist_table = Table(dist_data, colWidths=[2.4*inch, 0.7*inch, 0.7*inch, 2.4*inch])
+        dist_table = Table(dist_data, colWidths=[3.0*inch, 1.2*inch, 1.0*inch])
         dist_style = [
             ('BACKGROUND',    (0,0), (-1,0), GREEN_MID),
             ('TEXTCOLOR',     (0,0), (-1,0), WHITE),
@@ -963,14 +941,12 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
             ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
             ('TOPPADDING',    (0,0), (-1,0), 6),
             ('BOTTOMPADDING', (0,0), (-1,0), 6),
-            ('FONTSIZE',      (0,1), (-1,-1), 8),
-            ('PADDING',       (0,0), (-1,-1), 4),
+            ('FONTSIZE',      (0,1), (-1,-1), 9),
+            ('PADDING',       (0,0), (-1,-1), 5),
             ('GRID',          (0,0), (-1,-1), 0.5, GREEN_LIGHT),
             ('ALIGN',         (0,1), (0,-1), 'LEFT'),
-            ('ALIGN',         (3,1), (3,-1), 'LEFT'),
-            ('TEXTCOLOR',     (0,1), (-1,-1), colors.HexColor('#1b3a1b')),
         ]
-        # Alternating rows via loop
+        # Alternating rows
         for idx in range(1, len(dist_data)):
             if idx % 2 == 0:
                 dist_style.append(('BACKGROUND', (0,idx), (-1,idx), ROW_ALT))
@@ -981,16 +957,16 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
         story.append(Spacer(1, 0.15*inch))
 
     # ── RECOMMENDATIONS ──
-    story.append(Paragraph(f"[ {rec_head} ]", heading_style))
+    story.append(Paragraph(f"{rec_head}", heading_style))
     if recommendations:
         for rec in recommendations:
-            story.append(Paragraph(f"  - {rec}", normal_style))
+            story.append(Paragraph(f"• {rec}", normal_style))
     else:
         story.append(Paragraph(rec_default, normal_style))
     story.append(Spacer(1, 0.15*inch))
 
     # ── DETECTION HISTORY ──
-    story.append(Paragraph(f"[ {history_head} ]", heading_style))
+    story.append(Paragraph(f"{history_head}", heading_style))
 
     if predictions:
         MAX_ROWS   = 20
@@ -1010,7 +986,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
             date_str = str(p['created_at'])[:16]
             table_data.append([str(i), disease[:30], conf, sev, date_str])
 
-        col_widths  = [0.4*inch, 2.6*inch, 0.85*inch, 1.0*inch, 1.45*inch]
+        col_widths  = [0.5*inch, 2.4*inch, 0.9*inch, 1.0*inch, 1.6*inch]
         hist_table  = Table(table_data, colWidths=col_widths)
         hist_style  = [
             ('BACKGROUND',    (0,0), (-1,0), GREEN_MID),
@@ -1023,11 +999,11 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
             ('ALIGN',         (0,1), (-1,-1), 'CENTER'),
             ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
             ('FONTSIZE',      (0,1), (-1,-1), 8),
-            ('PADDING',       (0,0), (-1,-1), 5),
+            ('PADDING',       (0,0), (-1,-1), 4),
             ('GRID',          (0,0), (-1,-1), 0.5, colors.HexColor('#e0e0e0')),
             ('TEXTCOLOR',     (0,1), (-1,-1), colors.HexColor('#222222')),
         ]
-        # Alternating rows via loop
+        # Alternating rows
         for idx in range(1, len(table_data)):
             if idx % 2 == 0:
                 hist_style.append(('BACKGROUND', (0,idx), (-1,idx), ROW_ALT))
@@ -1047,7 +1023,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total, health
 
     # ── FOOTER ──
     story.append(Spacer(1, 0.25*inch))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=GREEN_LIGHT, spaceAfter=8))
     story.append(Paragraph(footer_txt, footer_style))
 
     doc.build(story)
@@ -1124,6 +1099,26 @@ def download_report():
         d = p['predicted_disease'].replace('Tomato__','').replace('Tomato_','').replace('_',' ')
         disease_counts[d] = disease_counts.get(d, 0) + 1
     sorted_diseases = sorted(disease_counts.items(), key=lambda x: x[1], reverse=True)
+
+    # ── Summary text ──
+    if lang == 'sw':
+        if healthy > 0 and diseased > 0:
+            summary_text = f"Katika kipindi kilichochaguliwa, uchunguzi {total} ulifanywa kwenye mimea yako ya nyanya. Mimea {healthy} ilipatikana na afya na mimea {diseased} ilionyesha dalili za ugonjwa."
+        elif healthy > 0 and diseased == 0:
+            summary_text = f"Mimea yote {healthy} ilipatikana na afya. Endelea na mazoea mazuri ya kilimo!"
+        elif healthy == 0 and diseased > 0:
+            summary_text = f"Mimea yote {diseased} ilionyesha dalili za ugonjwa. Tunashauri kuchukua hatua mara moja."
+        else:
+            summary_text = "Hakuna uchunguzi uliofanywa katika kipindi hiki."
+    else:
+        if healthy > 0 and diseased > 0:
+            summary_text = f"Over the selected period, {total} scan(s) were performed on your tomato plants. {healthy} plant(s) were found healthy and {diseased} plant(s) showed signs of disease."
+        elif healthy > 0 and diseased == 0:
+            summary_text = f"All {healthy} plant(s) were found healthy. Continue your good farming practices!"
+        elif healthy == 0 and diseased > 0:
+            summary_text = f"All {diseased} plant(s) showed signs of disease. We recommend taking immediate action."
+        else:
+            summary_text = "No scans were performed during this period."
 
     # ── Smart recommendations ──
     recommendations = []
@@ -1280,7 +1275,7 @@ def download_report():
         elif sev in ('Mild', 'Kidogo'):          sev_color = '#4caf50'
         row_bg = '#f9fff9' if is_healthy else '#fffaf6'
         img_display = truncate_name(p['image_name'], 28)
-        status_icon = '[OK]' if is_healthy else '[!]'
+        status_icon = '✅' if is_healthy else '⚠️'
         rows_html += f"""
         <tr style="background:{row_bg};">
             <td style="text-align:center;">{i}</td>
@@ -1413,14 +1408,14 @@ tr:hover td {{ background:#f5f5f5 !important; }}
     </div>
 </div>
 
-<div class="section-title">[ {summary_lbl} ]</div>
+<div class="section-title">{summary_lbl}</div>
 <div class="summary">
-    <div class="summary-card card-total"><div class="val">{total}</div><div class="lbl">[S] {total_lbl}</div></div>
-    <div class="summary-card card-healthy"><div class="val" style="color:#2e7d32;">{healthy}</div><div class="lbl">[OK] {healthy_lbl}</div></div>
-    <div class="summary-card card-diseased"><div class="val">{diseased}</div><div class="lbl">[!] {diseased_lbl}</div></div>
+    <div class="summary-card card-total"><div class="val">{total}</div><div class="lbl">{total_lbl}</div></div>
+    <div class="summary-card card-healthy"><div class="val" style="color:#2e7d32;">{healthy}</div><div class="lbl">{healthy_lbl}</div></div>
+    <div class="summary-card card-diseased"><div class="val">{diseased}</div><div class="lbl">{diseased_lbl}</div></div>
 </div>
 
-<div class="section-title">[ {history_lbl} ]</div>
+<div class="section-title">{history_lbl}</div>
 <table>
     <thead>
         <tr>
