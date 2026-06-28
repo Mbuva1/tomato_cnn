@@ -3,422 +3,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TomatoGuard — My Statistics</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <title>TomatoGuard — Statistics</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a1a0a; min-height: 100vh; color: #e8f5e9;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a1a0a;
+            min-height: 100vh;
+            color: #e8f5e9;
+            font-size: 18px;
+            line-height: 1.6;
         }
 
-        /* ── NAVBAR ── */
+        /* ─── FLOATING TOMATOES ─── */
+        .tomato {
+            position: fixed;
+            animation: floatTomato linear infinite;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 5rem;
+        }
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 0.04; }
+            90%  { opacity: 0.04; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* ─── NAVBAR ─── */
         nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(5,15,5,0.95);
-            border-bottom: 2px solid rgba(76,175,80,0.3);
-            padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
         }
-
         .nav-logo {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 1.3em; font-weight: bold; color: #4caf50; letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
         }
-
-        .nav-logo span { font-size: 1.5em; }
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .nav-farmer { color: #a5d6a7; font-size: 0.9em; }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
         .nav-farmer strong { color: #4caf50; }
 
-        .lang-toggle {
-            display: flex; align-items: center;
+        /* ─── HAMBURGER ─── */
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* ─── MOBILE MENU ─── */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 300px;
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { right: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
             background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; overflow: hidden;
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
         }
 
-        .lang-btn {
-            padding: 5px 12px; font-size: 0.8em; cursor: pointer;
-            border: none; background: transparent; color: #a5d6a7;
-            transition: all 0.2s ease; font-weight: bold;
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        .lang-btn.active { background: #4caf50; color: white; border-radius: 20px; }
-        .lang-btn:hover:not(.active) { color: #4caf50; }
-
-        .nav-link {
-            color: #a5d6a7; text-decoration: none; font-size: 0.82em;
-            padding: 6px 12px; border-radius: 20px;
-            border: 1px solid rgba(76,175,80,0.3);
-            transition: all 0.2s ease; white-space: nowrap; cursor: pointer;
+        /* ─── HERO ─── */
+        .hero {
+            text-align: center;
+            padding: 30px 20px 10px;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            color: #4caf50;
+            margin-bottom: 4px;
+        }
+        .hero p {
+            color: #a5d6a7;
+            font-size: 1rem;
+            opacity: 0.7;
         }
 
-        .nav-link:hover { background: rgba(76,175,80,0.2); color: #4caf50; }
-        .nav-link.active-page { background: rgba(76,175,80,0.2); color: #4caf50; border-color: #4caf50; }
-
-        .btn-logout {
-            background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4);
-            color: #ef9a9a; padding: 6px 14px; border-radius: 20px; font-size: 0.82em;
-            cursor: pointer; text-decoration: none; transition: all 0.3s ease; white-space: nowrap;
+        /* ─── STATS GRID ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        @media (min-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .stat-card {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #4caf50;
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #a5d6a7;
+            margin-top: 4px;
         }
 
-        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
-
-        /* ── PAGE HEADER ── */
-        .page-header { text-align: center; padding: 40px 20px 20px; }
-        .page-header h1 { font-size: 2em; color: #4caf50; margin-bottom: 8px; }
-        .page-header p  { color: #a5d6a7; font-size: 0.95em; opacity: 0.8; }
-
-        /* ── LOADING ── */
-        .loading-state { text-align: center; padding: 60px 20px; color: #a5d6a7; }
-
-        .big-spinner {
-            width: 50px; height: 50px; border: 4px solid rgba(76,175,80,0.2);
-            border-top: 4px solid #4caf50; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 0 auto 15px;
+        /* ─── CHARTS SECTION ─── */
+        .charts-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* ── CONTENT ── */
-        .content { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; }
-
-        /* ── SUMMARY ── */
-        .summary-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 15px; margin-bottom: 25px;
+        @media (max-width: 700px) {
+            .charts-section { grid-template-columns: 1fr; }
         }
-
-        @media (max-width: 768px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        .summary-card {
-            background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 14px; padding: 20px; text-align: center; transition: all 0.3s ease;
-        }
-
-        .summary-card:hover {
-            border-color: rgba(76,175,80,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            transform: translateY(-2px);
-        }
-
-        .summary-icon  { font-size: 2em; margin-bottom: 8px; }
-        .summary-value { font-size: 2em; font-weight: bold; color: #4caf50; }
-        .summary-label { font-size: 0.78em; color: #a5d6a7; margin-top: 4px; }
-
-        /* ── CHART GRID ── */
-        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-
-        @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } }
-
         .chart-card {
-            background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 14px; padding: 20px;
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+        .chart-card h3 {
+            color: #81c784;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            padding-bottom: 10px;
         }
 
-        .chart-card.full-width { grid-column: 1 / -1; }
-
-        .chart-title {
-            font-size: 1em; color: #81c784; margin-bottom: 16px;
-            display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid rgba(76,175,80,0.15); padding-bottom: 10px;
+        /* ─── PIE CHART ─── */
+        .pie-chart {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: conic-gradient(#4caf50 0% 0%, #ff6f00 0% 100%);
+        }
+        .pie-chart .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(10,30,10,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+        .pie-chart .center .big {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #e8f5e9;
         }
 
-        .chart-wrap    { position: relative; height: 240px; }
-        .chart-wrap-lg { position: relative; height: 280px; }
-
-        /* ── SEVERITY ── */
-        .severity-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-
-        .sev-item {
-            flex: 1; min-width: 80px; padding: 12px;
-            border-radius: 10px; text-align: center; border: 1px solid;
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-item .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
-        .sev-item .sev-val { font-size: 1.6em; font-weight: bold; }
-        .sev-item .sev-lbl { font-size: 0.72em; margin-top: 3px; }
+        /* ─── SEVERITY BREAKDOWN ─── */
+        .severity-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 0.9rem;
+        }
+        .severity-item .sev-label { color: #a5d6a7; }
+        .severity-item .sev-count {
+            font-weight: 600;
+            color: #e8f5e9;
+        }
+        .severity-bar {
+            height: 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            transition: width 0.5s ease;
+        }
 
-        /* ── EMPTY STATE ── */
-        .empty-state { text-align: center; padding: 60px 20px; color: #a5d6a7; opacity: 0.6; }
-        .empty-state div { font-size: 3em; margin-bottom: 12px; }
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: #a5d6a7;
+            opacity: 0.5;
+            font-size: 0.9rem;
+        }
 
-        /* ── FOOTER ── */
+        /* ─── FOOTER ─── */
         footer {
-            text-align: center; padding: 20px; color: rgba(255,255,255,0.2); font-size: 0.78em;
-            border-top: 1px solid rgba(76,175,80,0.1);
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.1);
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(76,175,80,0.03);
+            max-width: 1100px;
+            margin: 0 auto;
         }
-
         footer span { color: #4caf50; }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 480px) {
+            body { font-size: 16px; }
+            .hero h1 { font-size: 1.5rem; }
+            .stat-card .number { font-size: 1.8rem; }
+            .chart-card { padding: 14px 16px; }
+            .mobile-menu { width: 260px; padding: 70px 20px 20px; }
+        }
+        @media (min-width: 769px) {
+            .hamburger { display: none; }
+            .mobile-menu { display: none; }
+            .menu-overlay { display: none; }
+        }
+        @media (max-width: 768px) {
+            .nav-farmer { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
+    <div id="tomatoContainer"></div>
+
+    <!-- ─── OVERLAY ─── -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <!-- ─── NAVBAR ─── -->
     <nav>
-        <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
+        <a href="/dashboard" class="nav-logo">
+            <span>🍅</span>
+            <span class="logo-text">TomatoGuard</span>
+        </a>
         <div class="nav-right">
-            <div class="nav-farmer">
-                <span data-en="Welcome," data-sw="Karibu,">Welcome,</span>
-                <strong>{{ farmer_name }}</strong> 👨‍🌾
-            </div>
-
-            <div class="lang-toggle">
-                <button class="lang-btn active" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
-                <button class="lang-btn"        id="btnSW" onclick="setLang('sw')">🇰🇪 SW</button>
-            </div>
-
-            <a href="/dashboard" class="nav-link"
-               data-en="🏠 Dashboard" data-sw="🏠 Dashibodi">🏠 Dashboard</a>
-
-            <a href="/stats" class="nav-link active-page"
-               data-en="📊 Statistics" data-sw="📊 Takwimu">📊 Statistics</a>
-
-            <!-- FIXED: window.open opens report in new tab so Close button works -->
-            <a href="#" class="nav-link" onclick="openReport(event)"
-               data-en="📄 Report" data-sw="📄 Ripoti">📄 Report</a>
-
-            <a href="/logout" class="btn-logout"
-               data-en="🚪 Logout" data-sw="🚪 Toka">🚪 Logout</a>
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-        <h1 data-en="📊 My Farm Statistics" data-sw="📊 Takwimu za Shamba Langu">
-            📊 My Farm Statistics</h1>
-        <p data-en="Overview of your tomato disease detection history"
-           data-sw="Muhtasari wa historia yako ya utambuzi wa magonjwa ya nyanya">
-            Overview of your tomato disease detection history</p>
+    <!-- ─── MOBILE MENU ─── -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
+            </div>
+        </div>
+
+        <div class="lang-toggle-menu">
+            <button class="active" onclick="setLang('en')">🇬🇧 English</button>
+            <button onclick="setLang('sw')">🇰🇪 Kiswahili</button>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item active">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="#" class="menu-item" onclick="showSupport()">
+            <span class="icon">📧</span> Contact Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
+        </div>
     </div>
 
-    <!-- LOADING -->
-    <div class="loading-state" id="loadingState">
-        <div class="big-spinner"></div>
-        <p data-en="Loading your statistics..." data-sw="Inapakia takwimu zako...">
-            Loading your statistics...</p>
+    <!-- ─── HERO ─── -->
+    <div class="hero">
+        <h1>📊 My Farm Statistics</h1>
+        <p>Overview of your tomato disease detection history</p>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content" id="mainContent" style="display:none;">
+    <!-- ─── STATS GRID ─── -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="number" id="totalScans">0</div>
+            <div class="label">Total Scans</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="healthyCount">0</div>
+            <div class="label">Healthy Plants</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="diseasedCount">0</div>
+            <div class="label">Diseased Plants</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="avgConfidence">0%</div>
+            <div class="label">Avg Confidence</div>
+        </div>
+    </div>
 
-        <!-- SUMMARY -->
-        <div class="summary-grid">
-            <div class="summary-card">
-                <div class="summary-icon">🔍</div>
-                <div class="summary-value" id="statTotal">0</div>
-                <div class="summary-label" data-en="Total Scans" data-sw="Jumla ya Uchunguzi">Total Scans</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-icon">✅</div>
-                <div class="summary-value" id="statHealthy" style="color:#4caf50;">0</div>
-                <div class="summary-label" data-en="Healthy Plants" data-sw="Mimea Yenye Afya">Healthy Plants</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-icon">⚠️</div>
-                <div class="summary-value" id="statDiseased" style="color:#ffb74d;">0</div>
-                <div class="summary-label" data-en="Diseased Plants" data-sw="Mimea Yenye Ugonjwa">Diseased Plants</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-icon">🎯</div>
-                <div class="summary-value" id="statAvgConf" style="color:#81c784;">0%</div>
-                <div class="summary-label" data-en="Avg. Confidence" data-sw="Uhakika wa Wastani">Avg. Confidence</div>
+    <!-- ─── CHARTS ─── -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <h3>🟢 Healthy vs Diseased</h3>
+            <div id="pieContainer">
+                <div class="empty-state">No data yet — upload your first image!</div>
             </div>
         </div>
-
-        <!-- ROW 1 -->
-        <div class="chart-grid">
-            <div class="chart-card">
-                <div class="chart-title"
-                     data-en="🌿 Healthy vs Diseased"
-                     data-sw="🌿 Zenye Afya dhidi ya Zenye Ugonjwa">🌿 Healthy vs Diseased</div>
-                <div id="noDataPie" class="empty-state" style="display:none;">
-                    <div>🍃</div>
-                    <p data-en="No data yet" data-sw="Bado hakuna data">No data yet</p>
+        <div class="chart-card">
+            <h3>📊 Severity Breakdown</h3>
+            <div id="severityContainer">
+                <div class="severity-item">
+                    <span class="sev-label">🟢 Mild</span>
+                    <span class="sev-count" id="mildCount">0</span>
                 </div>
-                <div class="chart-wrap" id="wrapPie"><canvas id="chartPie"></canvas></div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-title"
-                     data-en="🎚️ Severity Breakdown"
-                     data-sw="🎚️ Mgawanyo wa Ukali">🎚️ Severity Breakdown</div>
-                <div class="severity-row">
-                    <div class="sev-item" style="color:#66bb6a; border-color:#66bb6a; background:rgba(102,187,106,0.1);">
-                        <div class="sev-val" id="sevMild">0</div>
-                        <div class="sev-lbl" data-en="🟢 Mild" data-sw="🟢 Kidogo">🟢 Mild</div>
-                    </div>
-                    <div class="sev-item" style="color:#ffca28; border-color:#ffca28; background:rgba(255,202,40,0.1);">
-                        <div class="sev-val" id="sevModerate">0</div>
-                        <div class="sev-lbl" data-en="🟡 Moderate" data-sw="🟡 Ya Wastani">🟡 Moderate</div>
-                    </div>
-                    <div class="sev-item" style="color:#ef5350; border-color:#ef5350; background:rgba(239,83,80,0.1);">
-                        <div class="sev-val" id="sevSevere">0</div>
-                        <div class="sev-lbl" data-en="🔴 Severe" data-sw="🔴 Kali Sana">🔴 Severe</div>
-                    </div>
+                <div class="severity-item">
+                    <span class="sev-label">🟡 Moderate</span>
+                    <span class="sev-count" id="moderateCount">0</span>
                 </div>
-                <div class="chart-wrap" style="margin-top:15px;"><canvas id="chartSeverity"></canvas></div>
+                <div class="severity-item">
+                    <span class="sev-label">🔴 Severe</span>
+                    <span class="sev-count" id="severeCount">0</span>
+                </div>
             </div>
         </div>
-
-        <!-- ROW 2 -->
-        <div class="chart-grid">
-            <div class="chart-card full-width">
-                <div class="chart-title"
-                     data-en="🦠 Disease Breakdown"
-                     data-sw="🦠 Mgawanyo wa Magonjwa">🦠 Disease Breakdown</div>
-                <div id="noDataBar" class="empty-state" style="display:none;">
-                    <div>🍃</div>
-                    <p data-en="No disease data yet" data-sw="Bado hakuna data ya ugonjwa">No disease data yet</p>
-                </div>
-                <div class="chart-wrap-lg" id="wrapBar"><canvas id="chartBar"></canvas></div>
-            </div>
-        </div>
-
-        <!-- ROW 3 -->
-        <div class="chart-grid">
-            <div class="chart-card full-width">
-                <div class="chart-title"
-                     data-en="📅 Detections — Last 7 Days"
-                     data-sw="📅 Utambuzi — Siku 7 Zilizopita">📅 Detections — Last 7 Days</div>
-                <div id="noDataLine" class="empty-state" style="display:none;">
-                    <div>📅</div>
-                    <p data-en="No recent activity" data-sw="Hakuna shughuli za hivi karibuni">No recent activity</p>
-                </div>
-                <div class="chart-wrap-lg" id="wrapLine"><canvas id="chartLine"></canvas></div>
-            </div>
-        </div>
-
     </div>
 
     <footer>
-        <p>🍅 TomatoGuard |
-           <span data-en="Built with" data-sw="Imejengwa na">Built with</span>
-           <span>CNN from Scratch</span> | Pure Python + NumPy</p>
+        <p>🍅 TomatoGuard | <span>CNN from Scratch</span> | Pure Python + NumPy</p>
     </footer>
 
     <script>
-        let currentLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        let currentLang = 'en';
 
-        function setLang(lang) {
-            currentLang = lang;
-            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
-            document.getElementById('btnSW').classList.toggle('active', lang === 'sw');
-            document.querySelectorAll('[data-en]').forEach(el => {
-                const text = el.getAttribute(`data-${lang}`);
-                if (text) el.textContent = text;
-            });
-            localStorage.setItem('tomatoguard_lang', lang);
+        // ─── MENU ───
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
         }
 
-        if (currentLang === 'sw') setLang('sw');
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
 
-        // FIXED: window.open so the tab is owned by JS and window.close() works on report page
         function openReport(e) {
             e.preventDefault();
             window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
         }
 
-        Chart.defaults.color       = '#a5d6a7';
-        Chart.defaults.borderColor = 'rgba(76,175,80,0.15)';
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
+            closeMenu();
+        }
 
-        fetch('/api/stats')
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('mainContent').style.display  = 'block';
+        // ─── LANGUAGE ───
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
 
-            document.getElementById('statTotal').textContent    = data.total;
-            document.getElementById('statHealthy').textContent  = data.healthy_count;
-            document.getElementById('statDiseased').textContent = data.diseased_count;
-            document.getElementById('statAvgConf').textContent  = data.avg_confidence + '%';
-            document.getElementById('sevMild').textContent      = data.severity.mild;
-            document.getElementById('sevModerate').textContent  = data.severity.moderate;
-            document.getElementById('sevSevere').textContent    = data.severity.severe;
+        // ─── FLOATING TOMATOES ───
+        const emojis = ['🍅', '🌿', '🍃', '🌱'];
+        for (let i = 0; i < 10; i++) {
+            const el = document.createElement('div');
+            el.className = 'tomato';
+            el.textContent = emojis[i % emojis.length];
+            el.style.left = (Math.random() * 90 + 5) + '%';
+            el.style.fontSize = (2.5 + Math.random() * 3) + 'rem';
+            el.style.animationDuration = (12 + Math.random() * 18) + 's';
+            el.style.animationDelay = (Math.random() * 10) + 's';
+            document.getElementById('tomatoContainer').appendChild(el);
+        }
 
-            // Pie
-            if (data.total === 0) {
-                document.getElementById('noDataPie').style.display = 'block';
-                document.getElementById('wrapPie').style.display   = 'none';
-            } else {
-                new Chart(document.getElementById('chartPie').getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: [currentLang==='sw'?'Yenye Afya':'Healthy', currentLang==='sw'?'Yenye Ugonjwa':'Diseased'],
-                        datasets: [{ data: [data.healthy_count, data.diseased_count],
-                            backgroundColor: ['rgba(76,175,80,0.7)','rgba(255,111,0,0.7)'],
-                            borderColor: ['#4caf50','#ff6f00'], borderWidth: 2 }]
-                    },
-                    options: { responsive:true, maintainAspectRatio:false,
-                        plugins: { legend: { position:'bottom', labels:{color:'#a5d6a7',padding:15} } } }
-                });
+        // ─── LOAD STATS ───
+        function loadStats() {
+            fetch('/api/stats')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('totalScans').textContent = data.total || 0;
+                    document.getElementById('healthyCount').textContent = data.healthy_count || 0;
+                    document.getElementById('diseasedCount').textContent = data.diseased_count || 0;
+                    document.getElementById('avgConfidence').textContent = (data.avg_confidence || 0) + '%';
+
+                    document.getElementById('mildCount').textContent = data.severity?.mild || 0;
+                    document.getElementById('moderateCount').textContent = data.severity?.moderate || 0;
+                    document.getElementById('severeCount').textContent = data.severity?.severe || 0;
+
+                    updatePieChart(data.healthy_count || 0, data.diseased_count || 0);
+                })
+                .catch(err => console.error('Stats error:', err));
+        }
+
+        // ─── PIE CHART ───
+        function updatePieChart(healthy, diseased) {
+            const container = document.getElementById('pieContainer');
+            const total = healthy + diseased;
+
+            if (total === 0) {
+                container.innerHTML = `<div class="empty-state">No data yet — upload your first image!</div>`;
+                return;
             }
 
-            // Severity bar
-            new Chart(document.getElementById('chartSeverity').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: [currentLang==='sw'?'Kidogo':'Mild', currentLang==='sw'?'Ya Wastani':'Moderate', currentLang==='sw'?'Kali Sana':'Severe'],
-                    datasets: [{ label: currentLang==='sw'?'Idadi':'Count',
-                        data: [data.severity.mild, data.severity.moderate, data.severity.severe],
-                        backgroundColor: ['rgba(102,187,106,0.6)','rgba(255,202,40,0.6)','rgba(239,83,80,0.6)'],
-                        borderColor: ['#66bb6a','#ffca28','#ef5350'], borderWidth:2, borderRadius:6 }]
-                },
-                options: { responsive:true, maintainAspectRatio:false,
-                    plugins:{legend:{display:false}},
-                    scales:{ y:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, x:{ticks:{color:'#a5d6a7'}} } }
+            const healthyPct = (healthy / total * 100);
+            const diseasedPct = (diseased / total * 100);
+
+            container.innerHTML = `
+                <div class="pie-chart" style="background: conic-gradient(#4caf50 0% ${healthyPct}%, #ff6f00 ${healthyPct}% 100%);">
+                    <div class="center">
+                        <span class="big">${total}</span>
+                        <span>Total</span>
+                    </div>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="dot" style="background:#4caf50;"></span> Healthy (${healthy})</span>
+                    <span class="legend-item"><span class="dot" style="background:#ff6f00;"></span> Diseased (${diseased})</span>
+                </div>
+            `;
+        }
+
+        // ─── CLOSE MENU ON LINK CLICK ───
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
             });
-
-            // Disease bar
-            if (!data.disease_labels.length) {
-                document.getElementById('noDataBar').style.display = 'block';
-                document.getElementById('wrapBar').style.display   = 'none';
-            } else {
-                const colors = ['rgba(76,175,80,0.6)','rgba(255,111,0,0.6)','rgba(239,83,80,0.6)',
-                    'rgba(255,202,40,0.6)','rgba(33,150,243,0.6)','rgba(156,39,176,0.6)',
-                    'rgba(0,188,212,0.6)','rgba(255,87,34,0.6)','rgba(96,125,139,0.6)',
-                    'rgba(121,85,72,0.6)','rgba(158,158,158,0.6)'];
-                new Chart(document.getElementById('chartBar').getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.disease_labels,
-                        datasets: [{ label: currentLang==='sw'?'Idadi ya Utambuzi':'Detection Count',
-                            data: data.disease_counts,
-                            backgroundColor: data.disease_labels.map((_,i)=>colors[i%colors.length]),
-                            borderColor: data.disease_labels.map((_,i)=>colors[i%colors.length].replace('0.6','1')),
-                            borderWidth:2, borderRadius:6 }]
-                    },
-                    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
-                        plugins:{legend:{display:false}},
-                        scales:{ x:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, y:{ticks:{color:'#a5d6a7',font:{size:11}}} } }
-                });
-            }
-
-            // Timeline
-            if (!data.timeline_labels.length) {
-                document.getElementById('noDataLine').style.display = 'block';
-                document.getElementById('wrapLine').style.display   = 'none';
-            } else {
-                new Chart(document.getElementById('chartLine').getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: data.timeline_labels,
-                        datasets: [{ label: currentLang==='sw'?'Utambuzi':'Detections',
-                            data: data.timeline_counts,
-                            borderColor:'#4caf50', backgroundColor:'rgba(76,175,80,0.15)',
-                            borderWidth:2, fill:true, tension:0.4,
-                            pointBackgroundColor:'#4caf50', pointRadius:5 }]
-                    },
-                    options: { responsive:true, maintainAspectRatio:false,
-                        plugins:{legend:{display:false}},
-                        scales:{ y:{beginAtZero:true,ticks:{stepSize:1,color:'#a5d6a7'}}, x:{ticks:{color:'#a5d6a7'}} } }
-                });
-            }
-        })
-        .catch(err => {
-            document.getElementById('loadingState').innerHTML =
-                `<p style="color:#ef9a9a;">Error loading statistics: ${err}</p>`;
         });
+
+        // ─── INIT ───
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
+        loadStats();
+
+        // Auto-refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
     </script>
 
 </body>

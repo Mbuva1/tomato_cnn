@@ -3,300 +3,662 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TomatoGuard - Tip Settings</title>
+    <title>TomatoGuard — Tips Settings</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a1a0a;
             min-height: 100vh;
             color: #e8f5e9;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .tomato {
+            position: fixed;
+            animation: floatTomato linear infinite;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 5rem;
+        }
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 0.04; }
+            90%  { opacity: 0.04; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
 
         nav {
-            background: rgba(5,15,5,0.95);
-            border-bottom: 2px solid rgba(76,175,80,0.3);
-            padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.3em; font-weight: bold; color: #4caf50; }
-        .nav-logo span { font-size: 1.5em; }
-
-        .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
-        .nav-link { color: #a5d6a7; text-decoration: none; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(76,175,80,0.3); transition: all 0.2s; }
-        .nav-link:hover, .nav-link.active { background: rgba(76,175,80,0.2); color: #4caf50; border-color: rgba(76,175,80,0.6); }
-        .btn-logout { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; padding: 6px 14px; border-radius: 20px; text-decoration: none; transition: all 0.2s; }
-        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
-
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-
-        .card {
-            background: rgba(10,30,10,0.85);
-            border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 1.2em;
-            color: #81c784;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(76,175,80,0.15);
-            padding-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .setting-row {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
+        .nav-farmer strong { color: #4caf50; }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
         }
 
-        .setting-info h4 { color: #e8f5e9; margin-bottom: 5px; font-size: 1em; }
-        .setting-info p { color: #a5d6a7; font-size: 0.8em; }
-
-        /* Toggle Switch */
-        .toggle-switch { position: relative; width: 50px; height: 26px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; inset: 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 34px;
-            transition: 0.3s;
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 300px;
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
-        .slider:before {
-            content: ""; position: absolute;
-            width: 20px; height: 20px;
-            left: 3px; bottom: 3px;
-            background: white;
+        .mobile-menu.open { right: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            transition: 0.3s;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
         }
-        input:checked + .slider { background: #4caf50; }
-        input:checked + .slider:before { transform: translateX(24px); }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 30px 20px 10px;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            color: #4caf50;
+            margin-bottom: 4px;
+        }
+        .hero p {
+            color: #a5d6a7;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 30px;
+        }
+        .card {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            color: #81c784;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            padding-bottom: 10px;
+        }
+        .card p {
+            color: #a5d6a7;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .toggle-row .label {
+            font-size: 0.9rem;
+            color: #c8e6c9;
+        }
+        .toggle-row .desc {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider-track {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.08);
+            border-radius: 24px;
+            transition: 0.25s;
+        }
+        .slider-track::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            transition: 0.25s;
+        }
+        input:checked + .slider-track { background: #4caf50; }
+        input:checked + .slider-track::before { transform: translateX(20px); background: white; }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4caf50;
+            cursor: pointer;
+        }
+        .checkbox-item label {
+            font-size: 0.85rem;
+            color: #c8e6c9;
+            cursor: pointer;
+        }
 
         select {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(76,175,80,0.3);
-            padding: 10px 15px;
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(76,175,80,0.08);
             border-radius: 8px;
             color: #e8f5e9;
-            cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.9rem;
+            font-family: inherit;
         }
-
-        .category-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .category-tag {
-            background: rgba(76,175,80,0.15);
-            border: 1px solid rgba(76,175,80,0.3);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85em;
-        }
-
-        .category-tag:hover { background: rgba(76,175,80,0.3); }
-        .category-tag.selected { background: #4caf50; color: white; border-color: #4caf50; }
+        select:focus { outline: none; border-color: #4caf50; }
+        select option { background: #0a1a0a; }
 
         .btn-save {
-            background: linear-gradient(135deg, #2e7d32, #4caf50);
             width: 100%;
-            padding: 12px;
-            font-size: 1em;
-            font-weight: bold;
-            margin-top: 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
             border: none;
             border-radius: 10px;
-            color: white;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
         }
-
-        .btn-save:hover { background: linear-gradient(135deg, #4caf50, #81c784); transform: translateY(-1px); }
-
-        .status-msg {
-            margin-top: 15px;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .success { background: rgba(46,125,50,0.2); color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
-        .error { background: rgba(211,47,47,0.2); color: #ef9a9a; border: 1px solid rgba(211,47,47,0.3); }
-
-        .info-box {
-            background: rgba(33,150,243,0.1);
-            border-left: 3px solid #2196f3;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.85em;
-            color: #90caf9;
-        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(76,175,80,0.2); }
 
         footer {
             text-align: center;
             padding: 20px;
-            color: rgba(255,255,255,0.2);
-            font-size: 0.78em;
-            border-top: 1px solid rgba(76,175,80,0.1);
+            color: rgba(255,255,255,0.1);
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(76,175,80,0.03);
+            max-width: 1100px;
+            margin: 0 auto;
         }
         footer span { color: #4caf50; }
+
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.35s ease;
+            pointer-events: none;
+            z-index: 999;
+            max-width: 400px;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.ok { background: rgba(27,94,32,0.97); border: 1px solid rgba(76,175,80,0.3); color: #c8e6c9; }
+        #toast.err { background: rgba(183,28,28,0.97); border: 1px solid rgba(211,47,47,0.3); color: #ffcdd2; }
+
+        @media (max-width: 480px) {
+            body { font-size: 16px; }
+            .hero h1 { font-size: 1.5rem; }
+            .card { padding: 14px 16px; }
+            .mobile-menu { width: 260px; padding: 70px 20px 20px; }
+            .checkbox-group { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 769px) {
+            .hamburger { display: none; }
+            .mobile-menu { display: none; }
+            .menu-overlay { display: none; }
+        }
+        @media (max-width: 768px) {
+            .nav-farmer { display: none; }
+        }
     </style>
 </head>
 <body>
 
+    <div id="tomatoContainer"></div>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
     <nav>
-        <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
-        <div class="nav-links">
-            <a href="/dashboard" class="nav-link">🏠 Dashboard</a>
-            <a href="/stats" class="nav-link">📊 Statistics</a>
-            <a href="/notifications" class="nav-link">🔔 SMS</a>
-            <a href="#" class="nav-link active">💡 Tips</a>
-            <a href="/logout" class="btn-logout">🚪 Logout</a>
+        <a href="/dashboard" class="nav-logo">
+            <span>🍅</span>
+            <span class="logo-text">TomatoGuard</span>
+        </a>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
+            </div>
+        </div>
+
+        <div class="lang-toggle-menu">
+            <button class="active" onclick="setLang('en')">🇬🇧 English</button>
+            <button onclick="setLang('sw')">🇰🇪 Kiswahili</button>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item active">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="#" class="menu-item" onclick="showSupport()">
+            <span class="icon">📧</span> Contact Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>💡 Proactive Farming Tips</h1>
+        <p>Get daily farming tips to help prevent diseases before they happen</p>
+    </div>
+
     <div class="container">
         <div class="card">
-            <div class="card-title">
-                <span>💡</span>
-                <span>Proactive Farming Tips</span>
-            </div>
+            <h3>⚙️ Tip Preferences</h3>
+            <p>Choose your preferences for the daily farming tips on your dashboard.</p>
 
-            <div class="info-box">
-                🌱 Get daily farming tips to help prevent diseases before they happen. 
-                Choose the topics that interest you most.
-            </div>
-
-            <div class="setting-row">
-                <div class="setting-info">
-                    <h4>📱 Show Daily Tips</h4>
-                    <p>Display a new farming tip on your dashboard every day</p>
+            <div class="toggle-row">
+                <div>
+                    <div class="label">Show Daily Tips</div>
+                    <div class="desc">Display a new farming tip on your dashboard every day</div>
                 </div>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="dailyToggle">
-                    <span class="slider"></span>
+                    <input type="checkbox" id="dailyTips" checked>
+                    <span class="slider-track"></span>
                 </label>
             </div>
 
-            <div class="setting-row">
-                <div class="setting-info">
-                    <h4>🌍 Tip Language</h4>
-                    <p>Choose your preferred language for farming tips</p>
-                </div>
-                <select id="languageSelect">
+            <div style="margin-top: 16px;">
+                <div class="label" style="margin-bottom: 4px;">Tip Language</div>
+                <select id="tipLang">
                     <option value="en">🇬🇧 English</option>
                     <option value="sw">🇰🇪 Kiswahili</option>
                 </select>
             </div>
+        </div>
 
-            <div class="setting-row" style="flex-direction: column; align-items: flex-start;">
-                <div class="setting-info" style="margin-bottom: 15px;">
-                    <h4>📚 Tip Categories</h4>
-                    <p>Select which topics you want to see</p>
+        <div class="card">
+            <h3>📂 Tip Categories</h3>
+            <p>Select which topics you want to see in your daily tips.</p>
+
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="catGeneral" checked>
+                    <label for="catGeneral">🌿 General</label>
                 </div>
-                <div class="category-group" id="categories">
-                    <span data-cat="general" class="category-tag selected">🌿 General</span>
-                    <span data-cat="disease" class="category-tag selected">🦠 Disease Prevention</span>
-                    <span data-cat="irrigation" class="category-tag selected">💧 Irrigation</span>
-                    <span data-cat="soil" class="category-tag selected">🌱 Soil Health</span>
-                    <span data-cat="pest" class="category-tag selected">🐛 Pest Control</span>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="catDisease" checked>
+                    <label for="catDisease">🦠 Disease Prevention</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="catIrrigation" checked>
+                    <label for="catIrrigation">💧 Irrigation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="catSoil" checked>
+                    <label for="catSoil">🌱 Soil Health</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="catPest" checked>
+                    <label for="catPest">🐛 Pest Control</label>
                 </div>
             </div>
-
-            <button class="btn-save" onclick="savePreferences()">💾 Save Preferences</button>
-            <div id="status" class="status-msg"></div>
         </div>
+
+        <button class="btn-save" onclick="savePreferences()">💾 Save Preferences</button>
     </div>
 
     <footer>
-        <p>🍅 TomatoGuard | <span>Proactive Tips</span> | Prevention is better than cure</p>
+        <p>🍅 TomatoGuard | <span>CNN from Scratch</span> | Pure Python + NumPy</p>
     </footer>
 
-    <script>
-        let selectedCategories = ['general', 'disease', 'irrigation', 'soil', 'pest'];
+    <div id="toast"></div>
 
-        // Load saved preferences from localStorage
+    <script>
+        let currentLang = 'en';
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
+        }
+
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
+            closeMenu();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'show ' + type;
+            setTimeout(() => { t.className = ''; }, 3500);
+        }
+
+        function savePreferences() {
+            const prefs = {
+                daily: document.getElementById('dailyTips').checked,
+                lang: document.getElementById('tipLang').value,
+                categories: {
+                    general: document.getElementById('catGeneral').checked,
+                    disease: document.getElementById('catDisease').checked,
+                    irrigation: document.getElementById('catIrrigation').checked,
+                    soil: document.getElementById('catSoil').checked,
+                    pest: document.getElementById('catPest').checked
+                }
+            };
+
+            localStorage.setItem('tipPreferences', JSON.stringify(prefs));
+            showToast('✅ Preferences saved successfully!', 'ok');
+        }
+
         function loadPreferences() {
             const saved = localStorage.getItem('tipPreferences');
             if (saved) {
                 const prefs = JSON.parse(saved);
-                document.getElementById('dailyToggle').checked = prefs.daily !== false;
-                document.getElementById('languageSelect').value = prefs.language || 'en';
+                document.getElementById('dailyTips').checked = prefs.daily !== false;
+                document.getElementById('tipLang').value = prefs.lang || 'en';
                 if (prefs.categories) {
-                    selectedCategories = prefs.categories;
-                    updateCategoryUI();
+                    document.getElementById('catGeneral').checked = prefs.categories.general !== false;
+                    document.getElementById('catDisease').checked = prefs.categories.disease !== false;
+                    document.getElementById('catIrrigation').checked = prefs.categories.irrigation !== false;
+                    document.getElementById('catSoil').checked = prefs.categories.soil !== false;
+                    document.getElementById('catPest').checked = prefs.categories.pest !== false;
                 }
             }
         }
 
-        // Update category UI based on selected categories
-        function updateCategoryUI() {
-            document.querySelectorAll('.category-tag').forEach(tag => {
-                const cat = tag.dataset.cat;
-                if (selectedCategories.includes(cat)) {
-                    tag.classList.add('selected');
-                } else {
-                    tag.classList.remove('selected');
-                }
-            });
+        const emojis = ['🍅', '🌿', '🍃', '🌱'];
+        for (let i = 0; i < 10; i++) {
+            const el = document.createElement('div');
+            el.className = 'tomato';
+            el.textContent = emojis[i % emojis.length];
+            el.style.left = (Math.random() * 90 + 5) + '%';
+            el.style.fontSize = (2.5 + Math.random() * 3) + 'rem';
+            el.style.animationDuration = (12 + Math.random() * 18) + 's';
+            el.style.animationDelay = (Math.random() * 10) + 's';
+            document.getElementById('tomatoContainer').appendChild(el);
         }
 
-        // Category selection handler
-        document.querySelectorAll('.category-tag').forEach(tag => {
-            tag.addEventListener('click', () => {
-                const cat = tag.dataset.cat;
-                if (selectedCategories.includes(cat)) {
-                    selectedCategories = selectedCategories.filter(c => c !== cat);
-                    tag.classList.remove('selected');
-                } else {
-                    selectedCategories.push(cat);
-                    tag.classList.add('selected');
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
                 }
             });
         });
 
-        // Save preferences to localStorage
-        function savePreferences() {
-            const preferences = {
-                daily: document.getElementById('dailyToggle').checked,
-                language: document.getElementById('languageSelect').value,
-                categories: selectedCategories
-            };
-
-            localStorage.setItem('tipPreferences', JSON.stringify(preferences));
-
-            // Show success message
-            const status = document.getElementById('status');
-            status.textContent = '✅ Preferences saved successfully! Your tips will now be customized.';
-            status.className = 'status-msg success';
-            status.style.display = 'block';
-
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 3000);
-        }
-
-        // Load preferences on page load
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
         loadPreferences();
     </script>
+
 </body>
 </html>

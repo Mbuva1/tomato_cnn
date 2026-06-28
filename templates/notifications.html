@@ -6,753 +6,838 @@
     <title>TomatoGuard — Notifications</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a1a0a;
             min-height: 100vh;
             color: #e8f5e9;
+            font-size: 18px;
+            line-height: 1.6;
         }
 
         .tomato {
             position: fixed;
             animation: floatTomato linear infinite;
-            opacity: 0.07;
+            opacity: 0.04;
             z-index: 0;
             pointer-events: none;
+            font-size: 5rem;
         }
         @keyframes floatTomato {
-            0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0;   }
-            10%  { opacity: 0.07; }
-            90%  { opacity: 0.07; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0;   }
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 0.04; }
+            90%  { opacity: 0.04; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
 
         nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(5,15,5,0.95);
-            border-bottom: 2px solid rgba(76,175,80,0.3);
-            padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px);
-            flex-wrap: wrap;
-            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
         }
-        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.3em; font-weight: bold; color: #4caf50; letter-spacing: 2px; }
-        .nav-logo span { font-size: 1.5em; }
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .nav-farmer { color: #a5d6a7; font-size: 0.9em; }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
         .nav-farmer strong { color: #4caf50; }
-        .nav-link { color: #a5d6a7; text-decoration: none; font-size: 0.82em; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(76,175,80,0.3); transition: all 0.2s ease; white-space: nowrap; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { background: rgba(76,175,80,0.2); color: #4caf50; border-color: rgba(76,175,80,0.6); }
-        .btn-logout { background: rgba(211,47,47,0.2); border: 1px solid rgba(211,47,47,0.4); color: #ef9a9a; padding: 6px 14px; border-radius: 20px; font-size: 0.82em; cursor: pointer; text-decoration: none; transition: all 0.3s ease; white-space: nowrap; }
-        .btn-logout:hover { background: rgba(211,47,47,0.4); color: white; }
-        .lang-toggle { display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(76,175,80,0.3); border-radius: 20px; overflow: hidden; }
-        .lang-btn { padding: 5px 12px; font-size: 0.8em; cursor: pointer; border: none; background: transparent; color: #a5d6a7; transition: all 0.2s ease; font-weight: bold; }
-        .lang-btn.active { background: #4caf50; color: white; border-radius: 20px; }
-        .lang-btn:hover:not(.active) { color: #4caf50; }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 300px;
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { right: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
 
         .hero {
-            position: relative; text-align: center;
-            padding: 40px 20px 25px; overflow: hidden; z-index: 1;
+            text-align: center;
+            padding: 30px 20px 10px;
         }
-        .hero::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at center, rgba(76,175,80,0.1) 0%, transparent 70%);
-            z-index: -1;
+        .hero h1 {
+            font-size: 2rem;
+            color: #4caf50;
+            margin-bottom: 4px;
         }
-        .hero h1 { font-size: 2em; color: #4caf50; text-shadow: 0 0 30px rgba(76,175,80,0.5); margin-bottom: 8px; }
-        .hero p  { color: #a5d6a7; font-size: 0.92em; opacity: 0.8; }
-
-        .page-wrap {
-            max-width: 900px; margin: 0 auto;
-            padding: 0 20px 60px;
-            position: relative; z-index: 1;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 700px) {
-            .page-wrap { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 1.5em; }
-            .nav-right { gap: 6px; }
+        .hero p {
+            color: #a5d6a7;
+            font-size: 1rem;
+            opacity: 0.7;
         }
 
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 30px;
+        }
         .card {
             background: rgba(10,30,10,0.85);
-            border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 16px; padding: 24px;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
         }
-        .card:hover { border-color: rgba(76,175,80,0.45); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
-        .card-full { grid-column: 1 / -1; }
-        .card-title {
-            font-size: 1em; color: #81c784; margin-bottom: 18px;
-            display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid rgba(76,175,80,0.15); padding-bottom: 12px;
+        .card h3 {
+            color: #81c784;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            padding-bottom: 10px;
         }
-
-        .section-label {
-            font-size: 0.72em; font-weight: 600; color: #a5d6a7;
-            letter-spacing: 1.2px; text-transform: uppercase;
-            margin-bottom: 10px;
+        .card p {
+            color: #a5d6a7;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
         }
 
         .toggle-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 11px 14px;
-            background: rgba(0,0,0,0.25);
-            border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 10px; margin-bottom: 8px;
-            transition: border-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
         }
-        .toggle-row:hover { border-color: rgba(76,175,80,0.4); }
-        .toggle-info { display: flex; align-items: center; gap: 10px; }
-        .toggle-icon { font-size: 1.3em; }
-        .toggle-title { font-size: 0.88em; font-weight: 600; color: #e8f5e9; }
-        .toggle-sub   { font-size: 0.75em; color: #a5d6a7; margin-top: 2px; }
-
-        .toggle-switch { position: relative; width: 42px; height: 23px; cursor: pointer; flex-shrink: 0; }
+        .toggle-row .label {
+            font-size: 0.9rem;
+            color: #c8e6c9;
+        }
+        .toggle-row .desc {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider-track {
-            position: absolute; inset: 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 23px; transition: 0.25s;
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.08);
+            border-radius: 24px;
+            transition: 0.25s;
         }
         .slider-track::before {
-            content: ''; position: absolute;
-            width: 17px; height: 17px; left: 3px; top: 3px;
-            background: rgba(255,255,255,0.55); border-radius: 50%; transition: 0.25s;
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            transition: 0.25s;
         }
         input:checked + .slider-track { background: #4caf50; }
-        input:checked + .slider-track::before { transform: translateX(19px); background: white; }
+        input:checked + .slider-track::before { transform: translateX(20px); background: white; }
 
-        .sev-row { display: flex; gap: 8px; margin-bottom: 4px; }
-        .sev-btn {
-            flex: 1; padding: 9px 6px;
-            border-radius: 9px;
-            border: 1px solid rgba(76,175,80,0.2);
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .field label {
+            font-size: 0.85rem;
+            color: #a5d6a7;
+        }
+        .field input, .field select {
+            padding: 12px 14px;
             background: rgba(0,0,0,0.2);
-            color: #a5d6a7; font-size: 0.8em;
-            cursor: pointer; text-align: center;
+            border: 1px solid rgba(76,175,80,0.08);
+            border-radius: 8px;
+            color: #e8f5e9;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .field input:focus, .field select:focus { outline: none; border-color: #4caf50; }
+        .field input::placeholder { color: rgba(255,255,255,0.15); }
+        .field select option { background: #0a1a0a; }
+
+        .sev-row {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .sev-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(76,175,80,0.08);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.15);
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: center;
             transition: all 0.2s;
         }
-        .sev-btn:hover { border-color: #81c784; color: #81c784; }
-        .sev-btn.active-mild     { background: rgba(102,187,106,0.18); border-color: #66bb6a; color: #66bb6a; font-weight: 600; }
-        .sev-btn.active-moderate { background: rgba(255,202,40,0.15);  border-color: #ffca28; color: #ffca28; font-weight: 600; }
-        .sev-btn.active-severe   { background: rgba(239,83,80,0.18);   border-color: #ef5350; color: #ef5350; font-weight: 600; }
+        .sev-btn.active-mild { background: rgba(102,187,106,0.12); border-color: #66bb6a; color: #66bb6a; }
+        .sev-btn.active-moderate { background: rgba(255,202,40,0.1); border-color: #ffca28; color: #ffca28; }
+        .sev-btn.active-severe { background: rgba(239,83,80,0.1); border-color: #ef5350; color: #ef5350; }
 
-        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-        .field label { font-size: 0.78em; color: #a5d6a7; }
-        .field input, .field select {
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(76,175,80,0.25);
-            border-radius: 9px;
-            padding: 10px 13px;
-            color: #e8f5e9; font-size: 0.88em;
-            outline: none; transition: border 0.2s;
-            width: 100%;
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .field input:focus, .field select:focus { border-color: #4caf50; }
-        .field input::placeholder { color: rgba(255,255,255,0.2); }
-        .field select option { background: #1a2e1a; color: #e8f5e9; }
-
-        .status-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 600;
-        }
-        .badge-ok   { background: rgba(76,175,80,0.15);  border: 1px solid rgba(76,175,80,0.4);  color: #81c784; }
-        .badge-warn { background: rgba(255,202,40,0.12); border: 1px solid rgba(255,202,40,0.4); color: #ffca28; }
-        .badge-err  { background: rgba(211,47,47,0.15);  border: 1px solid rgba(211,47,47,0.4);  color: #ef9a9a; }
-        .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-        .dot-ok   { background: #4caf50; animation: pulse-ok 2s infinite; }
-        .dot-warn { background: #ffca28; }
-        .dot-err  { background: #ef5350; }
-        @keyframes pulse-ok {
-            0%,100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); }
-            50%      { box-shadow: 0 0 0 5px rgba(76,175,80,0); }
-        }
-
-        .preview-box {
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(76,175,80,0.2);
-            border-left: 3px solid #4caf50;
-            border-radius: 0 10px 10px 0;
-            padding: 14px 16px;
-            font-size: 0.82em; color: #c8e6c9;
-            line-height: 1.85; white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            min-height: 110px;
-        }
-        .preview-label {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .char-count { font-size: 0.72em; color: rgba(165,214,167,0.5); }
-
-        .divider {
-            display: flex; align-items: center; gap: 12px;
-            margin: 16px 0 12px;
-            color: rgba(165,214,167,0.3);
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .divider::after {
-            content: ''; flex: 1; height: 1px;
-            background: rgba(76,175,80,0.15);
-        }
-
-        .btn-row { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
         .btn {
-            flex: 1; padding: 11px 14px;
-            border-radius: 10px; font-size: 0.88em;
-            font-weight: 600; cursor: pointer;
-            transition: all 0.25s ease; border: none;
-            letter-spacing: 0.5px;
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
             min-width: 120px;
-            max-width: 200px;
         }
         .btn-test {
-            background: rgba(76,175,80,0.1);
-            border: 1px solid rgba(76,175,80,0.35);
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.08);
             color: #81c784;
         }
-        .btn-test:hover { background: rgba(76,175,80,0.25); color: white; }
         .btn-test-email {
-            background: rgba(33,150,243,0.1);
-            border: 1px solid rgba(33,150,243,0.35);
+            background: rgba(33,150,243,0.08);
+            border: 1px solid rgba(33,150,243,0.08);
             color: #90caf9;
         }
-        .btn-test-email:hover { background: rgba(33,150,243,0.25); color: white; }
         .btn-save {
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             color: white;
         }
-        .btn-save:hover { background: linear-gradient(135deg, #4caf50, #81c784); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(76,175,80,0.25); }
-        .btn-save:active { transform: translateY(0); }
-
-        /* ── CENTERED ACTIONS CARD ── */
-        .card-actions {
-            grid-column: 1 / -1;
-            text-align: center;
-        }
-        .card-actions .btn-row {
-            justify-content: center;
-        }
-        .card-actions .card-title {
-            justify-content: center;
-        }
-        .card-actions p {
-            text-align: center;
-            max-width: 500px;
-            margin: 0 auto 16px auto;
-        }
-
-        #toast {
-            position: fixed; bottom: 24px; right: 24px;
-            padding: 12px 20px;
-            border-radius: 12px; font-size: 0.88em;
-            opacity: 0; transform: translateY(12px);
-            transition: all 0.35s ease;
-            pointer-events: none; z-index: 999;
-            max-width: 400px;
-        }
-        #toast.show { opacity: 1; transform: translateY(0); }
-        #toast.ok  { background: rgba(27,94,32,0.97); border: 1px solid rgba(76,175,80,0.5); color: #c8e6c9; }
-        #toast.err { background: rgba(183,28,28,0.97); border: 1px solid rgba(211,47,47,0.5); color: #ffcdd2; }
-
-        .spinner-sm {
-            display: inline-block; width: 14px; height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            vertical-align: middle; margin-right: 6px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         footer {
-            text-align: center; padding: 20px;
-            color: rgba(255,255,255,0.2); font-size: 0.78em;
-            border-top: 1px solid rgba(76,175,80,0.1);
-            position: relative; z-index: 1;
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.1);
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(76,175,80,0.03);
+            max-width: 1100px;
+            margin: 0 auto;
         }
         footer span { color: #4caf50; }
 
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.35s ease;
+            pointer-events: none;
+            z-index: 999;
+            max-width: 400px;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.ok { background: rgba(27,94,32,0.97); border: 1px solid rgba(76,175,80,0.3); color: #c8e6c9; }
+        #toast.err { background: rgba(183,28,28,0.97); border: 1px solid rgba(211,47,47,0.3); color: #ffcdd2; }
+
         @media (max-width: 480px) {
-            .btn { min-width: 100%; max-width: 100%; }
-            .btn-row { flex-direction: column; align-items: center; }
+            body { font-size: 16px; }
+            .hero h1 { font-size: 1.5rem; }
+            .card { padding: 14px 16px; }
+            .mobile-menu { width: 260px; padding: 70px 20px 20px; }
+            .sev-row { flex-direction: column; }
+            .btn-row { flex-direction: column; }
+        }
+        @media (min-width: 769px) {
+            .hamburger { display: none; }
+            .mobile-menu { display: none; }
+            .menu-overlay { display: none; }
+        }
+        @media (max-width: 768px) {
+            .nav-farmer { display: none; }
         }
     </style>
 </head>
 <body>
 
-<div id="tomatoContainer"></div>
+    <div id="tomatoContainer"></div>
 
-<!-- ── NAVBAR ── -->
-<nav>
-    <div class="nav-logo"><span>🍅</span> TOMATOGUARD</div>
-    <div class="nav-right">
-        <div class="nav-farmer">
-            <span data-en="Welcome," data-sw="Karibu,">Welcome,</span>
-            <strong>{{ farmer_name }}</strong> 👨‍🌾
-        </div>
-        <div class="lang-toggle">
-            <button class="lang-btn active" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
-            <button class="lang-btn"        id="btnSW" onclick="setLang('sw')">🇰🇪 SW</button>
-        </div>
-        <a href="/dashboard" class="nav-link" data-en="🏠 Dashboard" data-sw="🏠 Dashibodi">🏠 Dashboard</a>
-        <a href="/stats"     class="nav-link" data-en="📊 Statistics" data-sw="📊 Takwimu">📊 Statistics</a>
-        <a href="/notifications" class="nav-link active" data-en="🔔 Notifications" data-sw="🔔 Arifa">🔔 Notifications</a>
-        <a href="/logout" class="btn-logout" data-en="🚪 Logout" data-sw="🚪 Toka">🚪 Logout</a>
-    </div>
-</nav>
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-<!-- ── HERO ── -->
-<div class="hero">
-    <h1 data-en="🔔 Notification Settings" data-sw="🔔 Mipangilio ya Arifa">🔔 Notification Settings</h1>
-    <p data-en="Configure when and how you receive disease alerts via SMS and Email"
-       data-sw="Weka mipangilio ya wakati na jinsi ya kupokea arifa za ugonjwa kupitia SMS na Barua pepe">
-        Configure when and how you receive disease alerts via SMS and Email</p>
-</div>
-
-<!-- ── MAIN CONTENT ── -->
-<div class="page-wrap">
-
-    <!-- LEFT: Triggers -->
-    <div class="card">
-        <div class="card-title">
-            <span>⚡</span>
-            <span data-en="Notification Triggers" data-sw="Vichocheo vya Arifa">Notification Triggers</span>
-        </div>
-
-        <div class="section-label" data-en="Alert me when..." data-sw="Niarifu ninapoo...">Alert me when...</div>
-
-        <div class="toggle-row" id="row-disease">
-            <div class="toggle-info">
-                <span class="toggle-icon">🦠</span>
-                <div>
-                    <div class="toggle-title" data-en="Disease detected" data-sw="Ugonjwa unagunduliwa">Disease detected</div>
-                    <div class="toggle-sub" data-en="Send SMS/Email when a disease is found" data-sw="Tuma SMS/Email ugonjwa unapogunduliwa">Send SMS/Email when a disease is found</div>
-                </div>
-            </div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="tog-disease">
-                <span class="slider-track"></span>
-            </label>
-        </div>
-
-        <div class="toggle-row">
-            <div class="toggle-info">
-                <span class="toggle-icon">✅</span>
-                <div>
-                    <div class="toggle-title" data-en="Healthy plant confirmed" data-sw="Mmea wenye afya unathibitishwa">Healthy plant confirmed</div>
-                    <div class="toggle-sub" data-en="Notify when scan shows a healthy leaf" data-sw="Arifa wakati uchunguzi unaonyesha jani lenye afya">Notify when scan shows a healthy leaf</div>
-                </div>
-            </div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="tog-healthy">
-                <span class="slider-track"></span>
-            </label>
-        </div>
-
-        <div class="toggle-row">
-            <div class="toggle-info">
-                <span class="toggle-icon">📅</span>
-                <div>
-                    <div class="toggle-title" data-en="Weekly farm summary" data-sw="Muhtasari wa shamba wa kila wiki">Weekly farm summary</div>
-                    <div class="toggle-sub" data-en="Digest of detections sent every Monday" data-sw="Muhtasari wa utambuzi unaotumwa kila Jumatatu">Digest of detections sent every Monday</div>
-                </div>
-            </div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="tog-weekly">
-                <span class="slider-track"></span>
-            </label>
-        </div>
-
-        <br>
-        <div class="section-label" data-en="Minimum severity to alert" data-sw="Ukali wa chini wa kutoa arifa">Minimum severity to alert</div>
-        <div class="sev-row" id="sevRow">
-            <button class="sev-btn" data-sev="mild" onclick="setSev(this)" data-en="🟢 Mild+" data-sw="🟢 Kidogo+">🟢 Mild+</button>
-            <button class="sev-btn" data-sev="moderate" onclick="setSev(this)" data-en="🟡 Moderate+" data-sw="🟡 Wastani+">🟡 Moderate+</button>
-            <button class="sev-btn" data-sev="severe"   onclick="setSev(this)" data-en="🔴 Severe only" data-sw="🔴 Kali tu">🔴 Severe only</button>
-        </div>
-    </div>
-
-    <!-- RIGHT: Phone Numbers & Email -->
-    <div class="card">
-        <div class="card-title">
-            <span>📱</span>
-            <span data-en="SMS & Email" data-sw="SMS na Barua pepe">SMS & Email</span>
-            <span class="status-badge badge-ok" id="connectionBadge" style="margin-left:auto;">
-                <span class="dot dot-ok"></span>
-                <span id="connectionText">Configured</span>
-            </span>
-        </div>
-
-        <div class="section-label" style="margin-top:4px;">
-            <span data-en="📱 SMS Numbers" data-sw="📱 Nambari za SMS">📱 SMS Numbers</span>
-        </div>
-
-        <div class="field">
-            <label data-en="Primary number (your number)" data-sw="Nambari ya kwanza (nambari yako)">Primary number (your number)</label>
-            <input type="tel" id="phone1" placeholder="e.g. 0712345678">
-        </div>
-
-        <div class="field">
-            <label data-en="Secondary number (optional — e.g. agronomist)" data-sw="Nambari ya pili (hiari — mfano mtaalam wa kilimo)">Secondary number (optional)</label>
-            <input type="tel" id="phone2" placeholder="e.g. 0722000000">
-        </div>
-
-        <div class="divider" data-en="📧 Email" data-sw="📧 Barua pepe">📧 Email</div>
-
-        <div class="field">
-            <label data-en="Email Address" data-sw="Anwani ya Barua pepe">Email Address</label>
-            <input type="email" id="email" placeholder="farmer@example.com">
-            <div style="font-size:0.7em; color:rgba(165,214,167,0.4); margin-top:2px;">
-                <span data-en="Receive disease alerts and weekly summaries via email" data-sw="Pokea arifa za ugonjwa na muhtasari wa wiki kupitia barua pepe">Receive disease alerts and weekly summaries via email</span>
-            </div>
-        </div>
-
-        <div class="field">
-            <label data-en="Notification Language" data-sw="Lugha ya Arifa">Notification Language</label>
-            <select id="langSel" onchange="updatePreview()">
-                <option value="en">English</option>
-                <option value="sw">Kiswahili</option>
-            </select>
-        </div>
-
-        <div class="field">
-            <label data-en="Send time preference" data-sw="Upendeleo wa wakati wa kutuma">Send time preference</label>
-            <select id="sendTime">
-                <option value="instant" data-en="Instantly after detection" data-sw="Mara baada ya utambuzi">Instantly after detection</option>
-                <option value="digest" data-en="Digest every 3 hours" data-sw="Muhtasari kila masaa 3">Digest every 3 hours</option>
-                <option value="evening" data-en="Evening summary (6PM)" data-sw="Muhtasari wa jioni (6PM)">Evening summary (6PM)</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- PREVIEW -->
-    <div class="card card-full">
-        <div class="card-title">
-            <span>👁</span>
-            <span data-en="Message Preview" data-sw="Mfano wa Ujumbe">Message Preview</span>
-        </div>
-
-        <div class="preview-label">
-            <span class="section-label" data-en="What your SMS will look like:" data-sw="SMS yako itaonekana hivi:">What your SMS will look like:</span>
-            <span class="char-count" id="charCount">0 / 160 chars</span>
-        </div>
-        <div class="preview-box" id="preview">Enable a trigger to see a preview.</div>
-    </div>
-
-    <!-- ACTIONS - CENTERED -->
-    <div class="card card-actions">
-        <div class="card-title">
-            <span>⚙️</span>
-            <span data-en="Actions" data-sw="Vitendo">Actions</span>
-        </div>
-
-        <p style="font-size:0.82em; color:#a5d6a7; line-height:1.6;"
-           data-en="Send a test message to confirm your settings are working before saving."
-           data-sw="Tuma ujumbe wa majaribio kuthibitisha mipangilio yako inafanya kazi kabla ya kuhifadhi.">
-            Send a test message to confirm your settings are working before saving.
-        </p>
-
-        <div class="btn-row">
-            <button class="btn btn-test" id="btnTest" onclick="sendTest()">
-                📤 <span data-en="Test SMS" data-sw="Jaribu SMS">Test SMS</span>
-            </button>
-            <button class="btn btn-test-email" id="btnTestEmail" onclick="sendTestEmail()">
-                📧 <span data-en="Test Email" data-sw="Jaribu Barua pepe">Test Email</span>
-            </button>
-            <button class="btn btn-save" id="btnSave" onclick="saveSettings()">
-                💾 <span data-en="Save settings" data-sw="Hifadhi mipangilio">Save settings</span>
+    <nav>
+        <a href="/dashboard" class="nav-logo">
+            <span>🍅</span>
+            <span class="logo-text">TomatoGuard</span>
+        </a>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
         </div>
+    </nav>
 
-        <div id="testResult" style="display:none; margin-top:12px; padding:10px 14px; border-radius:9px; font-size:0.82em; line-height:1.6; text-align:center;"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
+            </div>
+        </div>
+
+        <div class="lang-toggle-menu">
+            <button class="active" onclick="setLang('en')">🇬🇧 English</button>
+            <button onclick="setLang('sw')">🇰🇪 Kiswahili</button>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item active">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="#" class="menu-item" onclick="showSupport()">
+            <span class="icon">📧</span> Contact Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
+        </div>
     </div>
 
-</div>
+    <div class="hero">
+        <h1>🔔 Notification Settings</h1>
+        <p>Configure when and how you receive disease alerts via SMS and Email</p>
+    </div>
 
-<footer>
-    <p>🍅 TomatoGuard | <span>SMS powered by Africa's Talking</span> | <span>Email via SMTP</span> | Notification Module</p>
-</footer>
+    <div class="container">
+        <div class="card">
+            <h3>⚡ Notification Triggers</h3>
+            <p style="font-size:0.75rem;color:#666;">Alert me when...</p>
 
-<div id="toast"></div>
+            <div class="toggle-row">
+                <div>
+                    <div class="label">🦠 Disease detected</div>
+                    <div class="desc">Send SMS/Email when a disease is found</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="tog-disease" checked>
+                    <span class="slider-track"></span>
+                </label>
+            </div>
 
-<script>
-    let currentLang = 'en';
-    let currentSev = 'mild';
+            <div class="toggle-row">
+                <div>
+                    <div class="label">✅ Healthy plant confirmed</div>
+                    <div class="desc">Notify when scan shows a healthy leaf</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="tog-healthy">
+                    <span class="slider-track"></span>
+                </label>
+            </div>
 
-    // ── FLOATING TOMATOES ──
-    const emojis = ['🍅','🌿','🍃','🌱','🌾'];
-    for (let i = 0; i < 12; i++) {
-        const el = document.createElement('div');
-        el.className = 'tomato';
-        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        el.style.left = Math.random() * 100 + 'vw';
-        el.style.fontSize = (1.5 + Math.random() * 3) + 'em';
-        el.style.animationDuration = (10 + Math.random() * 20) + 's';
-        el.style.animationDelay    = (Math.random() * 15) + 's';
-        document.getElementById('tomatoContainer').appendChild(el);
-    }
+            <div class="toggle-row">
+                <div>
+                    <div class="label">📅 Weekly farm summary</div>
+                    <div class="desc">Digest of detections sent every Monday</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="tog-weekly">
+                    <span class="slider-track"></span>
+                </label>
+            </div>
 
-    // ── LANGUAGE ──
-    function setLang(lang) {
-        currentLang = lang;
-        document.getElementById('btnEN').classList.toggle('active', lang === 'en');
-        document.getElementById('btnSW').classList.toggle('active', lang === 'sw');
-        document.querySelectorAll('[data-en]').forEach(el => {
-            const text = el.getAttribute('data-' + lang);
-            if (text) el.textContent = text;
-        });
-        localStorage.setItem('tomatoguard_lang', lang);
-        updatePreview();
-    }
+            <div style="margin-top: 16px;">
+                <p style="font-size:0.75rem;color:#666;margin-bottom:6px;">Minimum severity to alert</p>
+                <div class="sev-row">
+                    <button class="sev-btn active-mild" data-sev="mild" onclick="setSev(this)">🟢 Mild+</button>
+                    <button class="sev-btn" data-sev="moderate" onclick="setSev(this)">🟡 Moderate+</button>
+                    <button class="sev-btn" data-sev="severe" onclick="setSev(this)">🔴 Severe only</button>
+                </div>
+            </div>
+        </div>
 
-    const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
-    if (savedLang === 'sw') setLang('sw');
+        <div class="card">
+            <h3>📱 SMS & Email</h3>
 
-    // ── SEVERITY ──
-    function setSev(btn) {
-        currentSev = btn.dataset.sev;
-        document.querySelectorAll('.sev-btn').forEach(b => {
-            b.className = 'sev-btn';
-        });
-        btn.classList.add('active-' + currentSev);
-        updatePreview();
-    }
+            <div class="field">
+                <label>📱 Primary number (your number)</label>
+                <input type="tel" id="phone1" placeholder="0712345678">
+            </div>
 
-    // ── PREVIEW ──
-    function updatePreview() {
-        const disease = document.getElementById('tog-disease').checked;
-        const healthy = document.getElementById('tog-healthy').checked;
-        const weekly  = document.getElementById('tog-weekly').checked;
-        const lang    = document.getElementById('langSel').value || currentLang;
+            <div class="field">
+                <label>📱 Secondary number (optional)</label>
+                <input type="tel" id="phone2" placeholder="0722000000">
+            </div>
 
-        let msg = '';
+            <div class="field">
+                <label>📧 Email Address</label>
+                <input type="email" id="email" placeholder="farmer@example.com">
+                <div style="font-size:0.75rem;color:#666;">Receive disease alerts and weekly summaries via email</div>
+            </div>
 
-        if (!disease && !healthy && !weekly) {
-            msg = lang === 'sw'
-                ? 'Washa kichocheo hapo juu kuona mfano wa ujumbe.'
-                : 'Enable a trigger above to see a preview.';
-        } else if (disease) {
-            const sevLabels = {
-                en: { mild: '🟢 Mild', moderate: '🟡 Moderate', severe: '🔴 Severe' },
-                sw: { mild: '🟢 Kidogo', moderate: '🟡 Wastani', severe: '🔴 Kali Sana' }
-            };
-            const sevLabel = (sevLabels[lang] || sevLabels['en'])[currentSev];
-            if (lang === 'sw') {
-                msg = '🍅 TomatoGuard\n'
-                    + 'Ugonjwa: Uozu wa Mapema (' + sevLabel + ')\n'
-                    + 'Tibu: Ondoa majani yaliyoathiriwa, tumia dawa ya kuua kuvu.';
-            } else {
-                msg = '🍅 TomatoGuard\n'
-                    + 'Disease: Early Blight (' + sevLabel + ')\n'
-                    + 'Action: Remove infected leaves, apply fungicide.';
-            }
-        } else if (healthy) {
-            msg = lang === 'sw'
-                ? '🍅 TomatoGuard\n✅ Mmea wako wa nyanya una afya. Endelea kufuatilia.'
-                : '🍅 TomatoGuard\n✅ Your tomato plant is healthy. Keep monitoring.';
-        } else if (weekly) {
-            msg = lang === 'sw'
-                ? '🍅 TomatoGuard — Wiki hii\nUchunguzi: 12 | Afya: 9 | Ugonjwa: 3\nUgonjwa wa kawaida: Uozu wa Mapema'
-                : '🍅 TomatoGuard — This week\nScans: 12 | Healthy: 9 | Diseased: 3\nTop: Early Blight';
+            <div class="field">
+                <label>🌍 Notification Language</label>
+                <select id="langSel">
+                    <option value="en">English</option>
+                    <option value="sw">Kiswahili</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>⏰ Send time preference</label>
+                <select id="sendTime">
+                    <option value="instant">Instantly after detection</option>
+                    <option value="digest">Digest every 3 hours</option>
+                    <option value="evening">Evening summary (6PM)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>⚙️ Actions</h3>
+            <p style="font-size:0.85rem;color:#a5d6a7;margin-bottom:14px;">Send a test message to confirm your settings are working.</p>
+
+            <div class="btn-row">
+                <button class="btn btn-test" onclick="sendTest()">📤 Test SMS</button>
+                <button class="btn btn-test-email" onclick="sendTestEmail()">📧 Test Email</button>
+                <button class="btn btn-save" onclick="saveSettings()">💾 Save</button>
+            </div>
+            <div id="testResult" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:0.85rem;"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🍅 TomatoGuard | <span>SMS powered by Africa's Talking</span> | <span>Email via SMTP</span></p>
+    </footer>
+
+    <div id="toast"></div>
+
+    <script>
+        let currentLang = 'en';
+        let currentSev = 'mild';
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
         }
 
-        document.getElementById('preview').textContent = msg;
-        document.getElementById('charCount').textContent = msg.length + ' / 160 chars';
-    }
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
 
-    // ── TOAST ──
-    function showToast(msg, type) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.className = 'show ' + type;
-        setTimeout(() => { t.className = ''; }, 3500);
-    }
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
+        }
 
-    // ── LOAD SETTINGS FROM SERVER ──
-    function loadSettings() {
-        console.log('🔄 Loading settings from server...');
-        fetch('/api/notifications/get')
-        .then(r => r.json())
-        .then(data => {
-            console.log('📦 Settings received:', data);
-            if (data.settings) {
-                const s = data.settings;
-                document.getElementById('tog-disease').checked = s.notify_disease === 1;
-                document.getElementById('tog-healthy').checked = s.notify_healthy === 1;
-                document.getElementById('tog-weekly').checked = s.notify_weekly === 1;
-                document.getElementById('phone1').value = s.phone1 || '';
-                document.getElementById('phone2').value = s.phone2 || '';
-                document.getElementById('email').value = s.email || '';
-                document.getElementById('langSel').value = s.lang || 'en';
-                document.getElementById('sendTime').value = s.send_time || 'instant';
-                
-                const sev = s.min_severity || 'mild';
-                document.querySelectorAll('.sev-btn').forEach(b => {
-                    b.className = 'sev-btn';
-                    if (b.dataset.sev === sev) {
-                        b.classList.add('active-' + sev);
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
+            closeMenu();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
+        function setSev(btn) {
+            currentSev = btn.dataset.sev;
+            document.querySelectorAll('.sev-btn').forEach(b => b.className = 'sev-btn');
+            btn.classList.add('active-' + currentSev);
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'show ' + type;
+            setTimeout(() => { t.className = ''; }, 3500);
+        }
+
+        function loadSettings() {
+            fetch('/api/notifications/get')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.settings) {
+                        const s = data.settings;
+                        document.getElementById('tog-disease').checked = s.notify_disease === 1;
+                        document.getElementById('tog-healthy').checked = s.notify_healthy === 1;
+                        document.getElementById('tog-weekly').checked = s.notify_weekly === 1;
+                        document.getElementById('phone1').value = s.phone1 || '';
+                        document.getElementById('phone2').value = s.phone2 || '';
+                        document.getElementById('email').value = s.email || '';
+                        document.getElementById('langSel').value = s.lang || 'en';
+                        document.getElementById('sendTime').value = s.send_time || 'instant';
+                        const sev = s.min_severity || 'mild';
+                        document.querySelectorAll('.sev-btn').forEach(b => {
+                            b.className = 'sev-btn';
+                            if (b.dataset.sev === sev) b.classList.add('active-' + sev);
+                        });
+                        currentSev = sev;
                     }
-                });
-                currentSev = sev;
-                updatePreview();
-                console.log('✅ Settings loaded successfully');
-            }
-        })
-        .catch(err => console.error('❌ Error loading settings:', err));
-    }
-
-    // ── SAVE SETTINGS ──
-    function saveSettings() {
-        const btn = document.getElementById('btnSave');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-sm"></span>' + (currentLang === 'sw' ? 'Inahifadhi...' : 'Saving...');
-
-        const payload = {
-            phone1:   document.getElementById('phone1').value.trim(),
-            phone2:   document.getElementById('phone2').value.trim(),
-            email:    document.getElementById('email').value.trim(),
-            lang:     document.getElementById('langSel').value,
-            send_time: document.getElementById('sendTime').value,
-            disease:  document.getElementById('tog-disease').checked ? 1 : 0,
-            healthy:  document.getElementById('tog-healthy').checked ? 1 : 0,
-            weekly:   document.getElementById('tog-weekly').checked ? 1 : 0,
-            severity: currentSev
-        };
-
-        fetch('/api/notifications/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '💾 <span>' + (currentLang === 'sw' ? 'Hifadhi mipangilio' : 'Save settings') + '</span>';
-            if (data.success) {
-                showToast(currentLang === 'sw' ? '✅ Mipangilio imehifadhiwa' : '✅ Settings saved', 'ok');
-                setTimeout(loadSettings, 500);
-            } else {
-                showToast(currentLang === 'sw' ? 'Imeshindwa kuhifadhi' : 'Failed to save', 'err');
-            }
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '💾 <span>' + (currentLang === 'sw' ? 'Hifadhi mipangilio' : 'Save settings') + '</span>';
-            showToast('Error: ' + err, 'err');
-        });
-    }
-
-    // ── TEST SMS ──
-    function sendTest() {
-        const phone = document.getElementById('phone1').value.trim();
-        if (!phone) {
-            showToast(currentLang === 'sw' ? 'Weka nambari ya simu kwanza' : 'Enter a phone number first', 'err');
-            return;
+                })
+                .catch(() => {});
         }
-        const btn = document.getElementById('btnTest');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-sm"></span>' + (currentLang === 'sw' ? 'Inatuma...' : 'Sending...');
 
-        fetch('/api/notifications/test', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone1: phone })
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '📤 <span>' + (currentLang === 'sw' ? 'Jaribu SMS' : 'Test SMS') + '</span>';
-            const resultEl = document.getElementById('testResult');
-            if (data.success) {
-                resultEl.style.display = 'block';
-                resultEl.style.background = 'rgba(46,125,50,0.2)';
-                resultEl.style.border = '1px solid rgba(76,175,80,0.4)';
-                resultEl.style.color = '#81c784';
-                resultEl.textContent = currentLang === 'sw'
-                    ? '✅ SMS ya majaribio ilitumwa kwa ' + phone
-                    : '✅ Test SMS sent to ' + phone;
-                showToast(currentLang === 'sw' ? 'SMS ya majaribio imetumwa!' : 'Test SMS sent!', 'ok');
-            } else {
-                resultEl.style.display = 'block';
-                resultEl.style.background = 'rgba(183,28,28,0.2)';
-                resultEl.style.border = '1px solid rgba(211,47,47,0.4)';
-                resultEl.style.color = '#ef9a9a';
-                resultEl.textContent = '❌ ' + (data.response || 'Failed to send');
-                showToast(currentLang === 'sw' ? 'Imeshindwa kutuma' : 'Send failed', 'err');
-            }
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '📤 <span>' + (currentLang === 'sw' ? 'Jaribu SMS' : 'Test SMS') + '</span>';
-            showToast('Error: ' + err, 'err');
-        });
-    }
+        function saveSettings() {
+            const btn = document.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = '⏳ Saving...';
 
-    // ── TEST EMAIL ──
-    function sendTestEmail() {
-        const email = document.getElementById('email').value.trim();
-        if (!email) {
-            showToast(currentLang === 'sw' ? 'Weka anwani ya barua pepe kwanza' : 'Enter an email address first', 'err');
-            return;
+            const payload = {
+                phone1: document.getElementById('phone1').value.trim(),
+                phone2: document.getElementById('phone2').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                lang: document.getElementById('langSel').value,
+                send_time: document.getElementById('sendTime').value,
+                disease: document.getElementById('tog-disease').checked ? 1 : 0,
+                healthy: document.getElementById('tog-healthy').checked ? 1 : 0,
+                weekly: document.getElementById('tog-weekly').checked ? 1 : 0,
+                severity: currentSev
+            };
+
+            fetch('/api/notifications/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = '💾 Save';
+                if (data.success) {
+                    showToast('✅ Settings saved', 'ok');
+                    setTimeout(loadSettings, 500);
+                } else {
+                    showToast('❌ Failed to save', 'err');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = '💾 Save';
+                showToast('❌ Error saving', 'err');
+            });
         }
-        const btn = document.getElementById('btnTestEmail');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-sm"></span>' + (currentLang === 'sw' ? 'Inatuma...' : 'Sending...');
 
-        fetch('/api/email/test', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '📧 <span>' + (currentLang === 'sw' ? 'Jaribu Barua pepe' : 'Test Email') + '</span>';
-            const resultEl = document.getElementById('testResult');
-            if (data.success) {
-                resultEl.style.display = 'block';
-                resultEl.style.background = 'rgba(33,150,243,0.15)';
-                resultEl.style.border = '1px solid rgba(33,150,243,0.4)';
-                resultEl.style.color = '#90caf9';
-                resultEl.textContent = currentLang === 'sw'
-                    ? '✅ Barua pepe ya majaribio ilitumwa kwa ' + email
-                    : '✅ Test email sent to ' + email;
-                showToast(currentLang === 'sw' ? 'Barua pepe ya majaribio imetumwa!' : 'Test email sent!', 'ok');
-            } else {
-                resultEl.style.display = 'block';
-                resultEl.style.background = 'rgba(183,28,28,0.2)';
-                resultEl.style.border = '1px solid rgba(211,47,47,0.4)';
-                resultEl.style.color = '#ef9a9a';
-                resultEl.textContent = '❌ ' + (data.message || 'Failed to send');
-                showToast(currentLang === 'sw' ? 'Imeshindwa kutuma' : 'Send failed', 'err');
-            }
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '📧 <span>' + (currentLang === 'sw' ? 'Jaribu Barua pepe' : 'Test Email') + '</span>';
-            showToast('Error: ' + err, 'err');
+        function sendTest() {
+            const phone = document.getElementById('phone1').value.trim();
+            if (!phone) { showToast('⚠️ Enter a phone number', 'err'); return; }
+
+            const btn = document.querySelector('.btn-test');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+
+            fetch('/api/notifications/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone1: phone })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = '📤 Test SMS';
+                const result = document.getElementById('testResult');
+                result.style.display = 'block';
+                if (data.success) {
+                    result.style.background = 'rgba(46,125,50,0.1)';
+                    result.style.color = '#81c784';
+                    result.textContent = '✅ Test SMS sent to ' + phone;
+                    showToast('✅ Test SMS sent!', 'ok');
+                } else {
+                    result.style.background = 'rgba(183,28,28,0.1)';
+                    result.style.color = '#ef9a9a';
+                    result.textContent = '❌ ' + (data.response || 'Failed to send');
+                    showToast('❌ Failed to send', 'err');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = '📤 Test SMS';
+                showToast('❌ Error sending', 'err');
+            });
+        }
+
+        function sendTestEmail() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) { showToast('⚠️ Enter an email address', 'err'); return; }
+
+            const btn = document.querySelector('.btn-test-email');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+
+            fetch('/api/email/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = '📧 Test Email';
+                const result = document.getElementById('testResult');
+                result.style.display = 'block';
+                if (data.success) {
+                    result.style.background = 'rgba(33,150,243,0.1)';
+                    result.style.color = '#90caf9';
+                    result.textContent = '✅ Test email sent to ' + email;
+                    showToast('✅ Test email sent!', 'ok');
+                } else {
+                    result.style.background = 'rgba(183,28,28,0.1)';
+                    result.style.color = '#ef9a9a';
+                    result.textContent = '❌ ' + (data.message || 'Failed to send');
+                    showToast('❌ Failed to send', 'err');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = '📧 Test Email';
+                showToast('❌ Error sending', 'err');
+            });
+        }
+
+        const emojis = ['🍅', '🌿', '🍃', '🌱'];
+        for (let i = 0; i < 10; i++) {
+            const el = document.createElement('div');
+            el.className = 'tomato';
+            el.textContent = emojis[i % emojis.length];
+            el.style.left = (Math.random() * 90 + 5) + '%';
+            el.style.fontSize = (2.5 + Math.random() * 3) + 'rem';
+            el.style.animationDuration = (12 + Math.random() * 18) + 's';
+            el.style.animationDelay = (Math.random() * 10) + 's';
+            document.getElementById('tomatoContainer').appendChild(el);
+        }
+
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
         });
-    }
 
-    // ── INIT ──
-    document.addEventListener('DOMContentLoaded', function() {
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
         loadSettings();
-        
-        document.getElementById('tog-disease').addEventListener('change', updatePreview);
-        document.getElementById('tog-healthy').addEventListener('change', updatePreview);
-        document.getElementById('tog-weekly').addEventListener('change', updatePreview);
-        document.getElementById('langSel').addEventListener('change', updatePreview);
-        document.getElementById('phone1').addEventListener('input', updatePreview);
-    });
-</script>
+    </script>
+
 </body>
 </html>
