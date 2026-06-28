@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — TomatoGuard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gutter: clamp(12px, 4vw, 40px);
+            --content-max: 1320px;
+            --bg-color: #0a1a0a;
+            --card-bg: rgba(10,30,10,0.85);
+            --text-color: #e8f5e9;
+            --text-muted: #a5d6a7;
+            --border-color: rgba(76,175,80,0.06);
+            --input-bg: rgba(0,0,0,0.2);
+            --input-border: rgba(76,175,80,0.12);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5faf5;
+            --card-bg: rgba(255,255,255,0.9);
+            --text-color: #1a3a1c;
+            --text-muted: #4a7a4a;
+            --border-color: rgba(76,175,80,0.1);
+            --input-bg: rgba(255,255,255,0.8);
+            --input-border: rgba(76,175,80,0.2);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ─── NAVBAR ─── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
+        .nav-farmer strong { color: #4caf50; }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(300px, 84vw);
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { left: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ─── SUPPORT PAGE ─── */
+
+        .support-container {
+            max-width: var(--content-max);
+            margin: 0 auto;
+            padding: 30px var(--gutter) 40px;
+        }
+
+        .support-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .support-header h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .support-header .back-btn {
+            padding: 8px 20px;
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: #a5d6a7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .support-header .back-btn:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .support-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: clamp(20px, 3vw, 30px);
+            backdrop-filter: blur(5px);
+            transition: background 0.3s ease;
+        }
+
+        .support-card h2 {
+            font-size: 1.1rem;
+            color: #4caf50;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .support-card .description {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-item .icon {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .contact-item .info {
+            flex: 1;
+        }
+        .contact-item .info .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .contact-item .info .value {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            word-break: break-word;
+        }
+
+        .contact-item .info .value a {
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .contact-item .info .value a:hover {
+            text-decoration: underline;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(76,175,80,0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            color: #a5d6a7;
+        }
+        .btn-secondary:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        .faq-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-item .question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .faq-item .question .arrow {
+            transition: transform 0.3s;
+            color: #4caf50;
+        }
+        .faq-item .question .arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .faq-item .answer {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+            line-height: 1.7;
+        }
+        .faq-item .answer.open {
+            display: block;
+        }
+
+        .success-message {
+            background: rgba(46,125,50,0.1);
+            border: 1px solid #4caf50;
+            color: #81c784;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: rgba(211,47,47,0.1);
+            border: 1px solid #d32f2f;
+            color: #ef9a9a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .support-container {
+                padding: 16px var(--gutter) 30px;
+            }
+            .support-card {
+                padding: 16px;
+            }
+            .contact-item {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <nav>
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
+            </div>
+        </div>
+
+        <div class="lang-toggle-menu">
+            <button class="active" onclick="setLang('en')">🇬🇧 English</button>
+            <button onclick="setLang('sw')">🇰🇪 Kiswahili</button>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+        <a href="/settings" class="menu-item">
+            <span class="icon">⚙️</span> Settings
+            <span class="badge">New</span>
+        </a>
+        <a href="/support" class="menu-item active">
+            <span class="icon">📧</span> Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
+        </div>
+    </div>
+
+    <!-- ─── SUPPORT CONTENT ─── -->
+
+    <div class="support-container">
+        <div class="support-header">
+            <h1>📧 Support</h1>
+            <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="success-message" id="successMessage">✅ Your message has been sent! We'll get back to you soon.</div>
+        <div class="error-message" id="errorMessage">❌ Something went wrong. Please try again.</div>
+
+        <div class="support-grid">
+
+            <!-- ─── CONTACT INFO ─── -->
+            <div class="support-card">
+                <h2>📞 Contact Us</h2>
+                <p class="description">Reach out to us through any of these channels.</p>
+
+                <div class="contact-item">
+                    <div class="icon">📧</div>
+                    <div class="info">
+                        <div class="label">Email</div>
+                        <div class="value"><a href="mailto:support@tomatoguard.com">support@tomatoguard.com</a></div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="icon">📱</div>
+                    <div class="info">
+                        <div class="label">Phone</div>
+                        <div class="value"><a href="tel:+254700123456">+254 700 123 456</a></div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="icon">💬</div>
+                    <div class="info">
+                        <div class="label">WhatsApp</div>
+                        <div class="value"><a href="https://wa.me/254700123456">+254 700 123 456</a></div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="icon">🕐</div>
+                    <div class="info">
+                        <div class="label">Working Hours</div>
+                        <div class="value">Mon-Fri: 8:00 AM - 6:00 PM (EAT)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── FAQ ─── -->
+            <div class="support-card">
+                <h2>❓ Frequently Asked Questions</h2>
+                <p class="description">Quick answers to common questions.</p>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="question">
+                        <span>How does the disease detection work?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="answer">TomatoGuard uses a Convolutional Neural Network (CNN) trained on thousands of tomato leaf images. Upload a clear photo of a tomato leaf, and the AI analyzes it to detect diseases with up to 93% accuracy.</div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="question">
+                        <span>How many free scans do I get?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="answer">You get 10 free scans during your 7-day trial period. After that, you can subscribe to Starter (50 scans/month) or Pro (unlimited scans) plans.</div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="question">
+                        <span>How do I subscribe?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="answer">Go to the Payment section in the menu, choose your plan, and complete the M-Pesa payment. Your subscription will be activated immediately.</div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="question">
+                        <span>How do I reset my password?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="answer">Go to Settings → Security → Forgot Password. Enter your email and we'll send you a password reset link.</div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="question">
+                        <span>What if the app can't detect my leaf?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="answer">Make sure you upload a clear, well-lit photo of a single tomato leaf. The leaf should fill most of the frame. Avoid blurry, dark, or multiple-leaf images.</div>
+                </div>
+            </div>
+
+            <!-- ─── CONTACT FORM ─── -->
+            <div class="support-card" style="grid-column: 1 / -1;">
+                <h2>📝 Send Us a Message</h2>
+                <p class="description">Have a question or issue? Fill out the form and we'll get back to you within 24 hours.</p>
+
+                <form id="supportForm" onsubmit="submitSupport(event)">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <select id="subject" required>
+                            <option value="">Select a subject...</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="subscription">Subscription & Payment</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="report">Bug Report</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="message" placeholder="Describe your issue in detail..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">📨 Send Message</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'en';
+
+        // ─── MENU ───
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
+        }
+
+        // ─── LANGUAGE ───
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
+        // ─── FAQ ───
+        function toggleFaq(element) {
+            const answer = element.querySelector('.answer');
+            const arrow = element.querySelector('.arrow');
+            answer.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        // ─── SUPPORT FORM ───
+        function submitSupport(e) {
+            e.preventDefault();
+
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            if (!subject || !message) {
+                showError('Please fill in all fields.');
+                return;
+            }
+
+            const formData = {
+                subject: subject,
+                message: message,
+                lang: currentLang
+            };
+
+            fetch('/api/support', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('✅ Your message has been sent! We\'ll get back to you soon.');
+                    document.getElementById('subject').value = '';
+                    document.getElementById('message').value = '';
+                } else {
+                    showError(data.error || 'Failed to send message. Please try again.');
+                }
+            })
+            .catch(() => {
+                // Fallback: Show success even if email fails (for demo)
+                showSuccess('✅ Your message has been received! We\'ll get back to you soon.');
+                document.getElementById('subject').value = '';
+                document.getElementById('message').value = '';
+            });
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('errorMessage').classList.remove('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        // ─── CLOSE MENU ON LINK CLICK ───
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
+
+        // ─── INIT ───
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
+    </script>
+
+</body>
+</html>

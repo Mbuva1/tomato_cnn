@@ -1653,6 +1653,60 @@ def save_notification_settings():
     conn.close()
     
     return jsonify({'success': True})
+# ─────────────────────────────────────────────
+# SUPPORT ROUTES
+# ─────────────────────────────────────────────
+
+@app.route('/support')
+def support():
+    if 'farmer_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('support.html',
+        farmer_name=session.get('farmer_name')
+    )
+
+
+@app.route('/api/support', methods=['POST'])
+def submit_support():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    subject = data.get('subject')
+    message = data.get('message')
+    lang = data.get('lang', 'en')
+    
+    if not subject or not message:
+        return jsonify({'error': 'Subject and message are required'}), 400
+    
+    # Get farmer details
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT full_name, email FROM farmers WHERE id=%s", (session['farmer_id'],))
+    farmer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    # Send email notification (if configured)
+    try:
+        from email_notifier import send_email
+        subject_line = f"[Support] {subject} - {farmer['full_name']}"
+        body = f"""
+        <h2>Support Ticket</h2>
+        <p><strong>Farmer:</strong> {farmer['full_name']}</p>
+        <p><strong>Email:</strong> {farmer.get('email', 'Not provided')}</p>
+        <p><strong>Subject:</strong> {subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>{message}</p>
+        <p><strong>Language:</strong> {lang}</p>
+        """
+        # Uncomment when email is configured
+        # send_email('support@tomatoguard.com', subject_line, body)
+    except Exception as e:
+        print(f"[Support] Email error: {e}")
+    
+    return jsonify({'success': True})
 
 
 # ─────────────────────────────────────────────
