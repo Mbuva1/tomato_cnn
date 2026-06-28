@@ -18,9 +18,10 @@ load_dotenv()
 # ── ReportLab for PDF (Pure Python, no external dependencies) ──
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 
 from module1_image_loader import load_image, resize_image, TOMATO_CLASSES
@@ -806,7 +807,7 @@ def feedback_summary():
 
 
 # ─────────────────────────────────────────────
-# PDF REPORT USING REPORTLAB (Railway Compatible)
+# PDF REPORT USING REPORTLAB (Professional Design)
 # ─────────────────────────────────────────────
 
 @app.route('/report')
@@ -875,6 +876,58 @@ def download_report():
     healthy = sum(1 for p in predictions if 'healthy' in p['predicted_disease'].lower())
     diseased = total - healthy
 
+    # ── Calculate disease distribution for chart ──
+    disease_counts = {}
+    for p in predictions:
+        disease = p['predicted_disease'].replace('Tomato__', '').replace('Tomato_', '').replace('_', ' ')
+        if disease in disease_counts:
+            disease_counts[disease] += 1
+        else:
+            disease_counts[disease] = 1
+    
+    # Sort by count descending
+    sorted_diseases = sorted(disease_counts.items(), key=lambda x: x[1], reverse=True)
+
+    # ── Generate recommendations based on top diseases ──
+    recommendations = []
+    if sorted_diseases:
+        top_disease = sorted_diseases[0][0]
+        if "Septoria" in top_disease:
+            recommendations = [
+                "Apply fungicides containing chlorothalonil or copper",
+                "Remove infected leaves immediately",
+                "Mulch soil to prevent spore splashing",
+                "Rotate crops annually"
+            ]
+        elif "Early" in top_disease or "blight" in top_disease.lower():
+            recommendations = [
+                "Remove infected leaves immediately",
+                "Apply fungicides with chlorothalonil or mancozeb",
+                "Water in the morning so leaves dry during the day",
+                "Mulch around plants to prevent soil splash"
+            ]
+        elif "Leaf_Mold" in top_disease or "mold" in top_disease.lower():
+            recommendations = [
+                "Improve air circulation by pruning and spacing plants",
+                "Apply fungicides containing chlorothalonil or mancozeb",
+                "Reduce humidity",
+                "Avoid overhead watering"
+            ]
+        elif "mosaic" in top_disease.lower() or "curl" in top_disease.lower():
+            recommendations = [
+                "Remove and destroy infected plants immediately",
+                "Control whitefly and aphid populations",
+                "Wash hands before handling plants",
+                "Plant resistant varieties next season"
+            ]
+        else:
+            recommendations = [
+                "Monitor plants regularly for early signs of disease",
+                "Remove and destroy infected plant material",
+                "Practice crop rotation",
+                "Consult a local agricultural officer for specific advice"
+            ]
+
     # ── If download requested, generate PDF with ReportLab ──
     if request.args.get('download') == '1':
         try:
@@ -885,106 +938,269 @@ def download_report():
             
             styles = getSampleStyleSheet()
             
-            # Custom styles
+            # ── Custom Styles ──
+            
+            # Main title
             title_style = ParagraphStyle(
                 'CustomTitle',
                 parent=styles['Heading1'],
-                fontSize=24,
-                textColor=colors.HexColor('#2e7d32'),
-                alignment=1,  # Center
-                spaceAfter=6
+                fontSize=26,
+                textColor=colors.HexColor('#1b5e20'),
+                alignment=TA_CENTER,
+                spaceAfter=4,
+                fontName='Helvetica-Bold'
             )
             
+            # Subtitle
             subtitle_style = ParagraphStyle(
                 'Subtitle',
                 parent=styles['Normal'],
                 fontSize=12,
                 textColor=colors.HexColor('#555555'),
-                alignment=1,
+                alignment=TA_CENTER,
                 spaceAfter=20
             )
             
+            # Section heading
             heading_style = ParagraphStyle(
                 'Heading',
                 parent=styles['Heading2'],
                 fontSize=14,
-                textColor=colors.HexColor('#2e7d32'),
-                spaceAfter=10
+                textColor=colors.HexColor('#1b5e20'),
+                spaceAfter=8,
+                fontName='Helvetica-Bold'
+            )
+            
+            # Info text
+            info_style = ParagraphStyle(
+                'Info',
+                parent=styles['Normal'],
+                fontSize=11,
+                textColor=colors.HexColor('#333333'),
+                spaceAfter=4
+            )
+            
+            # Summary card labels
+            card_label_style = ParagraphStyle(
+                'CardLabel',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.HexColor('#666666'),
+                alignment=TA_CENTER,
+                spaceAfter=2
+            )
+            
+            # Summary card values
+            card_value_style = ParagraphStyle(
+                'CardValue',
+                parent=styles['Normal'],
+                fontSize=24,
+                textColor=colors.HexColor('#1b5e20'),
+                fontName='Helvetica-Bold',
+                alignment=TA_CENTER
+            )
+            
+            # Footer
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontSize=8,
+                textColor=colors.HexColor('#888888'),
+                alignment=TA_CENTER
             )
             
             story = []
             
-            # Title
-            title_text = "Tomato Disease Detection Report" if lang == 'en' else "Ripoti ya Utambuzi wa Magonjwa ya Nyanya"
-            story.append(Paragraph(f"🍅 {title_text}", title_style))
-            story.append(Paragraph("TomatoGuard — AI-Powered Disease Detection", subtitle_style))
-            story.append(Spacer(1, 0.1*inch))
-            
-            # Farmer info
-            story.append(Paragraph(f"<b>Farmer:</b> {farmer_name}", styles['Normal']))
-            story.append(Paragraph(f"<b>Report Date:</b> {now}", styles['Normal']))
-            story.append(Paragraph(f"<b>Period:</b> {period_label}", styles['Normal']))
+            # ── HEADER ──
+            story.append(Paragraph("🍅 Tomato Disease Detection Report", title_style))
+            story.append(Paragraph("TomatoGuard — AI-Powered Disease Detection System", subtitle_style))
             story.append(Spacer(1, 0.2*inch))
             
-            # Summary
+            # ── DIVIDER LINE ──
+            story.append(Paragraph("─" * 80, styles['Normal']))
+            story.append(Spacer(1, 0.15*inch))
+            
+            # ── FARMER INFO ──
+            info_data = [
+                ['👨‍🌾 Farmer:', farmer_name],
+                ['📅 Report Date:', now],
+                ['📊 Period:', period_label],
+            ]
+            
+            info_table = Table(info_data, colWidths=[1.2*inch, 3.8*inch])
+            info_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 11),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#555555')),
+                ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#1b5e20')),
+                ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('PADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ]))
+            story.append(info_table)
+            story.append(Spacer(1, 0.2*inch))
+            
+            # ── SUMMARY SECTION ──
             story.append(Paragraph("📊 Summary", heading_style))
             
-            # Summary table
+            # Summary Cards (3 columns)
             summary_data = [
-                ['Metric', 'Count'],
-                ['Total Scans', str(total)],
-                ['Healthy Plants', str(healthy)],
-                ['Diseased Plants', str(diseased)],
+                ['🔍 Total Scans', '✅ Healthy', '⚠️ Diseased'],
+                [str(total), str(healthy), str(diseased)]
             ]
-            summary_table = Table(summary_data, colWidths=[2*inch, 1.5*inch])
+            
+            summary_table = Table(summary_data, colWidths=[1.8*inch, 1.8*inch, 1.8*inch])
             summary_table.setStyle(TableStyle([
+                # Header row
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2e7d32')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f1f8e9')),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+                # Values row
+                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 1), (-1, 1), 22),
+                ('TEXTCOLOR', (0, 1), (0, 1), colors.HexColor('#1565c0')),
+                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#2e7d32')),
+                ('TEXTCOLOR', (2, 1), (2, 1), colors.HexColor('#c62828')),
+                ('PADDING', (0, 1), (-1, 1), 10),
+                # Borders
                 ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#c8e6c9')),
-                ('FONTSIZE', (0, 1), (-1, -1), 11),
-                ('PADDING', (0, 0), (-1, -1), 6),
+                ('ROUND', (0, 0), (-1, -1), 6),
             ]))
             story.append(summary_table)
-            story.append(Spacer(1, 0.3*inch))
+            story.append(Spacer(1, 0.2*inch))
             
-            # Detection history
+            # ── SUMMARY TEXT ──
+            summary_text = f"Over the selected period, {total} scan(s) were performed on your tomato plants. "
+            if healthy > 0 and diseased > 0:
+                summary_text += f"{healthy} plant(s) were found healthy and {diseased} plant(s) showed signs of disease."
+            elif healthy > 0 and diseased == 0:
+                summary_text += f"All {healthy} plant(s) were found healthy. Continue your good farming practices!"
+            elif healthy == 0 and diseased > 0:
+                summary_text += f"All {diseased} plant(s) showed signs of disease. We recommend taking immediate action."
+            else:
+                summary_text += "No scans were performed during this period."
+            
+            story.append(Paragraph(summary_text, styles['Normal']))
+            story.append(Spacer(1, 0.2*inch))
+            
+            # ── DISEASE DISTRIBUTION ──
+            if sorted_diseases:
+                story.append(Paragraph("📈 Disease Distribution", heading_style))
+                
+                # Create a bar chart representation using tables
+                chart_data = [['Disease', 'Count', 'Percentage']]
+                max_count = sorted_diseases[0][1] if sorted_diseases else 1
+                
+                for disease, count in sorted_diseases:
+                    pct = round((count / total * 100), 1) if total > 0 else 0
+                    # Create visual bar using block characters
+                    bar_length = int((count / max_count) * 20) if max_count > 0 else 0
+                    bar = '█' * bar_length + '░' * (20 - bar_length)
+                    chart_data.append([disease[:20], str(count), f"{pct}% {bar}"])
+                
+                # Only show top 5 diseases
+                if len(chart_data) > 6:
+                    chart_data = chart_data[:6]
+                    chart_data.append(['...', '...', '...'])
+                
+                chart_table = Table(chart_data, colWidths=[2.2*inch, 0.8*inch, 2.2*inch])
+                chart_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2e7d32')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+                    ('TOPPADDING', (0, 0), (-1, 0), 6),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5faf5')),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#c8e6c9')),
+                    ('FONTSIZE', (0, 1), (-1, -1), 9),
+                    ('PADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(chart_table)
+                story.append(Spacer(1, 0.2*inch))
+            
+            # ── RECOMMENDATIONS ──
+            story.append(Paragraph("💡 Recommendations", heading_style))
+            
+            if recommendations:
+                rec_text = "<br/>".join([f"• {r}" for r in recommendations])
+                story.append(Paragraph(rec_text, styles['Normal']))
+            else:
+                story.append(Paragraph("Continue monitoring your plants regularly. No specific recommendations at this time.", styles['Normal']))
+            
+            story.append(Spacer(1, 0.2*inch))
+            
+            # ── DETECTION HISTORY ──
             story.append(Paragraph("📋 Detection History", heading_style))
             
             if predictions:
                 table_data = [['#', 'Disease', 'Confidence', 'Severity', 'Date']]
                 
-                for i, p in enumerate(predictions, 1):
+                for i, p in enumerate(predictions[:20], 1):  # Limit to 20 for PDF
                     disease = p['predicted_disease'].replace('Tomato__', '').replace('Tomato_', '').replace('_', ' ')
                     conf = f"{round(p['confidence'] * 100, 1)}%"
                     sev = severity_label(p['confidence'], p['predicted_disease'], lang)
                     date_str = str(p['created_at'])[:16]
-                    table_data.append([str(i), disease, conf, sev, date_str])
+                    table_data.append([str(i), disease[:25], conf, sev, date_str])
                 
-                table = Table(table_data, colWidths=[0.5*inch, 2.5*inch, 0.8*inch, 1*inch, 1.5*inch])
+                table = Table(table_data, colWidths=[0.4*inch, 2.4*inch, 0.8*inch, 1*inch, 1.6*inch])
                 table.setStyle(TableStyle([
+                    # Header
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2e7d32')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                     ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+                    ('TOPPADDING', (0, 0), (-1, 0), 8),
+                    # Alternating row colors
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 4), (-1, 4), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 5), (-1, 5), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 6), (-1, 6), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 7), (-1, 7), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 8), (-1, 8), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 9), (-1, 9), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 10), (-1, 10), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 11), (-1, 11), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 12), (-1, 12), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 13), (-1, 13), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 14), (-1, 14), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 15), (-1, 15), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 16), (-1, 16), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 17), (-1, 17), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 18), (-1, 18), colors.HexColor('#ffffff')),
+                    ('BACKGROUND', (0, 19), (-1, 19), colors.HexColor('#f5faf5')),
+                    ('BACKGROUND', (0, 20), (-1, 20), colors.HexColor('#ffffff')),
+                    # Alignment
+                    ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                     ('FONTSIZE', (0, 1), (-1, -1), 9),
                     ('PADDING', (0, 0), (-1, -1), 5),
+                    # Grid
+                    ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
                 ]))
                 story.append(table)
+                
+                if len(predictions) > 20:
+                    story.append(Paragraph(f"<i>Showing first 20 of {len(predictions)} detections.</i>", styles['Normal']))
             else:
-                story.append(Paragraph("No records found.", styles['Normal']))
+                story.append(Paragraph("No detection records found for this period.", styles['Normal']))
             
-            # Footer
-            story.append(Spacer(1, 0.5*inch))
-            footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.HexColor('#888888'))
+            # ── FOOTER ──
+            story.append(Spacer(1, 0.3*inch))
+            story.append(Paragraph("─" * 60, styles['Normal']))
             story.append(Paragraph(f"Generated by TomatoGuard | CNN from Scratch | {now}", footer_style))
             
             # Build PDF
