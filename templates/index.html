@@ -13,8 +13,9 @@
             background: #0a1a0a;
             min-height: 100vh;
             color: #e8f5e9;
-            font-size: 16px;
+            font-size: 18px;
             -webkit-text-size-adjust: 100%;
+            line-height: 1.6;
         }
 
         /* ─── FLOATING TOMATOES ─── */
@@ -24,10 +25,7 @@
             opacity: 0.04;
             z-index: 0;
             pointer-events: none;
-            font-size: 4rem;
-        }
-        @media (max-width: 480px) {
-            .tomato { font-size: 3rem; }
+            font-size: 5rem;
         }
 
         @keyframes floatTomato {
@@ -43,8 +41,8 @@
             top: 0;
             z-index: 1000;
             background: rgba(5,15,5,0.97);
-            border-bottom: 1px solid rgba(76,175,80,0.15);
-            padding: 10px 16px;
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -54,61 +52,55 @@
         .nav-logo {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.1rem;
+            gap: 10px;
+            font-size: 1.3rem;
             font-weight: 800;
             color: #4caf50;
-            letter-spacing: 0.5px;
             text-decoration: none;
         }
-        .nav-logo span { font-size: 1.3rem; }
+        .nav-logo span { font-size: 1.5rem; }
         .nav-logo .logo-text { color: #e8f5e9; }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
         .nav-farmer {
             color: #a5d6a7;
-            font-size: 0.7rem;
-            display: none;
+            font-size: 0.85rem;
         }
-        @media (min-width: 600px) {
-            .nav-farmer { display: inline; }
-        }
+        .nav-farmer strong { color: #4caf50; }
 
         /* ─── HAMBURGER ─── */
         .hamburger {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
             cursor: pointer;
             padding: 4px;
-            background: rgba(76,175,80,0.06);
-            border-radius: 8px;
-            border: none;
             background: transparent;
+            border: none;
             z-index: 1001;
         }
         .hamburger span {
             display: block;
-            width: 24px;
-            height: 2.5px;
+            width: 28px;
+            height: 3px;
             background: #a5d6a7;
             border-radius: 2px;
             transition: all 0.3s ease;
             transform-origin: center;
         }
         .hamburger.active span:nth-child(1) {
-            transform: rotate(45deg) translate(4px, 5px);
+            transform: rotate(45deg) translate(5px, 6px);
         }
         .hamburger.active span:nth-child(2) {
             opacity: 0;
             transform: scaleX(0);
         }
         .hamburger.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(4px, -5px);
+            transform: rotate(-45deg) translate(5px, -6px);
         }
 
         /* ─── MOBILE MENU ─── */
@@ -116,61 +108,58 @@
             position: fixed;
             top: 0;
             right: -100%;
-            width: 280px;
+            width: 300px;
             height: 100vh;
             background: rgba(5,15,5,0.98);
             backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(76,175,80,0.1);
-            padding: 70px 24px 30px;
+            border-left: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
             transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
-        .mobile-menu.open {
-            right: 0;
-        }
+        .mobile-menu.open { right: 0; }
 
         .mobile-menu .menu-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(76,175,80,0.08);
-            margin-bottom: 12px;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
         }
         .mobile-menu .menu-header .avatar {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: white;
         }
         .mobile-menu .menu-header .user-info h4 {
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #e8f5e9;
         }
         .mobile-menu .menu-header .user-info p {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #a5d6a7;
         }
 
         .mobile-menu .menu-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
+            gap: 14px;
+            padding: 14px 16px;
             border-radius: 10px;
             color: #c8e6c9;
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 0.95rem;
             font-weight: 500;
             transition: all 0.2s ease;
             cursor: pointer;
@@ -181,17 +170,17 @@
             color: #4caf50;
         }
         .mobile-menu .menu-item .icon {
-            font-size: 1.2rem;
-            width: 28px;
+            font-size: 1.3rem;
+            width: 32px;
             text-align: center;
             flex-shrink: 0;
         }
         .mobile-menu .menu-item .badge {
             margin-left: auto;
-            background: rgba(76,175,80,0.15);
-            padding: 2px 10px;
+            background: rgba(76,175,80,0.12);
+            padding: 2px 12px;
             border-radius: 50px;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             color: #81c784;
         }
         .mobile-menu .menu-divider {
@@ -203,9 +192,36 @@
             margin-top: auto;
             padding-top: 16px;
             border-top: 1px solid rgba(255,255,255,0.04);
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.15);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
             text-align: center;
+        }
+
+        /* ─── MENU LANGUAGE TOGGLE ─── */
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
         }
 
         /* ─── OVERLAY ─── */
@@ -215,7 +231,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 998;
             opacity: 0;
             pointer-events: none;
@@ -226,84 +242,57 @@
             pointer-events: all;
         }
 
-        /* ─── LANGUAGE TOGGLE IN MENU ─── */
-        .lang-toggle-menu {
-            display: flex;
-            gap: 4px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 3px;
-            border: 1px solid rgba(76,175,80,0.1);
-            margin: 8px 0;
-        }
-        .lang-toggle-menu button {
-            flex: 1;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 18px;
-            background: transparent;
-            color: #a5d6a7;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .lang-toggle-menu button.active {
-            background: #4caf50;
-            color: white;
-        }
-
         /* ─── SUBSCRIPTION BANNER ─── */
         .sub-banner {
             max-width: 1100px;
-            margin: 10px auto;
-            padding: 0 12px;
+            margin: 14px auto;
+            padding: 0 20px;
         }
         .sub-banner .card {
-            background: linear-gradient(135deg, rgba(46,125,50,0.15), rgba(76,175,80,0.06));
-            border: 1px solid rgba(76,175,80,0.15);
-            border-radius: 12px;
-            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(46,125,50,0.12), rgba(76,175,80,0.05));
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 14px;
+            padding: 16px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
         .sub-left {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
             flex: 1;
             min-width: 0;
         }
-        .sub-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .sub-icon { font-size: 1.8rem; flex-shrink: 0; }
         .sub-info h3 {
             color: #4caf50;
-            font-size: 0.82rem;
+            font-size: 1rem;
             font-weight: 700;
         }
         .sub-info h3.trial-title { color: #ffca28; }
         .sub-info h3.no-access-title { color: #ef9a9a; }
         .sub-info p {
             color: #a5d6a7;
-            font-size: 0.68rem;
+            font-size: 0.85rem;
         }
         .sub-info .scan-count {
             display: inline-block;
-            background: rgba(76,175,80,0.12);
-            padding: 1px 8px;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
             border-radius: 50px;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             color: #81c784;
         }
         .progress-bar-wrap {
-            margin-top: 3px;
-            background: rgba(255,255,255,0.05);
+            margin-top: 4px;
+            background: rgba(255,255,255,0.04);
             border-radius: 50px;
-            height: 3px;
+            height: 4px;
             width: 100%;
-            max-width: 120px;
+            max-width: 150px;
             overflow: hidden;
         }
         .progress-bar-fill {
@@ -316,18 +305,18 @@
         }
         .sub-actions {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             flex-wrap: wrap;
             align-items: center;
         }
         .btn-subscribe {
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             color: white;
-            padding: 5px 14px;
+            padding: 8px 20px;
             border: none;
             border-radius: 50px;
             font-weight: 600;
-            font-size: 0.65rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s ease;
@@ -339,44 +328,44 @@
         .btn-upgrade {
             background: linear-gradient(135deg, #f57f17, #ffca28);
             color: #1a2e1a;
-            padding: 5px 14px;
+            padding: 8px 20px;
             border: none;
             border-radius: 50px;
             font-weight: 600;
-            font-size: 0.65rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
         }
         .plan-badge {
-            background: rgba(76,175,80,0.12);
-            padding: 2px 8px;
+            background: rgba(76,175,80,0.1);
+            padding: 4px 12px;
             border-radius: 50px;
-            font-size: 0.55rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
             color: #81c784;
-            border: 1px solid rgba(76,175,80,0.15);
+            border: 1px solid rgba(76,175,80,0.1);
         }
         .plan-badge.trial-badge {
-            background: rgba(255,193,7,0.1);
+            background: rgba(255,193,7,0.08);
             border-color: #ffca28;
             color: #ffca28;
         }
-        .days-left.trial-days { color: #ffca28; font-size: 0.65rem; }
 
         /* ─── HERO ─── */
         .hero {
             text-align: center;
-            padding: 20px 16px 12px;
+            padding: 30px 20px 20px;
         }
         .hero h1 {
-            font-size: 1.4rem;
+            font-size: 2rem;
             color: #4caf50;
-            text-shadow: 0 0 20px rgba(76,175,80,0.2);
+            text-shadow: 0 0 30px rgba(76,175,80,0.15);
+            margin-bottom: 6px;
         }
         .hero p {
             color: #a5d6a7;
-            font-size: 0.78rem;
+            font-size: 1rem;
             opacity: 0.7;
         }
 
@@ -384,78 +373,81 @@
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            padding: 0 12px 12px;
-            max-width: 600px;
+            gap: 12px;
+            padding: 0 20px 16px;
+            max-width: 800px;
             margin: 0 auto;
         }
-        @media (min-width: 500px) {
+        @media (min-width: 600px) {
             .stats-bar { grid-template-columns: repeat(4, 1fr); }
         }
         .stat-item {
             background: rgba(76,175,80,0.04);
             border: 1px solid rgba(76,175,80,0.06);
-            border-radius: 10px;
-            padding: 10px 6px;
+            border-radius: 12px;
+            padding: 16px 10px;
             text-align: center;
         }
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #4caf50;
         }
         .stat-label {
-            font-size: 0.5rem;
+            font-size: 0.7rem;
             color: #a5d6a7;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
         }
 
         /* ─── TIPS ─── */
         .tips-card {
-            margin: 0 12px 12px;
-            max-width: 600px;
+            margin: 0 20px 16px;
+            max-width: 800px;
             margin-left: auto;
             margin-right: auto;
         }
         .tips-card .card {
-            background: linear-gradient(135deg, rgba(46,125,50,0.08), rgba(76,175,80,0.04));
-            border-left: 3px solid #4caf50;
-            border-radius: 10px;
-            padding: 10px 14px;
+            background: linear-gradient(135deg, rgba(46,125,50,0.06), rgba(76,175,80,0.03));
+            border-left: 4px solid #4caf50;
+            border-radius: 12px;
+            padding: 14px 20px;
         }
         .tips-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
         .tips-left {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             flex: 1;
             min-width: 0;
         }
-        .tips-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .tips-icon { font-size: 1.6rem; flex-shrink: 0; }
         .tips-title {
             color: #4caf50;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .tips-text {
             color: #c8e6c9;
-            font-size: 0.7rem;
-            line-height: 1.3;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
         .btn-new-tip {
             background: rgba(76,175,80,0.08);
-            border: 1px solid rgba(76,175,80,0.12);
-            padding: 3px 10px;
+            border: 1px solid rgba(76,175,80,0.1);
+            padding: 6px 16px;
             border-radius: 20px;
             color: #81c784;
             cursor: pointer;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             white-space: nowrap;
         }
 
@@ -463,51 +455,53 @@
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
-            max-width: 600px;
+            gap: 20px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 12px 24px;
+            padding: 0 20px 30px;
         }
-        @media (min-width: 700px) {
-            .main-grid { grid-template-columns: 1fr 1fr; max-width: 900px; }
+        @media (min-width: 768px) {
+            .main-grid { grid-template-columns: 1fr 1fr; max-width: 1100px; }
             .history-card { grid-column: 1 / -1; }
         }
 
         .card {
             background: rgba(10,30,10,0.85);
-            border: 1px solid rgba(76,175,80,0.08);
-            border-radius: 12px;
-            padding: 14px;
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            padding: 20px 22px;
             backdrop-filter: blur(5px);
         }
         .card-title {
-            font-size: 0.78rem;
+            font-size: 0.95rem;
             color: #81c784;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             border-bottom: 1px solid rgba(76,175,80,0.06);
-            padding-bottom: 8px;
+            padding-bottom: 10px;
+            font-weight: 600;
         }
 
         /* ─── UPLOAD ─── */
         .method-tabs {
             display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 14px;
         }
         .method-tab {
             flex: 1;
-            padding: 6px;
+            padding: 10px;
             background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.06);
             border-radius: 8px;
             color: #a5d6a7;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
+            font-weight: 500;
         }
         .method-tab.active {
             background: rgba(76,175,80,0.08);
@@ -517,89 +511,99 @@
         }
 
         .upload-area {
-            border: 2px dashed rgba(76,175,80,0.15);
-            border-radius: 10px;
-            padding: 20px 12px;
+            border: 2px dashed rgba(76,175,80,0.12);
+            border-radius: 12px;
+            padding: 30px 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .upload-area:hover,
         .upload-area.dragover {
             border-color: #4caf50;
             background: rgba(76,175,80,0.04);
         }
-        .upload-icon-big { font-size: 2rem; margin-bottom: 4px; }
+        .upload-icon-big { font-size: 2.8rem; margin-bottom: 6px; }
         .upload-area p {
             color: #a5d6a7;
-            font-size: 0.7rem;
+            font-size: 0.9rem;
         }
         .upload-area p strong { color: #4caf50; }
 
         #preview {
             width: 100%;
-            max-height: 150px;
+            max-height: 200px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
             display: none;
-            margin-bottom: 8px;
-            border: 2px solid rgba(76,175,80,0.12);
+            margin-bottom: 10px;
+            border: 2px solid rgba(76,175,80,0.08);
         }
 
         .btn-clear {
             width: 100%;
-            padding: 6px;
+            padding: 10px;
             background: rgba(211,47,47,0.08);
-            border: 1px solid rgba(211,47,47,0.15);
+            border: 1px solid rgba(211,47,47,0.12);
             color: #ef9a9a;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.7rem;
-            margin-bottom: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
             display: none;
         }
         .btn-detect {
             width: 100%;
-            padding: 10px;
+            padding: 14px;
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 0.82rem;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: none;
+            letter-spacing: 0.5px;
         }
-        .btn-detect:active { transform: scale(0.97); }
+        .btn-detect:active { transform: scale(0.98); }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 12px;
+            padding: 16px;
         }
         .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(76,175,80,0.1);
-            border-top: 3px solid #4caf50;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(76,175,80,0.08);
+            border-top: 4px solid #4caf50;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 6px;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading p {
+            color: #a5d6a7;
+            font-size: 0.9rem;
         }
 
         /* ─── RESULT ─── */
         .result-section { display: none; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .disease-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 8px 18px;
             border-radius: 20px;
             font-weight: 700;
-            font-size: 0.8rem;
-            margin-bottom: 4px;
+            font-size: 1rem;
+            margin-bottom: 6px;
         }
         .badge-healthy {
             background: rgba(46,125,50,0.15);
@@ -617,13 +621,17 @@
             color: #ef9a9a;
         }
 
-        .conf-label { color: #a5d6a7; font-size: 0.68rem; }
+        .conf-label {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
         .conf-bar-wrap {
             background: rgba(255,255,255,0.04);
             border-radius: 8px;
-            height: 6px;
+            height: 8px;
             overflow: hidden;
-            margin: 4px 0 8px;
+            margin: 4px 0 10px;
         }
         .conf-bar {
             height: 100%;
@@ -634,78 +642,125 @@
         }
 
         .treatment-box {
-            background: rgba(0,0,0,0.15);
-            border-left: 3px solid #4caf50;
-            border-radius: 0 6px 6px 0;
-            padding: 8px 10px;
-            margin-top: 6px;
+            background: rgba(0,0,0,0.12);
+            border-left: 4px solid #4caf50;
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            margin-top: 8px;
         }
-        .treatment-box h4 { color: #81c784; font-size: 0.65rem; }
+        .treatment-box h4 {
+            color: #81c784;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
         .treatment-box p {
             color: #c8e6c9;
-            font-size: 0.7rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.6;
             white-space: pre-line;
         }
 
         /* ─── FEEDBACK ─── */
         .feedback-section {
-            margin-top: 10px;
+            margin-top: 14px;
             border-top: 1px solid rgba(76,175,80,0.06);
-            padding-top: 10px;
+            padding-top: 12px;
             display: none;
         }
-        .feedback-title { font-size: 0.7rem; color: #81c784; margin-bottom: 6px; }
-        .accuracy-btns { display: flex; gap: 6px; margin-bottom: 6px; }
+        .feedback-title {
+            font-size: 0.85rem;
+            color: #81c784;
+            margin-bottom: 8px;
+        }
+        .accuracy-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
         .acc-btn {
             flex: 1;
-            padding: 6px;
-            border-radius: 6px;
-            border: 1px solid rgba(76,175,80,0.1);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(76,175,80,0.08);
             background: rgba(0,0,0,0.1);
             color: #a5d6a7;
-            font-size: 0.65rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
         }
         .acc-btn.selected-yes {
-            background: rgba(46,125,50,0.12);
+            background: rgba(46,125,50,0.1);
             border-color: #4caf50;
             color: #81c784;
         }
         .acc-btn.selected-no {
-            background: rgba(211,47,47,0.12);
+            background: rgba(211,47,47,0.1);
             border-color: #ef5350;
             color: #ef9a9a;
         }
-        .star-row { display: flex; gap: 4px; margin-bottom: 6px; }
-        .star { font-size: 1.2rem; cursor: pointer; color: rgba(255,255,255,0.1); transition: color 0.15s; user-select: none; }
+
+        .star-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .star {
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: rgba(255,255,255,0.1);
+            transition: color 0.15s;
+            user-select: none;
+        }
         .star.lit { color: #ffca28; }
 
         .feedback-comment {
             width: 100%;
-            padding: 6px 10px;
-            background: rgba(0,0,0,0.15);
-            border: 1px solid rgba(76,175,80,0.08);
-            border-radius: 6px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.12);
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 8px;
             color: #e8f5e9;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             resize: vertical;
-            min-height: 50px;
+            min-height: 60px;
             font-family: inherit;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         .feedback-comment:focus { outline: none; border-color: #4caf50; }
+        .feedback-comment::placeholder { color: rgba(255,255,255,0.15); }
+
         .btn-submit-feedback {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             background: linear-gradient(135deg, #1565c0, #1976d2);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
+        }
+        .feedback-success {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(46,125,50,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: #81c784;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .feedback-already {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(33,150,243,0.06);
+            border: 1px solid rgba(33,150,243,0.1);
+            border-radius: 8px;
+            color: #90caf9;
+            font-size: 0.8rem;
+            text-align: center;
         }
 
         /* ─── HISTORY TABLE ─── */
@@ -713,55 +768,55 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
         }
         th {
             background: rgba(76,175,80,0.04);
-            padding: 6px 6px;
+            padding: 10px 10px;
             text-align: left;
             color: #81c784;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.55rem;
-            letter-spacing: 0.3px;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
         }
         td {
-            padding: 6px 6px;
+            padding: 10px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.02);
             color: #c8e6c9;
         }
 
         .tag-healthy {
-            background: rgba(46,125,50,0.12);
+            background: rgba(46,125,50,0.1);
             color: #81c784;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.6rem;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
         }
         .tag-diseased {
-            background: rgba(230,81,0,0.12);
+            background: rgba(230,81,0,0.1);
             color: #ffb74d;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.6rem;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
         }
 
         .btn-view, .btn-delete {
-            padding: 2px 8px;
+            padding: 4px 12px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
         .btn-view {
             background: rgba(76,175,80,0.08);
-            border: 1px solid rgba(76,175,80,0.1);
+            border: 1px solid rgba(76,175,80,0.08);
             color: #81c784;
         }
         .btn-delete {
             background: rgba(211,47,47,0.08);
-            border: 1px solid rgba(211,47,47,0.1);
+            border: 1px solid rgba(211,47,47,0.08);
             color: #ef9a9a;
         }
 
@@ -770,160 +825,199 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 2000;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 20px;
         }
         .modal-overlay.active { display: flex; }
         .modal {
             background: rgba(10,30,10,0.98);
-            border: 1px solid rgba(76,175,80,0.15);
-            border-radius: 14px;
-            padding: 20px;
-            max-width: 400px;
+            border: 1px solid rgba(76,175,80,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 450px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
         .modal-close {
             float: right;
             background: rgba(211,47,47,0.08);
-            border: 1px solid rgba(211,47,47,0.15);
+            border: 1px solid rgba(211,47,47,0.1);
             color: #ef9a9a;
             border-radius: 6px;
-            padding: 4px 10px;
+            padding: 4px 12px;
             cursor: pointer;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
         }
-        .modal h3 { color: #4caf50; font-size: 0.95rem; margin-bottom: 8px; }
+        .modal h3 {
+            color: #4caf50;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
         .modal-image {
             width: 100%;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border: 2px solid rgba(76,175,80,0.08);
-            max-height: 160px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(76,175,80,0.06);
+            max-height: 200px;
             object-fit: cover;
         }
         .modal-row {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.02);
-            font-size: 0.75rem;
+            font-size: 0.85rem;
         }
         .modal-row .label { color: #a5d6a7; }
         .modal-row .value { color: #e8f5e9; text-align: right; max-width: 60%; }
         .modal-treatment {
-            margin-top: 8px;
-            background: rgba(0,0,0,0.15);
+            margin-top: 12px;
+            background: rgba(0,0,0,0.1);
             border-left: 3px solid #4caf50;
-            border-radius: 0 6px 6px 0;
-            padding: 8px 10px;
-            font-size: 0.7rem;
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 0.8rem;
             color: #c8e6c9;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
+        /* ─── CONFIRM ─── */
         .confirm-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 2001;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 20px;
         }
         .confirm-overlay.active { display: flex; }
         .confirm-box {
             background: rgba(10,20,10,0.98);
-            border: 1px solid rgba(211,47,47,0.15);
+            border: 1px solid rgba(211,47,47,0.1);
             border-radius: 14px;
-            padding: 20px;
-            max-width: 320px;
+            padding: 24px;
+            max-width: 340px;
             width: 100%;
             text-align: center;
         }
-        .confirm-box h3 { color: #ef9a9a; font-size: 0.9rem; }
-        .confirm-box p { color: #a5d6a7; font-size: 0.75rem; margin: 6px 0 14px; }
-        .confirm-buttons { display: flex; gap: 10px; justify-content: center; }
+        .confirm-box h3 {
+            color: #ef9a9a;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+        .confirm-box p {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+            margin: 6px 0 16px;
+        }
+        .confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
         .btn-confirm-delete {
-            padding: 6px 20px;
-            background: rgba(211,47,47,0.2);
-            border: 1px solid rgba(211,47,47,0.2);
+            padding: 8px 24px;
+            background: rgba(211,47,47,0.15);
+            border: 1px solid rgba(211,47,47,0.15);
             color: white;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
         }
         .btn-confirm-cancel {
-            padding: 6px 20px;
-            background: rgba(76,175,80,0.08);
-            border: 1px solid rgba(76,175,80,0.1);
+            padding: 8px 24px;
+            background: rgba(76,175,80,0.06);
+            border: 1px solid rgba(76,175,80,0.06);
             color: #81c784;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
         }
 
+        /* ─── CAMERA ─── */
+        #cameraFeed {
+            width: 100%;
+            border-radius: 10px;
+            border: 2px solid rgba(76,175,80,0.06);
+            background: #000;
+            display: block;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .camera-section { display: none; margin-bottom: 12px; }
+        .camera-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-camera {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-snap {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+        }
+        .btn-stop-cam {
+            background: rgba(211,47,47,0.08);
+            border: 1px solid rgba(211,47,47,0.08);
+            color: #ef9a9a;
+        }
+
+        /* ─── FOOTER ─── */
         footer {
             text-align: center;
-            padding: 12px;
+            padding: 20px;
             color: rgba(255,255,255,0.1);
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             border-top: 1px solid rgba(76,175,80,0.03);
+            max-width: 1100px;
+            margin: 0 auto;
         }
         footer span { color: #4caf50; }
 
         #snapCanvas { display: none; }
         #fileInput { display: none; }
-        #cameraFeed {
-            width: 100%;
-            border-radius: 8px;
-            border: 2px solid rgba(76,175,80,0.08);
-            background: #000;
-            display: block;
-            max-height: 160px;
-            object-fit: cover;
-        }
-        .camera-section { display: none; margin-bottom: 10px; }
-        .camera-controls { display: flex; gap: 6px; margin-top: 6px; }
-        .btn-camera {
-            flex: 1;
-            padding: 6px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-snap { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; }
-        .btn-stop-cam {
-            background: rgba(211,47,47,0.08);
-            border: 1px solid rgba(211,47,47,0.1);
-            color: #ef9a9a;
-        }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 480px) {
-            .sub-banner .card { padding: 10px 12px; }
-            .sub-info h3 { font-size: 0.75rem; }
-            .hero h1 { font-size: 1.2rem; }
-            .stat-value { font-size: 1rem; }
-            .card { padding: 12px; }
-            .mobile-menu { width: 260px; }
-            .upload-area { padding: 16px 10px; }
-            .upload-icon-big { font-size: 1.6rem; }
+            body { font-size: 16px; }
+            .nav-logo { font-size: 1.1rem; }
+            .hero h1 { font-size: 1.5rem; }
+            .stat-value { font-size: 1.3rem; }
+            .card { padding: 14px 16px; }
+            .sub-banner .card { padding: 12px 16px; }
+            .sub-info h3 { font-size: 0.85rem; }
+            .mobile-menu { width: 260px; padding: 70px 20px 20px; }
+            .upload-area { padding: 20px 12px; }
+            .upload-icon-big { font-size: 2rem; }
+            .main-grid { padding: 0 12px 20px; gap: 14px; }
+            .stats-bar { gap: 8px; padding: 0 12px 12px; }
+            .tips-card { margin: 0 12px 12px; }
+            .sub-banner { padding: 0 12px; }
         }
-        @media (min-width: 768px) {
+
+        @media (min-width: 769px) {
             .hamburger { display: none; }
             .mobile-menu { display: none; }
             .menu-overlay { display: none; }
-            .nav-farmer { display: inline; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-farmer { display: none; }
         }
     </style>
 </head>
@@ -942,7 +1036,7 @@
             <span class="logo-text">TomatoGuard</span>
         </a>
         <div class="nav-right">
-            <span class="nav-farmer">👨‍🌾 {{ farmer_name }}</span>
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
             <button class="hamburger" id="hamburger" onclick="toggleMenu()">
                 <span></span>
                 <span></span>
@@ -989,7 +1083,7 @@
 
         <div class="menu-divider"></div>
 
-        <a href="/support" class="menu-item" onclick="alert('📧 support@tomatoguard.com\n📞 +254 700 123 456')">
+        <a href="#" class="menu-item" onclick="showSupport()">
             <span class="icon">📧</span> Contact Support
         </a>
 
@@ -1011,19 +1105,19 @@
             <div class="sub-left">
                 <span class="sub-icon">✅</span>
                 <div class="sub-info">
-                    <h3>{% if subscription and subscription.plan == 'pro' %}🌟 Pro{% elif subscription and subscription.plan == 'starter' %}📋 Starter{% else %}Active{% endif %}</h3>
+                    <h3>{% if subscription and subscription.plan == 'pro' %}🌟 Pro Plan{% elif subscription and subscription.plan == 'starter' %}📋 Starter Plan{% else %}Active Subscription{% endif %}</h3>
                     <p>
-                        {% if subscription and subscription.expires_at %}Expires: {{ subscription.expires_at.strftime('%d %b') }}{% else %}Unlimited{% endif %}
-                        {% if subscription and subscription.plan == 'starter' %}<span class="scan-count">📊 {{ scan_count }}/50</span>{% endif %}
+                        {% if subscription and subscription.expires_at %}Expires: {{ subscription.expires_at.strftime('%d %b %Y') }}{% else %}Unlimited access{% endif %}
+                        {% if subscription and subscription.plan == 'starter' %}<span class="scan-count">📊 {{ scan_count }}/50 scans used</span>{% endif %}
                     </p>
                 </div>
             </div>
             <div class="sub-actions">
                 {% if subscription and subscription.plan == 'starter' %}
-                    <a href="/payment/pro" class="btn-upgrade">⭐ Upgrade</a>
+                    <a href="/payment/pro" class="btn-upgrade">⭐ Upgrade to Pro</a>
                     <span class="plan-badge">Starter</span>
                 {% elif subscription and subscription.plan == 'pro' %}
-                    <span class="plan-badge" style="background:rgba(255,202,40,0.1);border-color:#ffca28;color:#ffca28;">🌟 Pro</span>
+                    <span class="plan-badge" style="background:rgba(255,202,40,0.08);border-color:#ffca28;color:#ffca28;">🌟 Pro</span>
                 {% else %}
                     <span class="plan-badge">Active</span>
                 {% endif %}
@@ -1031,14 +1125,14 @@
         </div>
 
         {% elif access_type == 'trial' %}
-        <div class="card" style="border-color:rgba(255,193,7,0.2);background:linear-gradient(135deg,rgba(255,193,7,0.08),rgba(255,152,0,0.04));">
+        <div class="card" style="border-color:rgba(255,193,7,0.15);background:linear-gradient(135deg,rgba(255,193,7,0.06),rgba(255,152,0,0.03));">
             <div class="sub-left">
                 <span class="sub-icon">🎯</span>
                 <div class="sub-info">
-                    <h3 class="trial-title">Free Trial</h3>
+                    <h3 class="trial-title">Free Trial Active</h3>
                     <p id="trialInfoText">
-                        <strong style="color:#ffca28;">{{ trial_info.scans_remaining }}</strong> left ({{ trial_info.scans_used }}/{{ trial_info.scan_limit }})
-                        {% if trial_info.days_left > 0 %}· <span class="days-left trial-days">{{ trial_info.days_left }}d</span>{% endif %}
+                        <strong style="color:#ffca28;">{{ trial_info.scans_remaining }}</strong> scans left ({{ trial_info.scans_used }}/{{ trial_info.scan_limit }})
+                        {% if trial_info.days_left > 0 %}· <span class="days-left" style="color:#ffca28;font-size:0.8rem;">{{ trial_info.days_left }} days left</span>{% endif %}
                     </p>
                     <div class="progress-bar-wrap">
                         <div class="progress-bar-fill trial-fill" id="trialProgressBar" style="width: {{ (trial_info.scans_used / trial_info.scan_limit * 100)|round(0) }}%;"></div>
@@ -1046,22 +1140,22 @@
                 </div>
             </div>
             <div class="sub-actions">
-                <a href="/payment/starter" class="btn-subscribe trial-btn">Subscribe</a>
+                <a href="/payment/starter" class="btn-subscribe trial-btn">🚀 Subscribe Now</a>
                 <span class="plan-badge trial-badge">Trial</span>
             </div>
         </div>
 
         {% else %}
-        <div class="card" style="border-color:rgba(211,47,47,0.12);background:linear-gradient(135deg,rgba(211,47,47,0.04),rgba(211,47,47,0.02));">
+        <div class="card" style="border-color:rgba(211,47,47,0.08);background:linear-gradient(135deg,rgba(211,47,47,0.04),rgba(211,47,47,0.02));">
             <div class="sub-left">
                 <span class="sub-icon">🔒</span>
                 <div class="sub-info">
-                    <h3 class="no-access-title">Subscribe</h3>
-                    <p>Unlock unlimited detection</p>
+                    <h3 class="no-access-title">Subscription Required</h3>
+                    <p>Subscribe to unlock unlimited disease detection</p>
                 </div>
             </div>
             <div class="sub-actions">
-                <a href="/payment/starter" class="btn-subscribe">Subscribe</a>
+                <a href="/payment/starter" class="btn-subscribe">🚀 Subscribe Now</a>
             </div>
         </div>
         {% endif %}
@@ -1070,26 +1164,26 @@
     <!-- ─── HERO ─── -->
     <div class="hero">
         <h1>🌿 Tomato Disease Detection</h1>
-        <p>Upload a leaf image for instant detection</p>
+        <p>Upload a tomato leaf image for instant AI-powered disease detection</p>
     </div>
 
     <!-- ─── STATS BAR ─── -->
     <div class="stats-bar">
         <div class="stat-item">
             <div class="stat-value">10</div>
-            <div class="stat-label">Diseases</div>
+            <div class="stat-label">Disease Classes</div>
         </div>
         <div class="stat-item">
             <div class="stat-value">93%</div>
-            <div class="stat-label">Accuracy</div>
+            <div class="stat-label">Model Accuracy</div>
         </div>
         <div class="stat-item">
             <div class="stat-value" id="totalDetections">0</div>
-            <div class="stat-label">Detections</div>
+            <div class="stat-label">Total Detections</div>
         </div>
         <div class="stat-item">
             <div class="stat-value">CNN</div>
-            <div class="stat-label">AI Model</div>
+            <div class="stat-label">From Scratch</div>
         </div>
     </div>
 
@@ -1100,11 +1194,11 @@
                 <div class="tips-left">
                     <span class="tips-icon">💡</span>
                     <div>
-                        <div class="tips-title">Farming Tip</div>
+                        <div class="tips-title">Proactive Farming Tip</div>
                         <p class="tips-text" id="tipContent">Loading tip...</p>
                     </div>
                 </div>
-                <button class="btn-new-tip" onclick="refreshTip()">🔄</button>
+                <button class="btn-new-tip" onclick="refreshTip()">🔄 New Tip</button>
             </div>
         </div>
     </div>
@@ -1114,16 +1208,16 @@
 
         <!-- ─── UPLOAD CARD ─── -->
         <div class="card">
-            <div class="card-title">📤 Upload Leaf</div>
+            <div class="card-title">📤 Upload Leaf Image</div>
             <div class="method-tabs">
-                <div class="method-tab active" id="tabUpload" onclick="switchMethod('upload')">📁 File</div>
-                <div class="method-tab" id="tabCamera" onclick="switchMethod('camera')">📷 Camera</div>
+                <div class="method-tab active" id="tabUpload" onclick="switchMethod('upload')">📁 Upload File</div>
+                <div class="method-tab" id="tabCamera" onclick="switchMethod('camera')">📷 Use Camera</div>
             </div>
             <div id="uploadSection">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon-big">🌿</div>
                     <p><strong>Click to upload</strong> or drag &amp; drop</p>
-                    <p style="font-size:0.6rem;opacity:0.4;margin-top:2px;">JPG, PNG supported</p>
+                    <p style="font-size:0.75rem;opacity:0.4;margin-top:4px;">JPG, PNG supported</p>
                 </div>
                 <input type="file" id="fileInput" accept=".jpg,.jpeg,.png">
             </div>
@@ -1131,38 +1225,38 @@
                 <video id="cameraFeed" autoplay playsinline muted></video>
                 <div class="camera-controls">
                     <button class="btn-camera btn-snap" onclick="snapPhoto()">📸 Take Photo</button>
-                    <button class="btn-camera btn-stop-cam" onclick="stopCamera()">✕ Stop</button>
+                    <button class="btn-camera btn-stop-cam" onclick="stopCamera()">✕ Stop Camera</button>
                 </div>
             </div>
             <img id="preview" src="" alt="Preview">
-            <button class="btn-clear" id="clearBtn" onclick="clearImage()">✕ Clear</button>
+            <button class="btn-clear" id="clearBtn" onclick="clearImage()">✕ Clear Image</button>
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="color:#a5d6a7;font-size:0.7rem;">Analyzing leaf...</p>
+                <p>Analyzing leaf...</p>
             </div>
-            <button class="btn-detect" id="detectBtn" onclick="detectDisease()">🔍 DETECT</button>
+            <button class="btn-detect" id="detectBtn" onclick="detectDisease()">🔍 DETECT DISEASE</button>
         </div>
 
         <!-- ─── RESULT CARD ─── -->
         <div class="card">
-            <div class="card-title">🔬 Result</div>
-            <div id="resultPlaceholder" style="text-align:center;padding:20px 0;opacity:0.3;">
-                <div style="font-size:2rem;">🍃</div>
-                <p style="font-size:0.7rem;color:#a5d6a7;">Results appear here</p>
+            <div class="card-title">🔬 Detection Result</div>
+            <div id="resultPlaceholder" style="text-align:center;padding:30px 0;opacity:0.3;">
+                <div style="font-size:3rem;">🍃</div>
+                <p style="font-size:0.9rem;color:#a5d6a7;margin-top:8px;">Results will appear here after detection</p>
             </div>
             <div class="result-section" id="resultSection">
                 <div id="diseaseBadge" class="disease-badge badge-diseased"></div>
                 <div class="conf-label" id="confLabel"></div>
                 <div class="conf-bar-wrap"><div class="conf-bar" id="confBar"></div></div>
                 <div class="treatment-box">
-                    <h4>💊 Treatment</h4>
+                    <h4>💊 Treatment Recommendations</h4>
                     <p id="treatmentText"></p>
                 </div>
                 <div class="feedback-section" id="feedbackSection">
-                    <div class="feedback-title">💬 Helpful?</div>
+                    <div class="feedback-title">💬 Was this diagnosis helpful?</div>
                     <div class="accuracy-btns">
-                        <button class="acc-btn" id="btnYes" onclick="selectAccuracy(1)">👍 Yes</button>
-                        <button class="acc-btn" id="btnNo" onclick="selectAccuracy(0)">👎 No</button>
+                        <button class="acc-btn" id="btnYes" onclick="selectAccuracy(1)">👍 Yes, correct</button>
+                        <button class="acc-btn" id="btnNo" onclick="selectAccuracy(0)">👎 No, incorrect</button>
                     </div>
                     <div class="star-row">
                         <span class="star" onclick="selectStar(1)">★</span>
@@ -1171,35 +1265,60 @@
                         <span class="star" onclick="selectStar(4)">★</span>
                         <span class="star" onclick="selectStar(5)">★</span>
                     </div>
-                    <textarea class="feedback-comment" id="feedbackComment" placeholder="Optional feedback..."></textarea>
-                    <button class="btn-submit-feedback" onclick="submitFeedback()">📨 Submit</button>
-                    <div class="feedback-success" id="feedbackSuccess">✅ Thank you!</div>
-                    <div class="feedback-already" id="feedbackAlready">ℹ️ Already submitted</div>
+                    <textarea class="feedback-comment" id="feedbackComment" placeholder="Optional: Tell us more about your experience..."></textarea>
+                    <button class="btn-submit-feedback" onclick="submitFeedback()">📨 Submit Feedback</button>
+                    <div class="feedback-success" id="feedbackSuccess">✅ Thank you! Your feedback helps improve the system.</div>
+                    <div class="feedback-already" id="feedbackAlready">ℹ️ You have already submitted feedback for this diagnosis.</div>
                 </div>
             </div>
         </div>
 
         <!-- ─── HISTORY CARD ─── -->
         <div class="card history-card">
-            <div class="card-title">📋 Recent</div>
+            <div class="card-title">📋 Recent Detections</div>
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr><th>#</th><th>Disease</th><th>Conf</th><th>Action</th></tr>
+                        <tr>
+                            <th>#</th>
+                            <th>Image</th>
+                            <th>Disease</th>
+                            <th>Confidence</th>
+                            <th>Severity</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody id="historyBody">
                         {% for r in recent %}
                         <tr id="row-{{ r.id }}">
                             <td>{{ loop.index }}</td>
-                            <td><span class="{% if 'healthy' in r.predicted_disease.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">{{ r.predicted_disease.replace('Tomato_','').replace('Tomato__','').replace('_',' ')[:12] }}</span></td>
+                            <td style="font-size:0.75rem;color:#666;">{{ r.image_name[:15] }}...</td>
+                            <td>
+                                <span class="{% if 'healthy' in r.predicted_disease.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">
+                                    {{ r.predicted_disease.replace('Tomato_','').replace('Tomato__','').replace('_',' ')[:15] }}
+                                </span>
+                            </td>
                             <td>{{ "%.0f"|format(r.confidence * 100) }}%</td>
                             <td>
-                                <button class="btn-view" onclick="viewPrediction({{ r.id }})">👁</button>
-                                <button class="btn-delete" onclick="confirmDelete({{ r.id }})">🗑</button>
+                                {% if 'healthy' in r.predicted_disease.lower() %}—
+                                {% elif r.confidence >= 0.92 %}<span style="color:#ef5350;">🔴 Severe</span>
+                                {% elif r.confidence >= 0.83 %}<span style="color:#ffca28;">🟡 Moderate</span>
+                                {% else %}<span style="color:#66bb6a;">🟢 Mild</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size:0.75rem;">{{ r.created_at.strftime('%d/%m/%Y') if r.created_at else '' }}</td>
+                            <td>
+                                <button class="btn-view" onclick="viewPrediction({{ r.id }})">👁 View</button>
+                                <button class="btn-delete" onclick="confirmDelete({{ r.id }})">🗑 Delete</button>
                             </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="4" style="text-align:center;padding:16px;opacity:0.3;font-size:0.7rem;">No detections yet 🌿</td></tr>
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">
+                                No detections yet — upload your first image! 🌿
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -1209,27 +1328,28 @@
     </div>
 
     <footer>
-        <p>🍅 TomatoGuard | <span>CNN from Scratch</span> | Pure Python + NumPy</p>
+        <p>🍅 TomatoGuard | <span>Convolutional Neural Network</span> from Scratch | Pure Python + NumPy | Deep Learning</p>
     </footer>
 
     <!-- ─── MODALS ─── -->
     <div class="modal-overlay" id="viewModal">
         <div class="modal">
-            <button class="modal-close" onclick="closeModal()">✕</button>
+            <button class="modal-close" onclick="closeModal()">✕ Close</button>
             <h3>🔬 Prediction Details</h3>
-            <img class="modal-image" id="modalImage" src="" alt="Leaf">
+            <img class="modal-image" id="modalImage" src="" alt="Leaf image">
             <div class="modal-row"><span class="label">Disease</span><span class="value" id="modalDisease"></span></div>
             <div class="modal-row"><span class="label">Confidence</span><span class="value" id="modalConfidence"></span></div>
             <div class="modal-row"><span class="label">Severity</span><span class="value" id="modalSeverity"></span></div>
-            <div class="modal-row"><span class="label">Date</span><span class="value" id="modalDate"></span></div>
+            <div class="modal-row"><span class="label">Image File</span><span class="value" id="modalImageName"></span></div>
+            <div class="modal-row"><span class="label">Date &amp; Time</span><span class="value" id="modalDate"></span></div>
             <div class="modal-treatment" id="modalTreatment"></div>
         </div>
     </div>
 
     <div class="confirm-overlay" id="confirmModal">
         <div class="confirm-box">
-            <h3>🗑 Delete?</h3>
-            <p>This cannot be undone.</p>
+            <h3>🗑 Delete Prediction?</h3>
+            <p>This will permanently delete this prediction and its image. This cannot be undone.</p>
             <div class="confirm-buttons">
                 <button class="btn-confirm-cancel" onclick="closeConfirm()">Cancel</button>
                 <button class="btn-confirm-delete" onclick="executeDelete()">Delete</button>
@@ -1268,6 +1388,11 @@
         function openReport(e) {
             e.preventDefault();
             window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
+        }
+
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
             closeMenu();
         }
 
@@ -1315,7 +1440,7 @@
             el.className = 'tomato';
             el.textContent = emojis[i % emojis.length];
             el.style.left = (Math.random() * 90 + 5) + '%';
-            el.style.fontSize = (2 + Math.random() * 3) + 'rem';
+            el.style.fontSize = (2.5 + Math.random() * 3) + 'rem';
             el.style.animationDuration = (12 + Math.random() * 18) + 's';
             el.style.animationDelay = (Math.random() * 10) + 's';
             document.getElementById('tomatoContainer').appendChild(el);
@@ -1475,7 +1600,7 @@
 
                     if (data.success === false || data.error === 'rejected' || data.error === 'low_confidence') {
                         const badge = document.getElementById('diseaseBadge');
-                        badge.textContent = data.disease || 'Not a Valid Leaf';
+                        badge.textContent = data.disease || 'Not a Valid Tomato Leaf';
                         badge.className = 'disease-badge badge-rejected';
                         const confBar = document.getElementById('confBar');
                         if (data.confidence && data.confidence > 0) {
@@ -1504,6 +1629,12 @@
                         const badge = document.getElementById('diseaseBadge');
                         badge.textContent = (isHealthy ? '✅ ' : '⚠️ ') + data.disease;
                         badge.className = 'disease-badge ' + (isHealthy ? 'badge-healthy' : 'badge-diseased');
+
+                        // Severity display
+                        if (data.severity) {
+                            const sev = data.severity;
+                            // Show severity in the badge or separate element if needed
+                        }
 
                         document.getElementById('confLabel').textContent = 'Confidence: ' + data.confidence + '%';
                         const confBar = document.getElementById('confBar');
@@ -1549,22 +1680,33 @@
                     tbody.innerHTML = '';
                     if (!data.length) {
                         tbody.innerHTML =
-                            `<tr><td colspan="4" style="text-align:center;padding:16px;opacity:0.3;font-size:0.7rem;">No detections yet 🌿</td></tr>`;
+                            `<tr><td colspan="7" style="text-align:center;padding:24px;opacity:0.3;font-size:0.85rem;">No detections yet — upload your first image! 🌿</td></tr>`;
                         return;
                     }
                     data.forEach((r, index) => {
                         const disease = r.predicted_disease.replace('Tomato__', '').replace('Tomato_', '').replace(/_/g,
-                            ' ').slice(0, 12);
+                            ' ').slice(0, 15);
                         const isHealthy = r.predicted_disease.toLowerCase().includes('healthy');
                         const conf = (r.confidence * 100).toFixed(0);
+                        let sevHTML = '—';
+                        if (!isHealthy) {
+                            if (r.confidence >= 0.92) sevHTML = '<span style="color:#ef5350;">🔴 Severe</span>';
+                            else if (r.confidence >= 0.83) sevHTML = '<span style="color:#ffca28;">🟡 Moderate</span>';
+                            else sevHTML = '<span style="color:#66bb6a;">🟢 Mild</span>';
+                        }
+                        const created = r.created_at ? new Date(r.created_at) : null;
+                        const dateStr = created ? created.toLocaleDateString('en-GB') : '';
                         tbody.innerHTML += `
                             <tr id="row-${r.id}">
                                 <td>${index + 1}</td>
+                                <td style="font-size:0.75rem;color:#666;">${r.image_name ? r.image_name.substring(0,15) + '...' : '-'}</td>
                                 <td><span class="${isHealthy ? 'tag-healthy' : 'tag-diseased'}">${disease}</span></td>
                                 <td>${conf}%</td>
+                                <td>${sevHTML}</td>
+                                <td style="font-size:0.75rem;">${dateStr}</td>
                                 <td>
-                                    <button class="btn-view" onclick="viewPrediction(${r.id})">👁</button>
-                                    <button class="btn-delete" onclick="confirmDelete(${r.id})">🗑</button>
+                                    <button class="btn-view" onclick="viewPrediction(${r.id})">👁 View</button>
+                                    <button class="btn-delete" onclick="confirmDelete(${r.id})">🗑 Delete</button>
                                 </td>
                             </tr>`;
                     });
@@ -1661,6 +1803,7 @@
                     document.getElementById('modalDisease').textContent = (isHealthy ? '✅ ' : '⚠️ ') + disease;
                     document.getElementById('modalConfidence').textContent = conf + '%';
                     document.getElementById('modalSeverity').textContent = severityText;
+                    document.getElementById('modalImageName').textContent = data.image_name;
                     document.getElementById('modalDate').textContent = data.created_at;
                     document.getElementById('modalTreatment').textContent = data.treatment;
                     const img = document.getElementById('modalImage');
@@ -1710,6 +1853,15 @@
         setTimeout(loadTip, 100);
         refreshHistory();
         updateStats();
+
+        // Close menu when clicking a link inside it
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
     </script>
 
 </body>
