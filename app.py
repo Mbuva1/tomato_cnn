@@ -1137,6 +1137,10 @@ tr:hover td {{ background:#f5f5f5 !important; }}
             return response
         except Exception as e:
             print(f"[PDF Error] {e}")
+            # Fallback: show HTML version
+            response = make_response(html)
+            response.headers['Content-Type'] = 'text/html; charset=utf-8'
+            return response
     response = make_response(html)
     response.headers['Content-Type'] = 'text/html; charset=utf-8'
     return response
@@ -1374,6 +1378,55 @@ def delete_prediction(prediction_id):
 
 
 # ─────────────────────────────────────────────
+# CSV REPORT FALLBACK
+# ─────────────────────────────────────────────
+
+@app.route('/report_csv')
+def download_report_csv():
+    """Download CSV report instead of PDF (fallback if PDF fails)"""
+    if 'farmer_id' not in session:
+        return redirect(url_for('login'))
+    
+    import csv
+    from io import StringIO
+    
+    farmer_id = session['farmer_id']
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM predictions WHERE farmer_id=%s ORDER BY created_at DESC", (farmer_id,))
+    predictions = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    if not predictions:
+        return "No detections found", 404
+    
+    si = StringIO()
+    writer = csv.writer(si)
+    writer.writerow(['#', 'Image', 'Disease', 'Confidence', 'Severity', 'Date'])
+    
+    for i, p in enumerate(predictions, 1):
+        disease = p['predicted_disease'].replace('Tomato_', '').replace('_', ' ')
+        sev = severity_label(p['confidence'], p['predicted_disease'], 'en')
+        writer.writerow([
+            i,
+            p['image_name'],
+            disease,
+            f"{p['confidence']*100:.1f}%",
+            sev,
+            p['created_at']
+        ])
+    
+    output = si.getvalue()
+    si.close()
+    
+    response = make_response(output)
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = f'attachment; filename=TomatoGuard_Report_{datetime.now().strftime("%Y%m%d")}.csv'
+    return response
+
+
+# ─────────────────────────────────────────────
 # INITIALIZE DATABASE TABLES (FIXED - CORRECT ORDER)
 # ─────────────────────────────────────────────
 
@@ -1391,9 +1444,9 @@ print("[App] ✅ Database tables ready!")
 
 # Print email status
 if EMAIL_CONFIGURED:
-    print("[App] ✅ Email notifications configured")
+    print("[App] ✅ Email notifications configured (Resend API)")
 else:
-    print("[App] ⚠️ Email notifications NOT configured. Set MAIL_USERNAME and MAIL_PASSWORD in .env")
+    print("[App] ⚠️ Email notifications NOT configured. Set RESEND_API_KEY in .env")
 
 
 # ─────────────────────────────────────────────

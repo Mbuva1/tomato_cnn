@@ -1,40 +1,32 @@
 """
 =============================================================
-EMAIL NOTIFIER MODULE
+EMAIL NOTIFIER MODULE - Resend API (Railway Compatible)
 Project: Tomato Leaf Disease Detection
 =============================================================
 """
 
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Email Configuration ──
-MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
-MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
-MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
-MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
+# ── Resend Configuration ──
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'onboarding@resend.dev')
 
 # Check if email is configured
-EMAIL_CONFIGURED = all([MAIL_USERNAME, MAIL_PASSWORD])
+EMAIL_CONFIGURED = bool(RESEND_API_KEY)
 
 if EMAIL_CONFIGURED:
-    print("[Email] ✅ Email configured and ready")
+    print("[Email] ✅ Resend API configured and ready")
 else:
-    print("[Email] ⚠️ Email is NOT configured. Set MAIL_USERNAME and MAIL_PASSWORD in .env")
+    print("[Email] ⚠️ Email is NOT configured. Set RESEND_API_KEY in .env")
 
-
-# ── Send Email ──
 
 def send_email(to_email, subject, html_content, plain_text=None):
-    """Send an email using SMTP."""
+    """Send email using Resend API."""
     if not EMAIL_CONFIGURED:
         return False, "Email is not configured"
     
@@ -42,31 +34,32 @@ def send_email(to_email, subject, html_content, plain_text=None):
         return False, "No email address provided"
     
     try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = MAIL_DEFAULT_SENDER
-        msg['To'] = to_email
+        response = requests.post(
+            'https://api.resend.com/emails',
+            headers={
+                'Authorization': f'Bearer {RESEND_API_KEY}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'from': MAIL_DEFAULT_SENDER,
+                'to': [to_email],
+                'subject': subject,
+                'html': html_content,
+                'text': plain_text or ''
+            },
+            timeout=30
+        )
         
-        if plain_text:
-            part1 = MIMEText(plain_text, 'plain')
-            msg.attach(part1)
-        
-        part2 = MIMEText(html_content, 'html')
-        msg.attach(part2)
-        
-        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
-            if MAIL_USE_TLS:
-                server.starttls()
-            server.login(MAIL_USERNAME, MAIL_PASSWORD)
-            server.send_message(msg)
-        
-        print(f"[Email] ✅ Sent to: {to_email}")
-        return True, "Email sent successfully"
-        
-    except smtplib.SMTPAuthenticationError:
-        return False, "Authentication failed. Check your email and app password."
-    except smtplib.SMTPException as e:
-        return False, f"SMTP error: {str(e)}"
+        if response.status_code == 200:
+            print(f"[Email] ✅ Sent to: {to_email}")
+            return True, "Email sent successfully"
+        else:
+            error = response.json().get('error', response.text)
+            print(f"[Email] ❌ Error: {error}")
+            return False, f"API error: {error}"
+            
+    except requests.exceptions.Timeout:
+        return False, "Connection timeout"
     except Exception as e:
         return False, f"Error: {str(e)}"
 
@@ -215,7 +208,6 @@ def send_healthy_alert_email(to_email, farmer_name, lang='en'):
                 </div>
                 <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e8f5e9;text-align:center;font-size:12px;color:#888;">
                     <p>© {current_year} TomatoGuard</p>
-                    <p><a href="mailto:support@tomatoguard.com" style="color:#2e7d32;text-decoration:none;">support@tomatoguard.com</a></p>
                 </div>
             </div>
         </body>
@@ -240,7 +232,6 @@ def send_healthy_alert_email(to_email, farmer_name, lang='en'):
                 </div>
                 <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e8f5e9;text-align:center;font-size:12px;color:#888;">
                     <p>© {current_year} TomatoGuard. Built for tomato farmers.</p>
-                    <p><a href="mailto:support@tomatoguard.com" style="color:#2e7d32;text-decoration:none;">support@tomatoguard.com</a></p>
                 </div>
             </div>
         </body>
