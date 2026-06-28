@@ -9,16 +9,245 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a1a0a;
             color: #e8f5e9;
             min-height: 100vh;
-            padding: 24px;
+            font-size: 18px;
+            line-height: 1.6;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ─── FLOATING TOMATOES ─── */
+        .tomato {
+            position: fixed;
+            animation: floatTomato linear infinite;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 5rem;
+        }
+        @keyframes floatTomato {
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 0.04; }
+            90%  { opacity: 0.04; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* ─── NAVBAR ─── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
+        .nav-farmer strong { color: #4caf50; }
+
+        /* ─── HAMBURGER ─── */
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* ─── MOBILE MENU ─── */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300px;
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { left: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .lang-toggle-menu {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid rgba(76,175,80,0.08);
+            margin: 8px 0 12px;
+        }
+        .lang-toggle-menu button {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: #a5d6a7;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-toggle-menu button.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
         }
 
         /* ─── BACK BUTTON ─── */
@@ -30,27 +259,26 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 0.95rem;
-            margin-bottom: 24px;
-            transition: color 0.2s;
+            margin-bottom: 20px;
             padding: 8px 16px;
             border-radius: 8px;
-            background: rgba(76,175,80,0.05);
-            border: 1px solid rgba(76,175,80,0.15);
+            background: rgba(76,175,80,0.04);
+            border: 1px solid rgba(76,175,80,0.06);
+            transition: all 0.2s;
         }
         .back-link:hover {
-            color: #4caf50;
-            background: rgba(76,175,80,0.15);
-            border-color: rgba(76,175,80,0.3);
+            background: rgba(76,175,80,0.08);
+            border-color: rgba(76,175,80,0.15);
         }
 
         /* ─── HEADER ─── */
         .page-header {
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(76,175,80,0.15);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(76,175,80,0.08);
         }
         .page-header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #4caf50;
             display: flex;
@@ -60,22 +288,17 @@
         .page-header p {
             color: #a5d6a7;
             font-size: 0.95rem;
-            margin-top: 4px;
-            opacity: 0.8;
+            margin-top: 2px;
+            opacity: 0.7;
         }
 
         /* ─── SUBSCRIPTION CARD ─── */
         .sub-card {
             background: rgba(10,30,10,0.85);
-            border: 1px solid rgba(76,175,80,0.2);
-            border-radius: 16px;
-            padding: 24px 28px;
-            margin-bottom: 28px;
-            transition: all 0.3s ease;
-        }
-        .sub-card:hover {
-            border-color: rgba(76,175,80,0.4);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+            border: 1px solid rgba(76,175,80,0.08);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
         }
         .sub-card .sub-header {
             display: flex;
@@ -89,9 +312,7 @@
             align-items: center;
             gap: 12px;
         }
-        .sub-card .sub-icon {
-            font-size: 2rem;
-        }
+        .sub-card .sub-icon { font-size: 1.8rem; }
         .sub-card .sub-info h3 {
             font-size: 1.1rem;
             font-weight: 700;
@@ -103,7 +324,7 @@
             font-size: 0.85rem;
             margin-top: 2px;
         }
-        .sub-card .sub-status {
+        .sub-status {
             padding: 6px 16px;
             border-radius: 50px;
             font-size: 0.8rem;
@@ -112,147 +333,41 @@
             letter-spacing: 0.5px;
         }
         .sub-status.active {
-            background: rgba(46,125,50,0.25);
+            background: rgba(46,125,50,0.08);
             color: #81c784;
-            border: 1px solid rgba(76,175,80,0.3);
+            border: 1px solid rgba(76,175,80,0.12);
         }
         .sub-status.inactive {
-            background: rgba(211,47,47,0.2);
+            background: rgba(211,47,47,0.08);
             color: #ef9a9a;
-            border: 1px solid rgba(211,47,47,0.3);
+            border: 1px solid rgba(211,47,47,0.1);
         }
         .sub-status.expired {
-            background: rgba(255,152,0,0.2);
+            background: rgba(255,152,0,0.08);
             color: #ffb74d;
-            border: 1px solid rgba(255,152,0,0.3);
+            border: 1px solid rgba(255,152,0,0.1);
         }
         .sub-plan-badge {
             display: inline-block;
             padding: 2px 12px;
             border-radius: 50px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-left: 8px;
         }
         .sub-plan-badge.starter {
-            background: rgba(76,175,80,0.15);
+            background: rgba(76,175,80,0.08);
             color: #81c784;
-            border: 1px solid rgba(76,175,80,0.2);
+            border: 1px solid rgba(76,175,80,0.08);
         }
         .sub-plan-badge.pro {
-            background: rgba(255,193,7,0.15);
+            background: rgba(255,193,7,0.08);
             color: #ffca28;
-            border: 1px solid rgba(255,193,7,0.2);
-        }
-        .sub-plan-badge.trial {
-            background: rgba(33,150,243,0.15);
-            color: #90caf9;
-            border: 1px solid rgba(33,150,243,0.2);
+            border: 1px solid rgba(255,193,7,0.08);
         }
 
-        /* ─── SECTION TITLE ─── */
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #81c784;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid #4caf50;
-            padding-left: 14px;
-        }
-
-        /* ─── TABLE ─── */
-        .table-wrap {
-            background: rgba(10,30,10,0.85);
-            border: 1px solid rgba(76,175,80,0.15);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .table-wrap:hover {
-            border-color: rgba(76,175,80,0.3);
-        }
-        .table-wrap table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .table-wrap th {
-            background: rgba(76,175,80,0.08);
-            padding: 14px 18px;
-            text-align: left;
-            color: #81c784;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            border-bottom: 2px solid rgba(76,175,80,0.1);
-        }
-        .table-wrap td {
-            padding: 14px 18px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: #c8e6c9;
-            font-size: 0.88rem;
-            vertical-align: middle;
-        }
-        .table-wrap tr:last-child td {
-            border-bottom: none;
-        }
-        .table-wrap tr:hover td {
-            background: rgba(76,175,80,0.04);
-        }
-
-        /* ─── STATUS BADGES ─── */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .status-badge.completed {
-            background: rgba(46,125,50,0.2);
-            color: #81c784;
-            border: 1px solid rgba(76,175,80,0.2);
-        }
-        .status-badge.pending {
-            background: rgba(255,193,7,0.15);
-            color: #ffca28;
-            border: 1px solid rgba(255,193,7,0.2);
-        }
-        .status-badge.failed {
-            background: rgba(211,47,47,0.2);
-            color: #ef9a9a;
-            border: 1px solid rgba(211,47,47,0.2);
-        }
-
-        /* ─── EMPTY STATE ─── */
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #a5d6a7;
-        }
-        .empty-state .icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        .empty-state h3 {
-            color: #81c784;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-        }
-        .empty-state p {
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        /* ─── SUBSCRIBE BUTTON ─── */
         .btn-subscribe {
             display: inline-flex;
             align-items: center;
@@ -263,188 +378,406 @@
             border: none;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         .btn-subscribe:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76,175,80,0.3);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.15);
         }
 
-        .btn-subscribe-small {
+        /* ─── SECTION TITLE ─── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #81c784;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #4caf50;
+            padding-left: 14px;
+        }
+
+        /* ─── TABLE ─── */
+        .table-wrap {
+            background: rgba(10,30,10,0.85);
+            border: 1px solid rgba(76,175,80,0.06);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .table-wrap th {
+            background: rgba(76,175,80,0.04);
+            padding: 12px 16px;
+            text-align: left;
+            color: #81c784;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(76,175,80,0.04);
+        }
+        .table-wrap td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8e6c9;
+            vertical-align: middle;
+        }
+        .table-wrap tr:last-child td { border-bottom: none; }
+        .table-wrap tr:hover td { background: rgba(76,175,80,0.02); }
+
+        /* ─── STATUS BADGES ─── */
+        .status-badge {
             display: inline-block;
-            padding: 6px 16px;
-            background: linear-gradient(135deg, #2e7d32, #4caf50);
-            color: white;
+            padding: 4px 14px;
             border-radius: 50px;
-            text-decoration: none;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .btn-subscribe-small:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+        .status-badge.completed {
+            background: rgba(46,125,50,0.08);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.08);
         }
+        .status-badge.pending {
+            background: rgba(255,193,7,0.08);
+            color: #ffca28;
+            border: 1px solid rgba(255,193,7,0.08);
+        }
+        .status-badge.failed {
+            background: rgba(211,47,47,0.08);
+            color: #ef9a9a;
+            border: 1px solid rgba(211,47,47,0.08);
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a5d6a7;
+        }
+        .empty-state .icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state h3 { color: #81c784; font-size: 1.1rem; margin-bottom: 4px; }
+        .empty-state p { font-size: 0.85rem; opacity: 0.6; }
+
+        /* ─── FOOTER ─── */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.08);
+            font-size: 0.7rem;
+            border-top: 1px solid rgba(76,175,80,0.03);
+            margin-top: 30px;
+        }
+        footer span { color: #4caf50; }
 
         /* ─── RESPONSIVE ─── */
-        @media (max-width: 768px) {
-            body { padding: 16px; }
-            .page-header h1 { font-size: 1.5rem; }
+        @media (max-width: 480px) {
+            body { font-size: 16px; }
+            .container { padding: 12px; }
+            .page-header h1 { font-size: 1.4rem; }
+            .sub-card { padding: 14px 16px; }
             .sub-card .sub-header { flex-direction: column; align-items: flex-start; }
             .table-wrap { overflow-x: auto; }
-            .table-wrap table { min-width: 500px; }
-            .table-wrap th, .table-wrap td { padding: 10px 14px; font-size: 0.8rem; }
+            .table-wrap table { min-width: 480px; }
+            .table-wrap th, .table-wrap td { padding: 8px 10px; font-size: 0.75rem; }
+            .mobile-menu { width: 260px; padding: 70px 20px 20px; }
         }
 
-        @media (max-width: 480px) {
-            .page-header h1 { font-size: 1.2rem; }
-            .sub-card { padding: 18px; }
-            .sub-card .sub-title { flex-direction: column; align-items: flex-start; }
+        @media (max-width: 768px) {
+            .nav-farmer { display: none; }
+        }
+
+        /* Hamburger visible on ALL screen sizes */
+        .hamburger {
+            display: flex;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <div id="tomatoContainer"></div>
 
-    <!-- ─── BACK BUTTON ─── -->
-    <a href="/dashboard" class="back-link">
-        ← Back to Dashboard
-    </a>
+    <!-- ─── OVERLAY ─── -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-    <!-- ─── HEADER ─── -->
-    <div class="page-header">
-        <h1>
-            💰 Payment & Subscription History
-        </h1>
-        <p>View your payment history and manage your subscription</p>
-    </div>
+    <!-- ─── NAVBAR ─── -->
+    <nav>
+        <div class="nav-left">
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        </div>
+    </nav>
 
-    <!-- ─── ACTIVE SUBSCRIPTION ─── -->
-    <div class="sub-card">
-        <div class="sub-header">
-            <div class="sub-title">
-                <span class="sub-icon">
-                    {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
-                        ✅
-                    {% else %}
-                        🔒
-                    {% endif %}
-                </span>
-                <div class="sub-info">
-                    <h3 class="{% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}active{% else %}inactive{% endif %}">
-                        {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
-                            Active Subscription
-                            {% if subscriptions[0].plan_id %}
-                                <span class="sub-plan-badge {{ subscriptions[0].plan_id }}">
-                                    {{ subscriptions[0].plan_id|title }}
-                                </span>
-                            {% endif %}
-                        {% else %}
-                            No Active Subscription
-                        {% endif %}
-                    </h3>
-                    <p>
-                        {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
-                            {% if subscriptions[0].expires_at %}
-                                Expires: {{ subscriptions[0].expires_at.strftime('%d %B %Y') }}
-                            {% else %}
-                                Unlimited access
-                            {% endif %}
-                            {% if subscriptions[0].plan_id == 'starter' %}
-                                · 50 scans per month
-                            {% elif subscriptions[0].plan_id == 'pro' %}
-                                · Unlimited scans
-                            {% endif %}
-                        {% else %}
-                            Subscribe to unlock unlimited disease detection
-                        {% endif %}
-                    </p>
-                </div>
+    <!-- ─── MOBILE MENU ─── -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
             </div>
-            <div>
-                {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
-                    <span class="sub-status active">✅ Active</span>
-                {% elif subscriptions and subscriptions[0] and not subscriptions[0].is_active %}
-                    <span class="sub-status expired">⏰ Expired</span>
-                {% else %}
-                    <span class="sub-status inactive">❌ Inactive</span>
-                    <a href="/payment/starter" class="btn-subscribe" style="margin-left: 12px;">
-                        🚀 Subscribe Now
-                    </a>
-                {% endif %}
-            </div>
+        </div>
+
+        <div class="lang-toggle-menu">
+            <button class="active" onclick="setLang('en')">🇬🇧 English</button>
+            <button onclick="setLang('sw')">🇰🇪 Kiswahili</button>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item active">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="#" class="menu-item" onclick="showSupport()">
+            <span class="icon">📧</span> Contact Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
         </div>
     </div>
 
-    <!-- ─── TRANSACTION HISTORY ─── -->
-    <h2 class="section-title">📋 Transaction History</h2>
+    <!-- ─── MAIN CONTENT ─── -->
+    <div class="container">
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Plan</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if transactions %}
-                    {% for t in transactions %}
-                    <tr>
-                        <td>{{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at else '-' }}</td>
-                        <td>
-                            {% if t.plan_id == 'starter' %}
-                                📋 Starter
-                            {% elif t.plan_id == 'pro' %}
-                                ⭐ Pro
-                            {% else %}
-                                {{ t.plan_id|title }}
-                            {% endif %}
-                        </td>
-                        <td><strong>KSh {{ t.amount }}</strong></td>
-                        <td>
-                            <span class="status-badge {{ t.status }}">
-                                {% if t.status == 'completed' %}✅ Completed
-                                {% elif t.status == 'pending' %}⏳ Pending
-                                {% elif t.status == 'failed' %}❌ Failed
-                                {% else %}{{ t.status|title }}
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+        <div class="page-header">
+            <h1>💰 Payment & Subscription History</h1>
+            <p>View your payment history and manage your subscription</p>
+        </div>
+
+        <!-- ─── SUBSCRIPTION CARD ─── -->
+        <div class="sub-card">
+            <div class="sub-header">
+                <div class="sub-title">
+                    <span class="sub-icon">
+                        {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                            ✅
+                        {% else %}
+                            🔒
+                        {% endif %}
+                    </span>
+                    <div class="sub-info">
+                        <h3 class="{% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}active{% else %}inactive{% endif %}">
+                            {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                                Active Subscription
+                                {% if subscriptions[0].plan_id %}
+                                    <span class="sub-plan-badge {{ subscriptions[0].plan_id }}">
+                                        {{ subscriptions[0].plan_id|title }}
+                                    </span>
                                 {% endif %}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
+                            {% else %}
+                                No Active Subscription
+                            {% endif %}
+                        </h3>
+                        <p>
+                            {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                                {% if subscriptions[0].expires_at %}
+                                    Expires: {{ subscriptions[0].expires_at.strftime('%d %B %Y') }}
+                                {% else %}
+                                    Unlimited access
+                                {% endif %}
+                                {% if subscriptions[0].plan_id == 'starter' %}
+                                    · 50 scans per month
+                                {% elif subscriptions[0].plan_id == 'pro' %}
+                                    · Unlimited scans
+                                {% endif %}
+                            {% else %}
+                                Subscribe to unlock unlimited disease detection
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    {% if subscriptions and subscriptions[0] and subscriptions[0].is_active %}
+                        <span class="sub-status active">✅ Active</span>
+                    {% elif subscriptions and subscriptions[0] and not subscriptions[0].is_active %}
+                        <span class="sub-status expired">⏰ Expired</span>
+                    {% else %}
+                        <span class="sub-status inactive">❌ Inactive</span>
+                        <a href="/payment/starter" class="btn-subscribe" style="margin-left: 12px;">
+                            🚀 Subscribe Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── TRANSACTION HISTORY ─── -->
+        <h2 class="section-title">📋 Transaction History</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="4">
-                            <div class="empty-state">
-                                <div class="icon">💳</div>
-                                <h3>No transactions yet</h3>
-                                <p>Make your first payment to unlock premium features</p>
-                                <a href="/payment/starter" class="btn-subscribe" style="margin-top: 16px;">
-                                    🚀 Subscribe Now
-                                </a>
-                            </div>
-                        </td>
+                        <th>Date</th>
+                        <th>Plan</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if transactions %}
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at else '-' }}</td>
+                            <td>
+                                {% if t.plan_id == 'starter' %}
+                                    📋 Starter
+                                {% elif t.plan_id == 'pro' %}
+                                    ⭐ Pro
+                                {% else %}
+                                    {{ t.plan_id|title }}
+                                {% endif %}
+                            </td>
+                            <td><strong>KSh {{ t.amount }}</strong></td>
+                            <td>
+                                <span class="status-badge {{ t.status }}">
+                                    {% if t.status == 'completed' %}✅ Completed
+                                    {% elif t.status == 'pending' %}⏳ Pending
+                                    {% elif t.status == 'failed' %}❌ Failed
+                                    {% else %}{{ t.status|title }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <div class="icon">💳</div>
+                                    <h3>No transactions yet</h3>
+                                    <p>Make your first payment to unlock premium features</p>
+                                    <a href="/payment/starter" class="btn-subscribe" style="margin-top: 16px;">
+                                        🚀 Subscribe Now
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>🍅 TomatoGuard · Secure payments powered by M-Pesa</p>
+        </footer>
+
     </div>
 
-    <!-- ─── FOOTER ─── -->
-    <div style="text-align: center; margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
-        <p style="color: rgba(255,255,255,0.15); font-size: 0.75rem;">
-            🍅 TomatoGuard · Secure payments powered by M-Pesa
-        </p>
-    </div>
+    <script>
+        let currentLang = 'en';
 
-</div>
+        // ─── MENU ───
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        function openReport(e) {
+            e.preventDefault();
+            window.open(`/report?lang=${currentLang}`, '_blank');
+            closeMenu();
+        }
+
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
+            closeMenu();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-toggle-menu button:first-child`).classList.toggle('active', lang === 'en');
+            document.querySelector(`.lang-toggle-menu button:last-child`).classList.toggle('active', lang === 'sw');
+            localStorage.setItem('tomatoguard_lang', lang);
+        }
+
+        // ─── FLOATING TOMATOES ───
+        const emojis = ['🍅', '🌿', '🍃', '🌱'];
+        for (let i = 0; i < 10; i++) {
+            const el = document.createElement('div');
+            el.className = 'tomato';
+            el.textContent = emojis[i % emojis.length];
+            el.style.left = (Math.random() * 90 + 5) + '%';
+            el.style.fontSize = (2.5 + Math.random() * 3) + 'rem';
+            el.style.animationDuration = (12 + Math.random() * 18) + 's';
+            el.style.animationDelay = (Math.random() * 10) + 's';
+            document.getElementById('tomatoContainer').appendChild(el);
+        }
+
+        // ─── CLOSE MENU ON LINK CLICK ───
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
+
+        // ─── INIT ───
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        if (savedLang === 'sw') setLang('sw');
+    </script>
 
 </body>
 </html>
