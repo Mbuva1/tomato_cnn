@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TomatoGuard — Statistics</title>
+    <title>TomatoGuard — My Statistics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -260,68 +261,115 @@
             opacity: 0.7;
         }
 
-        /* ─── STATS GRID ─── */
-        .stats-grid {
+        /* ─── LOADING ─── */
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a5d6a7;
+        }
+        .big-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(76,175,80,0.15);
+            border-top: 4px solid #4caf50;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ─── CONTENT ─── */
+        .content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        /* ─── SUMMARY GRID ─── */
+        .summary-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 20px;
+            margin-bottom: 24px;
         }
-        @media (min-width: 600px) {
-            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        .stat-card {
+
+        .summary-card {
             background: rgba(10,30,10,0.85);
             border: 1px solid rgba(76,175,80,0.06);
             border-radius: 14px;
             padding: 20px;
             text-align: center;
+            transition: all 0.3s ease;
         }
-        .stat-card .number {
-            font-size: 2.2rem;
-            font-weight: 800;
+        .summary-card:hover {
+            border-color: rgba(76,175,80,0.15);
+            transform: translateY(-2px);
+        }
+        .summary-icon { font-size: 2rem; margin-bottom: 6px; }
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
             color: #4caf50;
         }
-        .stat-card .label {
-            font-size: 0.8rem;
+        .summary-label {
+            font-size: 0.78rem;
             color: #a5d6a7;
             margin-top: 4px;
         }
 
-        /* ─── SEVERITY SECTION ─── */
-        .severity-section {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px 30px;
+        /* ─── CHART GRID ─── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        .severity-card {
+        @media (max-width: 768px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+
+        .chart-card {
             background: rgba(10,30,10,0.85);
             border: 1px solid rgba(76,175,80,0.06);
             border-radius: 14px;
-            padding: 20px 22px;
+            padding: 20px;
         }
-        .severity-card h3 {
-            color: #81c784;
+        .chart-card.full-width { grid-column: 1 / -1; }
+
+        .chart-title {
             font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 12px;
+            color: #81c784;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             border-bottom: 1px solid rgba(76,175,80,0.06);
             padding-bottom: 10px;
         }
-        .severity-item {
+
+        .chart-wrap { position: relative; height: 240px; }
+        .chart-wrap-lg { position: relative; height: 280px; }
+
+        /* ─── SEVERITY ─── */
+        .severity-row {
             display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            font-size: 0.9rem;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
         }
-        .severity-item .sev-label { color: #a5d6a7; }
-        .severity-item .sev-count {
-            font-weight: 600;
-            color: #e8f5e9;
+        .sev-item {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid;
         }
+        .sev-item .sev-val { font-size: 1.6rem; font-weight: 700; }
+        .sev-item .sev-lbl { font-size: 0.72rem; margin-top: 3px; }
 
         /* ─── EMPTY STATE ─── */
         .empty-state {
@@ -330,15 +378,16 @@
             color: #a5d6a7;
             opacity: 0.4;
         }
+        .empty-state div { font-size: 3rem; margin-bottom: 8px; }
 
         /* ─── FOOTER ─── */
         footer {
             text-align: center;
             padding: 20px;
-            color: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.08);
             font-size: 0.75rem;
             border-top: 1px solid rgba(76,175,80,0.03);
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
         }
         footer span { color: #4caf50; }
@@ -347,14 +396,13 @@
         @media (max-width: 480px) {
             body { font-size: 16px; }
             .page-header h1 { font-size: 1.5rem; }
-            .stat-card .number { font-size: 1.8rem; }
+            .summary-value { font-size: 1.5rem; }
             .mobile-menu { width: 260px; padding: 70px 20px 20px; }
         }
         @media (max-width: 768px) {
             .nav-farmer { display: none; }
         }
 
-        /* Hamburger visible on ALL screen sizes */
         .hamburger {
             display: flex;
         }
@@ -444,45 +492,94 @@
         <p>Overview of your tomato disease detection history</p>
     </div>
 
-    <!-- ─── STATS GRID ─── -->
-    <div class="stats-grid" id="statsGrid">
-        <div class="stat-card">
-            <div class="number" id="totalScans">0</div>
-            <div class="label">Total Scans</div>
-        </div>
-        <div class="stat-card">
-            <div class="number" id="healthyCount" style="color:#4caf50;">0</div>
-            <div class="label">Healthy Plants</div>
-        </div>
-        <div class="stat-card">
-            <div class="number" id="diseasedCount" style="color:#ffb74d;">0</div>
-            <div class="label">Diseased Plants</div>
-        </div>
-        <div class="stat-card">
-            <div class="number" id="avgConfidence" style="color:#81c784;">0%</div>
-            <div class="label">Avg. Confidence</div>
-        </div>
+    <!-- ─── LOADING ─── -->
+    <div class="loading-state" id="loadingState">
+        <div class="big-spinner"></div>
+        <p>Loading your statistics...</p>
     </div>
 
-    <!-- ─── SEVERITY BREAKDOWN ─── -->
-    <div class="severity-section">
-        <div class="severity-card">
-            <h3>📊 Severity Breakdown</h3>
-            <div id="severityContainer">
-                <div class="severity-item">
-                    <span class="sev-label">🟢 Mild</span>
-                    <span class="sev-count" id="mildCount">0</span>
-                </div>
-                <div class="severity-item">
-                    <span class="sev-label">🟡 Moderate</span>
-                    <span class="sev-count" id="moderateCount">0</span>
-                </div>
-                <div class="severity-item">
-                    <span class="sev-label">🔴 Severe</span>
-                    <span class="sev-count" id="severeCount">0</span>
-                </div>
+    <!-- ─── CONTENT ─── -->
+    <div class="content" id="mainContent" style="display:none;">
+
+        <!-- ─── SUMMARY ─── -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon">🔍</div>
+                <div class="summary-value" id="statTotal">0</div>
+                <div class="summary-label">Total Scans</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">✅</div>
+                <div class="summary-value" id="statHealthy" style="color:#4caf50;">0</div>
+                <div class="summary-label">Healthy Plants</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">⚠️</div>
+                <div class="summary-value" id="statDiseased" style="color:#ffb74d;">0</div>
+                <div class="summary-label">Diseased Plants</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">🎯</div>
+                <div class="summary-value" id="statAvgConf" style="color:#81c784;">0%</div>
+                <div class="summary-label">Avg. Confidence</div>
             </div>
         </div>
+
+        <!-- ─── ROW 1: Pie + Severity ─── -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">🌿 Healthy vs Diseased</div>
+                <div id="noDataPie" class="empty-state" style="display:none;">
+                    <div>🍃</div>
+                    <p>No data yet</p>
+                </div>
+                <div class="chart-wrap" id="wrapPie"><canvas id="chartPie"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">🎚️ Severity Breakdown</div>
+                <div class="severity-row">
+                    <div class="sev-item" style="color:#66bb6a; border-color:#66bb6a; background:rgba(102,187,106,0.08);">
+                        <div class="sev-val" id="sevMild">0</div>
+                        <div class="sev-lbl">🟢 Mild</div>
+                    </div>
+                    <div class="sev-item" style="color:#ffca28; border-color:#ffca28; background:rgba(255,202,40,0.08);">
+                        <div class="sev-val" id="sevModerate">0</div>
+                        <div class="sev-lbl">🟡 Moderate</div>
+                    </div>
+                    <div class="sev-item" style="color:#ef5350; border-color:#ef5350; background:rgba(239,83,80,0.08);">
+                        <div class="sev-val" id="sevSevere">0</div>
+                        <div class="sev-lbl">🔴 Severe</div>
+                    </div>
+                </div>
+                <div class="chart-wrap" style="margin-top:15px;"><canvas id="chartSeverity"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ─── ROW 2: Disease Breakdown (Bar Chart) ─── -->
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-title">🦠 Disease Breakdown</div>
+                <div id="noDataBar" class="empty-state" style="display:none;">
+                    <div>🍃</div>
+                    <p>No disease data yet</p>
+                </div>
+                <div class="chart-wrap-lg" id="wrapBar"><canvas id="chartBar"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ─── ROW 3: Timeline ─── -->
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-title">📅 Detections — Last 7 Days</div>
+                <div id="noDataLine" class="empty-state" style="display:none;">
+                    <div>📅</div>
+                    <p>No recent activity</p>
+                </div>
+                <div class="chart-wrap-lg" id="wrapLine"><canvas id="chartLine"></canvas></div>
+            </div>
+        </div>
+
     </div>
 
     <footer>
@@ -544,23 +641,6 @@
             document.getElementById('tomatoContainer').appendChild(el);
         }
 
-        // ─── LOAD STATS ───
-        function loadStats() {
-            fetch('/api/stats')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('totalScans').textContent = data.total || 0;
-                    document.getElementById('healthyCount').textContent = data.healthy_count || 0;
-                    document.getElementById('diseasedCount').textContent = data.diseased_count || 0;
-                    document.getElementById('avgConfidence').textContent = (data.avg_confidence || 0) + '%';
-
-                    document.getElementById('mildCount').textContent = data.severity?.mild || 0;
-                    document.getElementById('moderateCount').textContent = data.severity?.moderate || 0;
-                    document.getElementById('severeCount').textContent = data.severity?.severe || 0;
-                })
-                .catch(err => console.error('Stats error:', err));
-        }
-
         // ─── CLOSE MENU ON LINK CLICK ───
         document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
@@ -570,13 +650,156 @@
             });
         });
 
-        // ─── INIT ───
+        // ─── CHART.JS CONFIG ───
+        Chart.defaults.color = '#a5d6a7';
+        Chart.defaults.borderColor = 'rgba(76,175,80,0.12)';
+
+        // ─── LOAD STATS ───
+        fetch('/api/stats')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            document.getElementById('statTotal').textContent = data.total || 0;
+            document.getElementById('statHealthy').textContent = data.healthy_count || 0;
+            document.getElementById('statDiseased').textContent = data.diseased_count || 0;
+            document.getElementById('statAvgConf').textContent = (data.avg_confidence || 0) + '%';
+            document.getElementById('sevMild').textContent = data.severity?.mild || 0;
+            document.getElementById('sevModerate').textContent = data.severity?.moderate || 0;
+            document.getElementById('sevSevere').textContent = data.severity?.severe || 0;
+
+            // ─── PIE CHART ───
+            if (data.total === 0) {
+                document.getElementById('noDataPie').style.display = 'block';
+                document.getElementById('wrapPie').style.display = 'none';
+            } else {
+                new Chart(document.getElementById('chartPie').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Healthy', 'Diseased'],
+                        datasets: [{
+                            data: [data.healthy_count || 0, data.diseased_count || 0],
+                            backgroundColor: ['rgba(76,175,80,0.7)', 'rgba(255,111,0,0.7)'],
+                            borderColor: ['#4caf50', '#ff6f00'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#a5d6a7', padding: 15 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ─── SEVERITY BAR CHART ───
+            new Chart(document.getElementById('chartSeverity').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Mild', 'Moderate', 'Severe'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [data.severity?.mild || 0, data.severity?.moderate || 0, data.severity?.severe || 0],
+                        backgroundColor: ['rgba(102,187,106,0.6)', 'rgba(255,202,40,0.6)', 'rgba(239,83,80,0.6)'],
+                        borderColor: ['#66bb6a', '#ffca28', '#ef5350'],
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: '#a5d6a7' } },
+                        x: { ticks: { color: '#a5d6a7' } }
+                    }
+                }
+            });
+
+            // ─── DISEASE BREAKDOWN (BAR CHART) ───
+            if (!data.disease_labels || data.disease_labels.length === 0) {
+                document.getElementById('noDataBar').style.display = 'block';
+                document.getElementById('wrapBar').style.display = 'none';
+            } else {
+                const colors = [
+                    'rgba(76,175,80,0.6)', 'rgba(255,111,0,0.6)', 'rgba(239,83,80,0.6)',
+                    'rgba(255,202,40,0.6)', 'rgba(33,150,243,0.6)', 'rgba(156,39,176,0.6)',
+                    'rgba(0,188,212,0.6)', 'rgba(255,87,34,0.6)', 'rgba(96,125,139,0.6)',
+                    'rgba(121,85,72,0.6)', 'rgba(158,158,158,0.6)'
+                ];
+                new Chart(document.getElementById('chartBar').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.disease_labels,
+                        datasets: [{
+                            label: 'Detection Count',
+                            data: data.disease_counts,
+                            backgroundColor: data.disease_labels.map((_, i) => colors[i % colors.length]),
+                            borderColor: data.disease_labels.map((_, i) => colors[i % colors.length].replace('0.6', '1')),
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { stepSize: 1, color: '#a5d6a7' } },
+                            y: { ticks: { color: '#a5d6a7', font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            // ─── TIMELINE (LINE CHART) ───
+            if (!data.timeline_labels || data.timeline_labels.length === 0) {
+                document.getElementById('noDataLine').style.display = 'block';
+                document.getElementById('wrapLine').style.display = 'none';
+            } else {
+                new Chart(document.getElementById('chartLine').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.timeline_labels,
+                        datasets: [{
+                            label: 'Detections',
+                            data: data.timeline_counts,
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76,175,80,0.12)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#4caf50',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#a5d6a7' } },
+                            x: { ticks: { color: '#a5d6a7' } }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(err => {
+            document.getElementById('loadingState').innerHTML =
+                `<p style="color:#ef9a9a;">Error loading statistics: ${err.message}</p>`;
+        });
+
         const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
         if (savedLang === 'sw') setLang('sw');
-        loadStats();
-
-        // Auto-refresh stats every 30 seconds
-        setInterval(loadStats, 30000);
     </script>
 
 </body>
