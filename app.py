@@ -876,7 +876,7 @@ def download_report():
     healthy = sum(1 for p in predictions if 'healthy' in p['predicted_disease'].lower())
     diseased = total - healthy
 
-    # ── Calculate disease distribution for chart ──
+    # ── Calculate disease distribution ──
     disease_counts = {}
     for p in predictions:
         disease = p['predicted_disease'].replace('Tomato__', '').replace('Tomato_', '').replace('_', ' ')
@@ -927,8 +927,7 @@ def download_report():
                 "Consult a local agricultural officer for specific advice"
             ]
 
-    # ── BUILD HTML REPORT (FIRST, so it's available for fallback) ──
-
+    # ── BUILD HTML REPORT ──
     if lang == 'sw':
         title = "Ripoti ya Utambuzi wa Magonjwa ya Nyanya"
         subtitle = "TomatoGuard — Mfumo wa AI wa Kugundua Magonjwa ya Nyanya"
