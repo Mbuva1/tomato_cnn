@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — TomatoGuard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gutter: clamp(12px, 4vw, 40px);
+            --content-max: 1320px;
+            --bg-color: #0a1a0a;
+            --card-bg: rgba(10,30,10,0.85);
+            --text-color: #e8f5e9;
+            --text-muted: #a5d6a7;
+            --border-color: rgba(76,175,80,0.06);
+            --input-bg: rgba(0,0,0,0.2);
+            --input-border: rgba(76,175,80,0.12);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5faf5;
+            --card-bg: rgba(255,255,255,0.9);
+            --text-color: #1a3a1c;
+            --text-muted: #4a7a4a;
+            --border-color: rgba(76,175,80,0.1);
+            --input-bg: rgba(255,255,255,0.8);
+            --input-border: rgba(76,175,80,0.2);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
+        .nav-farmer strong { color: #4caf50; }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(300px, 84vw);
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { left: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ─── SETTINGS PAGE ─── */
+
+        .settings-container {
+            max-width: var(--content-max);
+            margin: 0 auto;
+            padding: 30px var(--gutter) 40px;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .settings-header h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .settings-header .back-btn {
+            padding: 8px 20px;
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: #a5d6a7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .settings-header .back-btn:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        /* ─── TABS ─── */
+
+        .settings-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .settings-tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .settings-tab:hover {
+            color: #4caf50;
+            background: rgba(76,175,80,0.04);
+        }
+        .settings-tab.active {
+            color: #4caf50;
+            border-bottom-color: #4caf50;
+            background: rgba(76,175,80,0.06);
+        }
+
+        /* ─── SETTINGS CARDS ─── */
+
+        .settings-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .settings-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: clamp(20px, 3vw, 30px);
+            margin-bottom: 24px;
+            backdrop-filter: blur(5px);
+            transition: background 0.3s ease;
+        }
+
+        .settings-card h2 {
+            font-size: 1.1rem;
+            color: #4caf50;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-card .description {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(76,175,80,0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            color: #a5d6a7;
+        }
+        .btn-secondary:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        .btn-danger {
+            background: rgba(211,47,47,0.08);
+            border: 1px solid rgba(211,47,47,0.12);
+            color: #ef9a9a;
+        }
+        .btn-danger:hover {
+            background: rgba(211,47,47,0.15);
+        }
+
+        .btn-warning {
+            background: rgba(255,193,7,0.08);
+            border: 1px solid rgba(255,193,7,0.12);
+            color: #ffca28;
+        }
+        .btn-warning:hover {
+            background: rgba(255,193,7,0.15);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        /* ─── TOGGLE SWITCH ─── */
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-row .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toggle-row .toggle-label span {
+            font-size: 0.95rem;
+        }
+        .toggle-row .toggle-label small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+        .toggle.active {
+            background: #4caf50;
+        }
+        .toggle .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .toggle.active .toggle-knob {
+            transform: translateX(22px);
+        }
+
+        /* ─── THEME SELECTOR ─── */
+
+        .theme-selector {
+            display: flex;
+            gap: 12px;
+        }
+        .theme-option {
+            padding: 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .theme-option:hover {
+            border-color: #4caf50;
+        }
+        .theme-option.active {
+            border-color: #4caf50;
+            background: rgba(76,175,80,0.08);
+        }
+
+        /* ─── THEME COLORS ─── */
+
+        .theme-option.light {
+            background: #f5faf5;
+            color: #1a3a1c;
+        }
+        .theme-option.dark {
+            background: #0a1a0a;
+            color: #e8f5e9;
+        }
+        .theme-option.system {
+            background: linear-gradient(135deg, #f5faf5 50%, #0a1a0a 50%);
+            color: #1a3a1c;
+        }
+
+        /* ─── SUCCESS MESSAGE ─── */
+
+        .success-message {
+            background: rgba(46,125,50,0.1);
+            border: 1px solid #4caf50;
+            color: #81c784;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: rgba(211,47,47,0.1);
+            border: 1px solid #d32f2f;
+            color: #ef9a9a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+
+        /* ─── MODAL ─── */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+        .modal h3 {
+            color: #4caf50;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .modal p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .modal .btn-group {
+            justify-content: center;
+        }
+
+        .modal .btn-danger {
+            padding: 10px 30px;
+        }
+
+        /* ─── RESPONSIVE ─── */
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .settings-tabs {
+                gap: 4px;
+            }
+            .settings-tab {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
+            .settings-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .theme-selector {
+                flex-direction: column;
+            }
+            .theme-option {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .settings-container {
+                padding: 16px var(--gutter) 30px;
+            }
+            .settings-card {
+                padding: 16px;
+            }
+            .toggle-row {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <nav>
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="nav-right">
+            <span class="nav-farmer">👨‍🌾 <strong>{{ farmer_name }}</strong></span>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'U' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍🌾 Tomato Farmer</p>
+            </div>
+        </div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Dashboard
+        </a>
+        <a href="/stats" class="menu-item">
+            <span class="icon">📊</span> Statistics
+        </a>
+        <a href="/payment/history" class="menu-item">
+            <span class="icon">💰</span> Payment
+            <span class="badge">History</span>
+        </a>
+        <a href="/notifications" class="menu-item">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge">SMS/Email</span>
+        </a>
+        <a href="/tips_settings" class="menu-item">
+            <span class="icon">💡</span> Tips
+        </a>
+        <a href="#" class="menu-item" onclick="openReport(event)">
+            <span class="icon">📄</span> Report
+        </a>
+        <a href="/settings" class="menu-item active">
+            <span class="icon">⚙️</span> Settings
+            <span class="badge">New</span>
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="#" class="menu-item" onclick="showSupport()">
+            <span class="icon">📧</span> Contact Support
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · CNN from Scratch
+        </div>
+    </div>
+
+    <!-- ─── SETTINGS CONTENT ─── -->
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>⚙️ Settings</h1>
+            <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="success-message" id="successMessage">✅ Settings updated successfully!</div>
+        <div class="error-message" id="errorMessage">❌ Something went wrong. Please try again.</div>
+
+        <!-- Tabs -->
+        <div class="settings-tabs" id="settingsTabs">
+            <button class="settings-tab active" data-tab="account">👤 Account</button>
+            <button class="settings-tab" data-tab="appearance">🎨 Appearance</button>
+            <button class="settings-tab" data-tab="notifications">🔔 Notifications</button>
+            <button class="settings-tab" data-tab="security">🔒 Security</button>
+            <button class="settings-tab" data-tab="data">📊 Data</button>
+        </div>
+
+        <!-- ─── ACCOUNT TAB ─── -->
+        <div class="settings-section active" id="tab-account">
+
+            <div class="settings-card">
+                <h2>👤 Profile Information</h2>
+                <p class="description">Update your personal information.</p>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" value="{{ farmer_name }}" placeholder="Enter your full name">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" value="{{ farmer_email or '' }}" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" value="{{ farmer_phone or '' }}" placeholder="+254XXXXXXXXX">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Location / Farm</label>
+                    <input type="text" id="location" value="{{ farmer_location or '' }}" placeholder="e.g., Nairobi, Kenya">
+                </div>
+
+                <button class="btn btn-primary" onclick="updateProfile()">💾 Save Profile</button>
+            </div>
+        </div>
+
+        <!-- ─── APPEARANCE TAB ─── -->
+        <div class="settings-section" id="tab-appearance">
+
+            <div class="settings-card">
+                <h2>🎨 Theme</h2>
+                <p class="description">Choose your preferred appearance.</p>
+
+                <div class="theme-selector">
+                    <button class="theme-option light" onclick="setTheme('light')">
+                        ☀️ Light
+                    </button>
+                    <button class="theme-option dark active" onclick="setTheme('dark')">
+                        🌙 Dark
+                    </button>
+                    <button class="theme-option system" onclick="setTheme('system')">
+                        💻 System
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2>🌐 Language</h2>
+                <p class="description">Choose your preferred language.</p>
+
+                <div class="form-group">
+                    <label>App Language</label>
+                    <select id="languageSelect" onchange="updateLanguage()">
+                        <option value="en" selected>🇬🇧 English</option>
+                        <option value="sw">🇰🇪 Kiswahili</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── NOTIFICATIONS TAB ─── -->
+        <div class="settings-section" id="tab-notifications">
+
+            <div class="settings-card">
+                <h2>🔔 Notification Settings</h2>
+                <p class="description">Manage how you receive alerts.</p>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>📱 Push Notifications</span>
+                        <small>Receive alerts in your browser</small>
+                    </div>
+                    <div class="toggle active" onclick="toggleSwitch(this)">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>📧 Email Alerts</span>
+                        <small>Receive disease alerts via email</small>
+                    </div>
+                    <div class="toggle active" onclick="toggleSwitch(this)">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>📱 SMS Alerts</span>
+                        <small>Receive disease alerts via SMS</small>
+                    </div>
+                    <div class="toggle" onclick="toggleSwitch(this)">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>📊 Weekly Summary</span>
+                        <small>Get a weekly summary of your scans</small>
+                    </div>
+                    <div class="toggle active" onclick="toggleSwitch(this)">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="btn-group" style="margin-top:16px;">
+                    <button class="btn btn-primary" onclick="saveNotifications()">💾 Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── SECURITY TAB ─── -->
+        <div class="settings-section" id="tab-security">
+
+            <div class="settings-card">
+                <h2>🔑 Change Password</h2>
+                <p class="description">Update your password to keep your account secure.</p>
+
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" placeholder="Enter current password">
+                </div>
+
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password">
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                </div>
+
+                <button class="btn btn-primary" onclick="changePassword()">🔒 Update Password</button>
+            </div>
+
+            <div class="settings-card">
+                <h2>🔐 Forgot Password</h2>
+                <p class="description">We'll send you a link to reset your password via email.</p>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="resetEmail" placeholder="Enter your registered email">
+                </div>
+
+                <button class="btn btn-warning" onclick="sendResetLink()">📧 Send Reset Link</button>
+            </div>
+        </div>
+
+        <!-- ─── DATA TAB ─── -->
+        <div class="settings-section" id="tab-data">
+
+            <div class="settings-card">
+                <h2>📊 Data Management</h2>
+                <p class="description">Manage your app data and storage.</p>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="clearCache()">🗑️ Clear Cache</button>
+                    <button class="btn btn-secondary" onclick="clearHistory()">🗑️ Clear History</button>
+                    <button class="btn btn-primary" onclick="exportData()">📥 Export Data</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2 style="color:#ef5350;">⚠️ Danger Zone</h2>
+                <p class="description">These actions are irreversible. Proceed with caution.</p>
+
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="openDeleteModal()">🗑️ Delete All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── DELETE CONFIRMATION MODAL ─── -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h3>⚠️ Delete All Data?</h3>
+            <p>This will permanently delete all your predictions, history, and settings. This action cannot be undone.</p>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteAllData()">🗑️ Yes, Delete Everything</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // ─── MENU ───
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        function openReport(e) {
+            e.preventDefault();
+            const lang = localStorage.getItem('tomatoguard_lang') || 'en';
+            window.open(`/report?lang=${lang}`, '_blank');
+            closeMenu();
+        }
+
+        function showSupport() {
+            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
+            closeMenu();
+        }
+
+        // ─── TABS ───
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active from all tabs
+                document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Hide all sections
+                document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+
+                // Show the selected section
+                const target = this.dataset.tab;
+                document.getElementById(`tab-${target}`).classList.add('active');
+            });
+        });
+
+        // ─── TOGGLE SWITCH ───
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // ─── THEME ───
+        function setTheme(theme) {
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.querySelector('.theme-option.light').classList.add('active');
+                localStorage.setItem('tomatoguard_theme', 'light');
+            } else if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-option.dark').classList.add('active');
+                localStorage.setItem('tomatoguard_theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.querySelector('.theme-option.system').classList.add('active');
+                localStorage.setItem('tomatoguard_theme', 'system');
+            }
+        }
+
+        // ─── LOAD SAVED THEME ───
+        const savedTheme = localStorage.getItem('tomatoguard_theme') || 'dark';
+        setTheme(savedTheme);
+
+        // ─── LANGUAGE ───
+        function updateLanguage() {
+            const lang = document.getElementById('languageSelect').value;
+            localStorage.setItem('tomatoguard_lang', lang);
+            showSuccess('Language updated successfully!');
+        }
+
+        // ─── PROFILE ───
+        function updateProfile() {
+            const data = {
+                full_name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value
+            };
+
+            fetch('/api/profile/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showSuccess('Profile updated successfully!');
+                } else {
+                    showError(res.error || 'Failed to update profile');
+                }
+            })
+            .catch(() => showError('Network error. Please try again.'));
+        }
+
+        // ─── CHANGE PASSWORD ───
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                showError('Please fill in all password fields.');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                showError('New passwords do not match.');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+
+            fetch('/api/password/change', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    current_password: current,
+                    new_password: newPass
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showSuccess('Password changed successfully!');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    showError(res.error || 'Failed to change password');
+                }
+            })
+            .catch(() => showError('Network error. Please try again.'));
+        }
+
+        // ─── FORGOT PASSWORD ───
+        function sendResetLink() {
+            const email = document.getElementById('resetEmail').value;
+
+            if (!email) {
+                showError('Please enter your email address.');
+                return;
+            }
+
+            fetch('/api/password/reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showSuccess('Password reset link sent to your email!');
+                    document.getElementById('resetEmail').value = '';
+                } else {
+                    showError(res.error || 'Failed to send reset link.');
+                }
+            })
+            .catch(() => showError('Network error. Please try again.'));
+        }
+
+        // ─── NOTIFICATIONS ───
+        function saveNotifications() {
+            const toggles = document.querySelectorAll('.toggle');
+            const data = {
+                push: toggles[0].classList.contains('active'),
+                email: toggles[1].classList.contains('active'),
+                sms: toggles[2].classList.contains('active'),
+                weekly: toggles[3].classList.contains('active')
+            };
+
+            fetch('/api/notifications/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showSuccess('Notification settings saved!');
+                } else {
+                    showError(res.error || 'Failed to save settings.');
+                }
+            })
+            .catch(() => showError('Network error. Please try again.'));
+        }
+
+        // ─── DATA MANAGEMENT ───
+        function clearCache() {
+            if (confirm('Clear cached data? This will not delete your history.')) {
+                fetch('/api/clear-cache', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            showSuccess('Cache cleared successfully!');
+                        } else {
+                            showError('Failed to clear cache.');
+                        }
+                    })
+                    .catch(() => showError('Network error.'));
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Delete all detection history? This cannot be undone.')) {
+                fetch('/api/clear-history', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            showSuccess('History cleared successfully!');
+                        } else {
+                            showError('Failed to clear history.');
+                        }
+                    })
+                    .catch(() => showError('Network error.'));
+            }
+        }
+
+        function exportData() {
+            window.open('/report_csv', '_blank');
+            showSuccess('Data export started!');
+        }
+
+        // ─── DELETE MODAL ───
+        function openDeleteModal() {
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        function deleteAllData() {
+            if (confirm('⚠️ Are you sure? This will delete EVERYTHING!')) {
+                fetch('/api/delete-all-data', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        closeDeleteModal();
+                        if (res.success) {
+                            showSuccess('All data deleted successfully.');
+                            setTimeout(() => window.location.href = '/dashboard', 2000);
+                        } else {
+                            showError('Failed to delete data.');
+                        }
+                    })
+                    .catch(() => showError('Network error.'));
+            }
+        }
+
+        // ─── MESSAGES ───
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = '✅ ' + msg;
+            el.classList.add('show');
+            document.getElementById('errorMessage').classList.remove('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = '❌ ' + msg;
+            el.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        // ─── CLOSE MENU ON LINK CLICK ───
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
+
+        // ─── LANGUAGE SELECTOR ───
+        const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
+        document.getElementById('languageSelect').value = savedLang;
+
+    </script>
+
+</body>
+</html>

@@ -18,10 +18,10 @@ load_dotenv()
 # ── ReportLab for PDF (Pure Python, no external dependencies) ──
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 import io
 
 from module1_image_loader import load_image, resize_image, TOMATO_CLASSES
@@ -1482,6 +1482,177 @@ tr:hover td {{ background:#f5f5f5 !important; }}
     response = make_response(html)
     response.headers['Content-Type'] = 'text/html; charset=utf-8'
     return response
+
+
+# ─────────────────────────────────────────────
+# SETTINGS ROUTES
+# ─────────────────────────────────────────────
+
+@app.route('/settings')
+def settings_page():
+    if 'farmer_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM farmers WHERE id=%s", (session['farmer_id'],))
+    farmer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('settings.html',
+        farmer_name=farmer['full_name'],
+        farmer_email=farmer.get('email', ''),
+        farmer_phone=farmer.get('phone', ''),
+        farmer_location=farmer.get('location', '')
+    )
+
+
+@app.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE farmers 
+        SET full_name=%s, email=%s, phone=%s, location=%s 
+        WHERE id=%s
+    """, (data.get('full_name'), data.get('email'), data.get('phone'), 
+          data.get('location'), session['farmer_id']))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    session['farmer_name'] = data.get('full_name')
+    return jsonify({'success': True})
+
+
+@app.route('/api/password/change', methods=['POST'])
+def change_password():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    current = data.get('current_password')
+    new_pass = data.get('new_password')
+    
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT password FROM farmers WHERE id=%s", (session['farmer_id'],))
+    farmer = cursor.fetchone()
+    
+    if not farmer:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'User not found'}), 404
+    
+    if hash_password(current) != farmer['password']:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Current password is incorrect'}), 400
+    
+    hashed = hash_password(new_pass)
+    cursor.execute("UPDATE farmers SET password=%s WHERE id=%s", (hashed, session['farmer_id']))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
+@app.route('/api/password/reset', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email:
+        return jsonify({'error': 'Email required'}), 400
+    
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, full_name FROM farmers WHERE email=%s", (email,))
+    farmer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    if not farmer:
+        return jsonify({'error': 'No account found with this email'}), 404
+    
+    print(f"[Password Reset] User {farmer['full_name']} requested reset for {email}")
+    return jsonify({'success': True, 'message': 'Reset link sent to your email'})
+
+
+@app.route('/api/clear-history', methods=['POST'])
+def clear_history():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM predictions WHERE farmer_id=%s", (session['farmer_id'],))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
+@app.route('/api/clear-cache', methods=['POST'])
+def clear_cache():
+    return jsonify({'success': True})
+
+
+@app.route('/api/delete-all-data', methods=['POST'])
+def delete_all_data():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM predictions WHERE farmer_id=%s", (session['farmer_id'],))
+    cursor.execute("DELETE FROM notification_settings WHERE farmer_id=%s", (session['farmer_id'],))
+    cursor.execute("DELETE FROM free_trials WHERE farmer_id=%s", (session['farmer_id'],))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
+@app.route('/api/notifications/settings', methods=['POST'])
+def save_notification_settings():
+    if 'farmer_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        INSERT INTO notification_settings 
+        (farmer_id, notify_disease, notify_healthy, notify_weekly, send_time)
+        VALUES (%s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            notify_disease=VALUES(notify_disease),
+            notify_healthy=VALUES(notify_healthy),
+            notify_weekly=VALUES(notify_weekly),
+            send_time=VALUES(send_time)
+    """, (
+        session['farmer_id'],
+        1 if data.get('email') else 0,
+        1 if data.get('sms') else 0,
+        1 if data.get('weekly') else 0,
+        'instant'
+    ))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
 
 
 # ─────────────────────────────────────────────

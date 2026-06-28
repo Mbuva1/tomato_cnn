@@ -9,10 +9,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            /* Fluid horizontal gutter: tiny on phones, generous on desktop,
-               capped so very large screens don't get absurd margins. */
             --gutter: clamp(12px, 4vw, 40px);
-            /* Content ceiling widens progressively instead of jumping. */
             --content-max: 1320px;
         }
 
@@ -252,14 +249,6 @@
             pointer-events: all;
         }
 
-        /* ───────────────────────────────────────────
-           SHARED PAGE-WIDTH WRAPPER
-           Every section below uses the same fluid gutter
-           and a max-width that grows with the viewport,
-           so mobile gets near-edge content and large
-           desktops don't get huge dead gutters.
-           ─────────────────────────────────────────── */
-
         .sub-banner,
         .stats-bar,
         .tips-card,
@@ -480,8 +469,6 @@
             .main-grid { grid-template-columns: 1fr 1fr; }
             .history-card { grid-column: 1 / -1; }
         }
-        /* On large desktops, give the two top cards a touch more room to
-           breathe rather than stretching to fill very wide columns thinly. */
         @media (min-width: 1100px) {
             .main-grid { gap: 24px; }
         }
@@ -975,7 +962,6 @@
         #snapCanvas { display: none; }
         #fileInput { display: none; }
 
-        /* ─── Small phones: tighten type and card padding a touch further ─── */
         @media (max-width: 480px) {
             body { font-size: 16px; }
             .nav-logo { font-size: 1.1rem; }
@@ -987,13 +973,10 @@
             .nav-farmer { display: none; }
         }
 
-        /* ─── Very large desktops: let the ceiling breathe a bit more
-               but never feel like a stretched mobile layout ─── */
         @media (min-width: 1600px) {
             :root { --content-max: 1480px; }
         }
 
-        /* ─── Respect reduced-motion preference ─── */
         @media (prefers-reduced-motion: reduce) {
             .tomato { animation: none; opacity: 0; }
             .spinner { animation-duration: 1.4s; }
@@ -1057,6 +1040,11 @@
         </a>
         <a href="#" class="menu-item" onclick="openReport(event)">
             <span class="icon">📄</span> Report
+        </a>
+        <!-- SETTINGS MENU LINK ADDED HERE -->
+        <a href="/settings" class="menu-item">
+            <span class="icon">⚙️</span> Settings
+            <span class="badge">New</span>
         </a>
 
         <div class="menu-divider"></div>
@@ -1324,7 +1312,6 @@
         let selectedAccuracy = null;
         let selectedRating = 0;
 
-        // ─── MENU ───
         function toggleMenu() {
             const menu = document.getElementById('mobileMenu');
             const overlay = document.getElementById('menuOverlay');
@@ -1354,7 +1341,6 @@
             closeMenu();
         }
 
-        // ─── LANGUAGE ───
         function setLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-toggle-menu button').forEach(b => b.classList.remove('active'));
@@ -1363,7 +1349,6 @@
             localStorage.setItem('tomatoguard_lang', lang);
         }
 
-        // ─── TIPS ───
         const tipsByCategory = {
             general: [
                 { en: "🌿 Inspect tomato plants weekly for early signs of disease.", sw: "🌿 Kagua mimea ya nyanya kila wiki." },
@@ -1400,7 +1385,6 @@
 
         function refreshTip() { loadTip(); }
 
-        // ─── FLOATING TOMATOES ───
         const emojis = ['🍅', '🌿', '🍃', '🌱'];
         for (let i = 0; i < 10; i++) {
             const el = document.createElement('div');
@@ -1413,7 +1397,6 @@
             document.getElementById('tomatoContainer').appendChild(el);
         }
 
-        // ─── CAMERA ───
         function switchMethod(method) {
             document.getElementById('tabUpload').classList.toggle('active', method === 'upload');
             document.getElementById('tabCamera').classList.toggle('active', method === 'camera');
@@ -1457,7 +1440,6 @@
             }, 'image/jpeg', 0.9);
         }
 
-        // ─── UPLOAD ───
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) { capturedBlob = null;
@@ -1516,7 +1498,6 @@
             currentPredId = null;
         }
 
-        // ─── UPDATE STATS ───
         function updateStats() {
             fetch('/api/stats')
                 .then(r => r.json())
@@ -1526,7 +1507,6 @@
                 .catch(() => {});
         }
 
-        // ─── UPDATE TRIAL COUNT ───
         function updateTrialCount(remaining) {
             const trialBanner = document.querySelector('.sub-banner .card.trial');
             if (!trialBanner) return;
@@ -1551,7 +1531,6 @@
             }
         }
 
-        // ─── DETECT ───
         function detectDisease() {
             const fileInput = document.getElementById('fileInput');
             let fileToSend = capturedBlob ?
@@ -1646,7 +1625,6 @@
                 });
         }
 
-        // ─── FEEDBACK ───
         function resetFeedbackUI() {
             selectedAccuracy = null;
             selectedRating = 0;
@@ -1716,7 +1694,6 @@
                 .catch(() => alert('Error submitting feedback'));
         }
 
-        // ─── VIEW PREDICTION ───
         function viewPrediction(id) {
             fetch(`/prediction/${id}`)
                 .then(r => r.json())
@@ -1747,7 +1724,6 @@
 
         function closeModal() { document.getElementById('viewModal').classList.remove('active'); }
 
-        // ─── DELETE ───
         function confirmDelete(id) { pendingDeleteId = id;
             document.getElementById('confirmModal').classList.add('active'); }
 
@@ -1771,7 +1747,6 @@
                     alert('Error deleting.'); });
         }
 
-        // ─── CLOSE MODALS ───
         document.getElementById('viewModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
@@ -1779,7 +1754,6 @@
             if (e.target === this) closeConfirm();
         });
 
-        // ─── REFRESH HISTORY ───
         function refreshHistory() {
             fetch('/history')
                 .then(r => r.json())
@@ -1821,7 +1795,6 @@
                 .catch(() => {});
         }
 
-        // ─── CLOSE MENU ON LINK CLICK ───
         document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (this.getAttribute('href') !== '#') {
@@ -1830,7 +1803,6 @@
             });
         });
 
-        // ─── INIT ───
         const savedLang = localStorage.getItem('tomatoguard_lang') || 'en';
         if (savedLang === 'sw') setLang('sw');
         else loadTipPreferences();

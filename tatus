@@ -1,0 +1,21 @@
+[1mdiff --git a/app.py b/app.py[m
+[1mindex f4618514..192df19f 100644[m
+[1m--- a/app.py[m
+[1m+++ b/app.py[m
+[36m@@ -1401,6 +1401,11 @@[m [melse:[m
+ # ─────────────────────────────────────────────[m
+ [m
+ if __name__ == '__main__':[m
+[31m-    import webbrowser[m
+[31m-    webbrowser.open('http://localhost:5000')[m
+[31m-    app.run(debug=True, port=5000)[m
+\ No newline at end of file[m
+[32m+[m[32m    port = int(os.environ.get('PORT', 5000))[m
+[32m+[m[32m    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'[m
+[32m+[m
+[32m+[m[32m    if debug_mode:[m
+[32m+[m[32m        import webbrowser[m
+[32m+[m[32m        webbrowser.open(f'http://localhost:{port}')[m
+[32m+[m
+[32m+[m[32m    app.run(host='0.0.0.0', port=port, debug=debug_mode)[m
+\ No newline at end of file[m
