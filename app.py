@@ -942,6 +942,12 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     buf = io.BytesIO()
     cv  = canvas.Canvas(buf, pagesize=letter)
 
+    # ── PDF METADATA (Fixes "untitled" issue) ──
+    cv.setTitle(lbl_title)
+    cv.setAuthor("TomatoGuard")
+    cv.setSubject("Tomato Disease Detection Report")
+    cv.setCreator("TomatoGuard - CNN from Scratch")
+
     # ── HEADER BAND ──
     cv.setFillColor(GREEN_DARK)
     cv.rect(0, H - 108, W, 108, fill=1, stroke=0)
