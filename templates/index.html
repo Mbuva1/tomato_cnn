@@ -1041,7 +1041,8 @@
         <a href="#" class="menu-item" onclick="openReport(event)">
             <span class="icon">📄</span> Report
         </a>
-        <!-- SETTINGS MENU LINK ADDED HERE -->
+
+        <!-- SETTINGS MENU LINK -->
         <a href="/settings" class="menu-item">
             <span class="icon">⚙️</span> Settings
             <span class="badge">New</span>
@@ -1049,9 +1050,18 @@
 
         <div class="menu-divider"></div>
 
+        <!-- SUPPORT LINK -->
         <a href="/support" class="menu-item">
-        <span class="icon">📧</span> Support
+            <span class="icon">📧</span> Support
         </a>
+
+        <!-- ADMIN LINK - Only visible to admin users -->
+        {% if session.get('is_admin') %}
+        <a href="/admin/feedback" class="menu-item">
+            <span class="icon">💬</span> Admin Panel
+            <span class="badge">{{ pending_count or 0 }}</span>
+        </a>
+        {% endif %}
 
         <div class="menu-divider"></div>
 
@@ -1333,11 +1343,6 @@
         function openReport(e) {
             e.preventDefault();
             window.open(`/report?lang=${currentLang}`, '_blank');
-            closeMenu();
-        }
-
-        function showSupport() {
-            alert('📧 Email: support@tomatoguard.com\n📞 Phone: +254 700 123 456\n🕐 Mon-Fri: 8am - 6pm');
             closeMenu();
         }
 

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Farmer Feedback</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gutter: clamp(12px, 4vw, 40px);
+            --content-max: 1400px;
+            --bg-color: #0a1a0a;
+            --card-bg: rgba(10,30,10,0.85);
+            --text-color: #e8f5e9;
+            --text-muted: #a5d6a7;
+            --border-color: rgba(76,175,80,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-farmer {
+            color: #a5d6a7;
+            font-size: 0.85rem;
+        }
+        .nav-farmer strong { color: #4caf50; }
+
+        .admin-badge {
+            background: #ffca28;
+            color: #1a2e1a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(300px, 84vw);
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { left: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ─── ADMIN FEEDBACK CONTENT ─── */
+
+        .feedback-container {
+            max-width: var(--content-max);
+            margin: 0 auto;
+            padding: 30px var(--gutter) 40px;
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .feedback-header h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feedback-header .back-btn {
+            padding: 8px 20px;
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: #a5d6a7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .feedback-header .back-btn:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        /* ─── STATS ─── */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4caf50;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── FILTERS ─── */
+
+        .filter-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 8px 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .filter-bar select:focus,
+        .filter-bar input:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .filter-bar .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(76,175,80,0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            color: #a5d6a7;
+        }
+        .btn-secondary:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        /* ─── FEEDBACK TABLE ─── */
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: rgba(76,175,80,0.04);
+            padding: 12px 14px;
+            text-align: left;
+            color: #81c784;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8e6c9;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(76,175,80,0.03);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(255,193,7,0.08);
+            color: #ffca28;
+            border: 1px solid rgba(255,193,7,0.12);
+        }
+
+        .status-reviewed {
+            background: rgba(33,150,243,0.08);
+            color: #64b5f6;
+            border: 1px solid rgba(33,150,243,0.12);
+        }
+
+        .status-resolved {
+            background: rgba(76,175,80,0.08);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.12);
+        }
+
+        .status-closed {
+            background: rgba(255,255,255,0.04);
+            color: #888;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .star-rating {
+            color: #ffca28;
+            letter-spacing: 2px;
+        }
+
+        .star-rating .empty {
+            color: rgba(255,255,255,0.1);
+        }
+
+        .btn-view {
+            padding: 4px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.08);
+            color: #81c784;
+        }
+
+        .btn-view:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        .btn-delete {
+            padding: 4px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(211,47,47,0.08);
+            border: 1px solid rgba(211,47,47,0.08);
+            color: #ef9a9a;
+        }
+
+        .btn-delete:hover {
+            background: rgba(211,47,47,0.15);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* ─── MODAL ─── */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: rgba(10,30,10,0.98);
+            border: 1px solid rgba(76,175,80,0.1);
+            border-radius: 16px;
+            padding: 28px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            float: right;
+            background: rgba(211,47,47,0.08);
+            border: 1px solid rgba(211,47,47,0.1);
+            color: #ef9a9a;
+            border-radius: 6px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .modal h3 {
+            color: #4caf50;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+
+        .modal .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.85rem;
+        }
+
+        .modal .detail-row .label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .modal .detail-row .value {
+            color: var(--text-color);
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+
+        .modal .comment-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-line;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .modal .status-select {
+            width: 100%;
+            padding: 8px 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            font-family: inherit;
+            margin-top: 8px;
+        }
+
+        .modal .status-select:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .modal .btn-update {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .modal .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(76,175,80,0.2);
+        }
+
+        .modal .response-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+            margin-top: 8px;
+        }
+
+        .modal .response-textarea:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stat-card .number {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <nav>
+        <div class="nav-left">
+            <a href="/admin" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="nav-right">
+            <span class="admin-badge">Admin</span>
+            <span class="nav-farmer">👨‍💻 <strong>{{ farmer_name }}</strong></span>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ farmer_name[0]|upper if farmer_name else 'A' }}</div>
+            <div class="user-info">
+                <h4>{{ farmer_name }}</h4>
+                <p>👨‍💻 Administrator</p>
+            </div>
+        </div>
+
+        <a href="/admin" class="menu-item">
+            <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/admin/feedback" class="menu-item active">
+            <span class="icon">💬</span> Feedback
+            <span class="badge">{{ total_count }}</span>
+        </a>
+        <a href="/admin/users" class="menu-item">
+            <span class="icon">👤</span> Users
+        </a>
+        <a href="/admin/subscriptions" class="menu-item">
+            <span class="icon">💰</span> Subscriptions
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Main Dashboard
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/admin/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · Admin Panel
+        </div>
+    </div>
+
+    <!-- ─── FEEDBACK CONTENT ─── -->
+
+    <div class="feedback-container">
+        <div class="feedback-header">
+            <h1>💬 Farmer Feedback</h1>
+            <a href="/admin" class="back-btn">← Back to Admin Dashboard</a>
+        </div>
+
+        <!-- ─── STATS ─── -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">{{ total_count }}</div>
+                <div class="label">Total Feedback</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#ffca28;">{{ pending_count }}</div>
+                <div class="label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#64b5f6;">{{ reviewed_count }}</div>
+                <div class="label">Reviewed</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#81c784;">{{ resolved_count }}</div>
+                <div class="label">Resolved</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#ffca28;">{{ avg_rating }}</div>
+                <div class="label">⭐ Avg Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" style="color:#81c784;">{{ helpful_pct }}%</div>
+                <div class="label">Helpful Rate</div>
+            </div>
+        </div>
+
+        <!-- ─── FILTERS ─── -->
+        <div class="filter-bar">
+            <select id="statusFilter" onchange="applyFilters()">
+                <option value="all">All Status</option>
+                <option value="pending">⏳ Pending</option>
+                <option value="reviewed">📋 Reviewed</option>
+                <option value="resolved">✅ Resolved</option>
+                <option value="closed">🔒 Closed</option>
+            </select>
+
+            <select id="ratingFilter" onchange="applyFilters()">
+                <option value="all">All Ratings</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                <option value="4">⭐⭐⭐⭐ 4</option>
+                <option value="3">⭐⭐⭐ 3</option>
+                <option value="2">⭐⭐ 2</option>
+                <option value="1">⭐ 1</option>
+            </select>
+
+            <input type="text" id="searchInput" placeholder="🔍 Search farmer or disease..." onkeyup="applyFilters()">
+
+            <button class="btn btn-secondary" onclick="resetFilters()">🔄 Reset</button>
+        </div>
+
+        <!-- ─── TABLE ─── -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Farmer</th>
+                        <th>Disease</th>
+                        <th>Confidence</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    {% for fb in feedback_list %}
+                    <tr id="row-{{ fb.id }}">
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ fb.farmer_name }}</strong></td>
+                        <td>{{ fb.disease_name }}</td>
+                        <td>{{ fb.confidence }}%</td>
+                        <td>
+                            {% if fb.rating %}
+                            <span class="star-rating">
+                                {% for i in range(5) %}
+                                    {% if i < fb.rating %}
+                                        ★
+                                    {% else %}
+                                        <span class="empty">☆</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                            {% else %}
+                            <span style="color:#888;font-size:0.8rem;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ fb.status }}">
+                                {% if fb.status == 'pending' %}⏳ Pending
+                                {% elif fb.status == 'reviewed' %}📋 Reviewed
+                                {% elif fb.status == 'resolved' %}✅ Resolved
+                                {% else %}🔒 Closed{% endif %}
+                            </span>
+                        </td>
+                        <td style="font-size:0.75rem;">{{ fb.created_at[:16] }}</td>
+                        <td>
+                            <button class="btn-view" onclick="viewFeedback({{ fb.id }})">👁 View</button>
+                            <button class="btn-delete" onclick="deleteFeedback({{ fb.id }})">🗑</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="no-data">No feedback found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if feedback_list and feedback_list|length > 10 %}
+        <div style="text-align:center;margin-top:20px;color:var(--text-muted);font-size:0.85rem;">
+            Showing {{ feedback_list|length }} entries
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── VIEW MODAL ─── -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">✕ Close</button>
+            <h3>📋 Feedback Details</h3>
+
+            <div class="detail-row">
+                <span class="label">Farmer</span>
+                <span class="value" id="modalFarmer">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Disease</span>
+                <span class="value" id="modalDisease">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Confidence</span>
+                <span class="value" id="modalConfidence">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Rating</span>
+                <span class="value" id="modalRating">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Status</span>
+                <span class="value" id="modalStatus">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Date</span>
+                <span class="value" id="modalDate">—</span>
+            </div>
+
+            <div style="margin-top:12px;">
+                <span style="color:var(--text-muted);font-size:0.8rem;font-weight:500;">💬 Farmer Comment</span>
+                <div class="comment-box" id="modalComment">No comment provided.</div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <span style="color:var(--text-muted);font-size:0.8rem;font-weight:500;">📌 Update Status</span>
+                <select class="status-select" id="modalStatusSelect">
+                    <option value="pending">⏳ Pending</option>
+                    <option value="reviewed">📋 Reviewed</option>
+                    <option value="resolved">✅ Resolved</option>
+                    <option value="closed">🔒 Closed</option>
+                </select>
+            </div>
+
+            <div style="margin-top:12px;">
+                <span style="color:var(--text-muted);font-size:0.8rem;font-weight:500;">✍️ Response to Farmer</span>
+                <textarea class="response-textarea" id="modalResponse" placeholder="Write a response to the farmer..."></textarea>
+            </div>
+
+            <button class="btn-update" onclick="updateFeedback()">💾 Update Status & Response</button>
+        </div>
+    </div>
+
+    <script>
+        let currentFeedbackId = null;
+
+        // ─── MENU ───
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        // ─── FILTERS ───
+        function applyFilters() {
+            const status = document.getElementById('statusFilter').value;
+            const rating = document.getElementById('ratingFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            const rows = document.querySelectorAll('#feedbackTableBody tr');
+
+            rows.forEach(row => {
+                if (row.querySelector('.no-data')) return;
+
+                const statusBadge = row.querySelector('.status-badge');
+                const ratingSpan = row.querySelector('.star-rating');
+                const farmerName = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
+                const diseaseName = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
+
+                let show = true;
+
+                if (status !== 'all' && statusBadge) {
+                    const statusText = statusBadge.textContent.trim().toLowerCase();
+                    if (statusText.includes('pending') && status !== 'pending') show = false;
+                    else if (statusText.includes('reviewed') && status !== 'reviewed') show = false;
+                    else if (statusText.includes('resolved') && status !== 'resolved') show = false;
+                    else if (statusText.includes('closed') && status !== 'closed') show = false;
+                }
+
+                if (rating !== 'all' && ratingSpan) {
+                    const starCount = ratingSpan.textContent.match(/★/g)?.length || 0;
+                    if (starCount !== parseInt(rating)) show = false;
+                }
+
+                if (search) {
+                    if (!farmerName.includes(search) && !diseaseName.includes(search)) {
+                        show = false;
+                    }
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('ratingFilter').value = 'all';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        // ─── VIEW FEEDBACK ───
+        function viewFeedback(id) {
+            currentFeedbackId = id;
+
+            fetch(`/api/admin/feedback/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    document.getElementById('modalFarmer').textContent = data.farmer_name || '—';
+                    document.getElementById('modalDisease').textContent = data.disease_name || '—';
+                    document.getElementById('modalConfidence').textContent = data.confidence ? data.confidence + '%' : '—';
+
+                    const rating = data.rating || 0;
+                    let ratingDisplay = '—';
+                    if (rating > 0) {
+                        ratingDisplay = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+                    }
+                    document.getElementById('modalRating').textContent = ratingDisplay;
+
+                    const status = data.status || 'pending';
+                    const statusLabels = {
+                        'pending': '⏳ Pending',
+                        'reviewed': '📋 Reviewed',
+                        'resolved': '✅ Resolved',
+                        'closed': '🔒 Closed'
+                    };
+                    document.getElementById('modalStatus').textContent = statusLabels[status] || status;
+                    document.getElementById('modalStatusSelect').value = status;
+
+                    document.getElementById('modalDate').textContent = data.created_at || '—';
+                    document.getElementById('modalComment').textContent = data.comment || 'No comment provided.';
+
+                    // Pre-fill response if exists
+                    const responseField = document.getElementById('modalResponse');
+                    responseField.value = data.response || '';
+
+                    document.getElementById('viewModal').classList.add('active');
+                })
+                .catch(err => {
+                    alert('Error loading feedback: ' + err);
+                });
+        }
+
+        // ─── UPDATE FEEDBACK ───
+        function updateFeedback() {
+            if (!currentFeedbackId) return;
+
+            const status = document.getElementById('modalStatusSelect').value;
+            const response = document.getElementById('modalResponse').value.trim();
+
+            fetch('/api/admin/feedback/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    feedback_id: currentFeedbackId,
+                    status: status,
+                    response: response
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Feedback updated successfully!');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                alert('❌ Error: ' + err);
+            });
+        }
+
+        // ─── DELETE FEEDBACK ───
+        function deleteFeedback(id) {
+            if (!confirm('⚠️ Delete this feedback? This cannot be undone.')) return;
+
+            fetch(`/api/admin/feedback/${id}/delete`, {
+                method: 'DELETE'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById(`row-${id}`);
+                    if (row) row.remove();
+                    alert('✅ Feedback deleted!');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                alert('❌ Error: ' + err);
+            });
+        }
+
+        // ─── CLOSE MODAL ───
+        function closeModal() {
+            document.getElementById('viewModal').classList.remove('active');
+            currentFeedbackId = null;
+        }
+
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ─── CLOSE MENU ON LINK CLICK ───
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

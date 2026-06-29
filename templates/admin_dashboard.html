@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — TomatoGuard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gutter: clamp(12px, 4vw, 40px);
+            --content-max: 1400px;
+            --bg-color: #0a1a0a;
+            --card-bg: rgba(10,30,10,0.85);
+            --text-color: #e8f5e9;
+            --text-muted: #a5d6a7;
+            --border-color: rgba(76,175,80,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,15,5,0.97);
+            border-bottom: 1px solid rgba(76,175,80,0.12);
+            padding: 14px var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .nav-logo span { font-size: 1.5rem; }
+        .nav-logo .logo-text { color: #e8f5e9; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-badge {
+            background: #ffca28;
+            color: #1a2e1a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: transparent;
+            border: none;
+            z-index: 1001;
+        }
+        .hamburger span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: #a5d6a7;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(300px, 84vw);
+            height: 100vh;
+            background: rgba(5,15,5,0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(76,175,80,0.08);
+            padding: 80px 28px 30px;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-menu.open { left: 0; }
+
+        .mobile-menu .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(76,175,80,0.06);
+            margin-bottom: 14px;
+        }
+        .mobile-menu .menu-header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-header .user-info h4 {
+            font-size: 1rem;
+            color: #e8f5e9;
+        }
+        .mobile-menu .menu-header .user-info p {
+            font-size: 0.75rem;
+            color: #a5d6a7;
+        }
+
+        .mobile-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #c8e6c9;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .mobile-menu .menu-item:hover,
+        .mobile-menu .menu-item.active {
+            background: rgba(76,175,80,0.08);
+            color: #4caf50;
+        }
+        .mobile-menu .menu-item .icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu .menu-item .badge {
+            margin-left: auto;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: #81c784;
+        }
+        .mobile-menu .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.04);
+            margin: 6px 0;
+        }
+        .mobile-menu .menu-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.12);
+            text-align: center;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .menu-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ─── ADMIN DASHBOARD ─── */
+
+        .dashboard-container {
+            max-width: var(--content-max);
+            margin: 0 auto;
+            padding: 30px var(--gutter) 40px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .dashboard-header h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dashboard-header .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(76,175,80,0.2);
+        }
+
+        .stat-card .number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4caf50;
+        }
+
+        .stat-card .number.gold { color: #ffca28; }
+        .stat-card .number.blue { color: #64b5f6; }
+        .stat-card .number.green { color: #81c784; }
+        .stat-card .number.red { color: #ef5350; }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-4px);
+            border-color: rgba(76,175,80,0.2);
+            background: rgba(76,175,80,0.04);
+        }
+
+        .quick-action .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .quick-action .title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .quick-action .desc {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .recent-feedback {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .recent-feedback h3 {
+            color: #4caf50;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+
+        .feedback-item .info {
+            flex: 1;
+        }
+
+        .feedback-item .info .farmer {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .feedback-item .info .detail {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .feedback-item .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255,193,7,0.08);
+            color: #ffca28;
+            border: 1px solid rgba(255,193,7,0.12);
+        }
+
+        .status-reviewed {
+            background: rgba(33,150,243,0.08);
+            color: #64b5f6;
+            border: 1px solid rgba(33,150,243,0.12);
+        }
+
+        .status-resolved {
+            background: rgba(76,175,80,0.08);
+            color: #81c784;
+            border: 1px solid rgba(76,175,80,0.12);
+        }
+
+        .status-closed {
+            background: rgba(255,255,255,0.04);
+            color: #888;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .btn-view-all {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            background: rgba(76,175,80,0.08);
+            border: 1px solid rgba(76,175,80,0.12);
+            border-radius: 8px;
+            color: #a5d6a7;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .btn-view-all:hover {
+            background: rgba(76,175,80,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            .stat-card .number {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <nav>
+        <div class="nav-left">
+            <a href="/admin" class="nav-logo">
+                <span>🍅</span>
+                <span class="logo-text">TomatoGuard</span>
+            </a>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="nav-right">
+            <span class="admin-badge">Admin</span>
+            <span class="nav-farmer">👨‍💻 <strong>{{ admin_name }}</strong></span>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="menu-header">
+            <div class="avatar">{{ admin_name[0]|upper if admin_name else 'A' }}</div>
+            <div class="user-info">
+                <h4>{{ admin_name }}</h4>
+                <p>👨‍💻 Administrator</p>
+            </div>
+        </div>
+
+        <a href="/admin" class="menu-item active">
+            <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="/admin/feedback" class="menu-item">
+            <span class="icon">💬</span> Feedback
+            <span class="badge">{{ pending_count }}</span>
+        </a>
+        <a href="/admin/users" class="menu-item">
+            <span class="icon">👤</span> Users
+        </a>
+        <a href="/admin/subscriptions" class="menu-item">
+            <span class="icon">💰</span> Subscriptions
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/dashboard" class="menu-item">
+            <span class="icon">🏠</span> Main Dashboard
+        </a>
+
+        <div class="menu-divider"></div>
+
+        <a href="/admin/logout" class="menu-item" style="color:#ef9a9a;">
+            <span class="icon">🚪</span> Logout
+        </a>
+
+        <div class="menu-footer">
+            🍅 TomatoGuard v2.0 · Admin Panel
+        </div>
+    </div>
+
+    <!-- ─── DASHBOARD CONTENT ─── -->
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>📊 Admin Dashboard</h1>
+                <p class="subtitle">Welcome back, {{ admin_name }}! Here's what's happening.</p>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-muted);">
+                {{ now }}
+            </div>
+        </div>
+
+        <!-- ─── STATS ─── -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">{{ total_farmers }}</div>
+                <div class="label">👨‍🌾 Total Farmers</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ total_predictions }}</div>
+                <div class="label">🔍 Total Scans</div>
+            </div>
+            <div class="stat-card">
+                <div class="number gold">{{ pending_count }}</div>
+                <div class="label">⏳ Pending Feedback</div>
+            </div>
+            <div class="stat-card">
+                <div class="number green">{{ resolved_count }}</div>
+                <div class="label">✅ Resolved Feedback</div>
+            </div>
+            <div class="stat-card">
+                <div class="number blue">{{ total_feedback }}</div>
+                <div class="label">💬 Total Feedback</div>
+            </div>
+            <div class="stat-card">
+                <div class="number gold">{{ avg_rating }}</div>
+                <div class="label">⭐ Avg Rating</div>
+            </div>
+        </div>
+
+        <!-- ─── QUICK ACTIONS ─── -->
+        <div class="quick-actions">
+            <a href="/admin/feedback" class="quick-action">
+                <div class="icon">💬</div>
+                <div class="title">View All Feedback</div>
+                <div class="desc">Manage farmer feedback</div>
+            </a>
+            <a href="/admin/users" class="quick-action">
+                <div class="icon">👤</div>
+                <div class="title">Manage Users</div>
+                <div class="desc">View all farmers</div>
+            </a>
+            <a href="/admin/subscriptions" class="quick-action">
+                <div class="icon">💰</div>
+                <div class="title">Subscriptions</div>
+                <div class="desc">View payment history</div>
+            </a>
+            <a href="/dashboard" class="quick-action">
+                <div class="icon">🏠</div>
+                <div class="title">Main App</div>
+                <div class="desc">Go to farmer dashboard</div>
+            </a>
+        </div>
+
+        <!-- ─── RECENT FEEDBACK ─── -->
+        <div class="recent-feedback">
+            <h3>📋 Recent Feedback</h3>
+
+            {% for fb in recent_feedback %}
+            <div class="feedback-item">
+                <div class="info">
+                    <div class="farmer">{{ fb.farmer_name }}</div>
+                    <div class="detail">
+                        {{ fb.disease_name }} · {{ fb.confidence }}% confidence
+                        {% if fb.rating %}
+                            · ⭐ {{ fb.rating }}/5
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <span class="status-badge status-{{ fb.status }}">
+                        {% if fb.status == 'pending' %}⏳ Pending
+                        {% elif fb.status == 'reviewed' %}📋 Reviewed
+                        {% elif fb.status == 'resolved' %}✅ Resolved
+                        {% else %}🔒 Closed{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align:center;padding:20px;color:var(--text-muted);opacity:0.5;">
+                No feedback yet.
+            </div>
+            {% endfor %}
+
+            {% if recent_feedback %}
+            <a href="/admin/feedback" class="btn-view-all">View All Feedback →</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+
+        document.querySelectorAll('.mobile-menu .menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') !== '#') {
+                    setTimeout(closeMenu, 300);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
