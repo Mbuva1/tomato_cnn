@@ -2262,7 +2262,7 @@ def admin_users():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT id, full_name, username, email, phone, location, 
+        SELECT id, full_name, username, email, phone, 
                is_admin, role, created_at 
         FROM farmers 
         ORDER BY created_at DESC
