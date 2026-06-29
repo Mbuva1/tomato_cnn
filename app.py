@@ -27,7 +27,18 @@ import io
 from module1_image_loader import load_image, resize_image, TOMATO_CLASSES
 from module4_forward_pass import TomatoCNN
 from module8_rejection import TomatoRejector
-from database import save_prediction, get_recent_predictions, get_connection, setup_all_tables
+from database import (
+    save_prediction,
+    get_recent_predictions,
+    get_connection,
+    setup_all_tables,
+    save_support_ticket,
+    get_support_tickets,
+    get_support_ticket,
+    update_support_ticket,
+    delete_support_ticket,
+    get_support_ticket_stats
+)
 
 # ── Import Payment Module ──
 from payment_routes import register_payment_routes, setup_payment_tables
@@ -42,6 +53,14 @@ from email_notifier import (
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tomato_cnn_secret_key_2024')
+
+# ── Session Security ──
+app.config.update(
+    SESSION_COOKIE_SECURE=os.getenv('SESSION_COOKIE_SECURE', 'false').lower() == 'true',
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),
+)
 
 # ── Register Payment Routes ──
 register_payment_routes(app)
@@ -149,11 +168,17 @@ def has_subscription_or_trial(farmer_id):
 # ─────────────────────────────────────────────
 
 print("[App] Loading model...")
-model    = TomatoCNN(num_classes=11)
-model.load_weights("saved_weights/best_model.npz")
-model.set_training(False)
-rejector = TomatoRejector(confidence_threshold=0.75)
-print("[App] Model ready!")
+try:
+    model = TomatoCNN(num_classes=11)
+    model.load_weights("saved_weights/best_model.npz")
+    model.set_training(False)
+    rejector = TomatoRejector(confidence_threshold=0.75)
+    print("[App] Model ready!")
+except Exception as e:
+    print(f"[App] ❌ Failed to load model: {e}")
+    print("[App] Please train the model first using: python module6_training.py full")
+    model = None
+    rejector = TomatoRejector(confidence_threshold=0.75)
 
 
 # ─────────────────────────────────────────────
@@ -451,6 +476,7 @@ def login():
         if farmer:
             session['farmer_id']   = farmer['id']
             session['farmer_name'] = farmer['full_name']
+            session['is_admin']    = farmer.get('is_admin', 0) == 1
             return redirect(url_for('index'))
         else:
             error = "Invalid username or password."
@@ -462,6 +488,8 @@ def register():
     if request.method == 'POST':
         full_name = request.form.get('full_name')
         username  = request.form.get('username')
+        email     = request.form.get('email', '').strip()
+        phone     = request.form.get('phone', '').strip()
         password  = request.form.get('password')
         confirm   = request.form.get('confirm_password')
         if password != confirm:
@@ -471,13 +499,14 @@ def register():
             try:
                 conn = get_connection(); cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO farmers (full_name, username, password) VALUES (%s,%s,%s)",
-                    (full_name, username, hashed)
+                    """INSERT INTO farmers (full_name, username, password, email, phone, role) 
+                       VALUES (%s, %s, %s, %s, %s, 'farmer')""",
+                    (full_name, username, hashed, email, phone)
                 )
                 conn.commit(); cursor.close(); conn.close()
                 success = "Account created! You can now log in."
-            except Exception:
-                error = "Username already exists."
+            except Exception as e:
+                error = f"Username already exists. {e}"
     return render_template('login.html', error=error, success=success, show_register=True)
 
 @app.route('/logout')
@@ -504,6 +533,17 @@ def check_username():
 def index():
     if 'farmer_id' not in session:
         return redirect(url_for('login'))
+    
+    # ── Check if user is admin ──
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT is_admin FROM farmers WHERE id = %s", (session['farmer_id'],))
+    farmer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    is_admin = farmer.get('is_admin', 0) == 1 if farmer else False
+    
     has_access, access_type, access_details = has_subscription_or_trial(session['farmer_id'])
     recent     = get_recent_predictions(farmer_id=session['farmer_id'], limit=10)
     scan_count = get_scan_count(session['farmer_id'])
@@ -520,6 +560,8 @@ def index():
     return render_template('index.html',
         recent          = recent,
         farmer_name     = session.get('farmer_name'),
+        is_admin        = is_admin,
+        pending_count   = 0,
         has_subscription= has_access,
         access_type     = access_type,
         subscription    = access_details if access_type == 'subscription' else None,
@@ -1701,7 +1743,7 @@ def save_notification_settings():
 
 
 # ─────────────────────────────────────────────
-# SUPPORT ROUTES
+# SUPPORT ROUTES - UPDATED
 # ─────────────────────────────────────────────
 
 @app.route('/support')
@@ -1710,20 +1752,188 @@ def support():
         return redirect(url_for('login'))
     return render_template('support.html', farmer_name=session.get('farmer_name'))
 
+
 @app.route('/api/support', methods=['POST'])
 def submit_support():
     if 'farmer_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
-    data    = request.get_json()
-    subject = data.get('subject')
-    message = data.get('message')
-    lang    = data.get('lang', 'en')
+    
+    data = request.get_json()
+    subject = data.get('subject', '').strip()
+    message = data.get('message', '').strip()
+    lang = data.get('lang', 'en')
+    
     if not subject or not message:
         return jsonify({'error': 'Subject and message are required'}), 400
-    conn = get_connection(); cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT full_name, email FROM farmers WHERE id=%s", (session['farmer_id'],))
-    farmer = cursor.fetchone(); cursor.close(); conn.close()
-    print(f"[Support] Ticket from {farmer['full_name']}: {subject}")
+    
+    # ── Save to database ──
+    ticket_id = save_support_ticket(session['farmer_id'], subject, message)
+    
+    if not ticket_id:
+        return jsonify({'error': 'Failed to save ticket. Please try again.'}), 500
+    
+    # ── Get farmer details ──
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT full_name, email, phone FROM farmers WHERE id=%s", (session['farmer_id'],))
+    farmer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    # ── Send email notification to admin ──
+    try:
+        admin_email = os.getenv('ADMIN_EMAIL', 'admin@tomatoguard.com')
+        
+        email_subject = f"🆕 New Support Ticket: {subject}"
+        email_body = f"""
+        <html>
+        <body style="font-family:Arial,sans-serif;background:#f5faf5;padding:20px;">
+            <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;padding:30px;">
+                <div style="background:#2e7d32;color:white;padding:15px 20px;border-radius:8px 8px 0 0;">
+                    <h2 style="margin:0;color:white;">🆕 New Support Ticket</h2>
+                </div>
+                <div style="padding:20px;">
+                    <p><strong>Ticket ID:</strong> #{ticket_id}</p>
+                    <p><strong>Farmer:</strong> {farmer['full_name']}</p>
+                    <p><strong>Email:</strong> {farmer.get('email', 'Not set')}</p>
+                    <p><strong>Phone:</strong> {farmer.get('phone', 'Not set')}</p>
+                    <p><strong>Subject:</strong> {subject}</p>
+                    <div style="background:#f1f8f1;padding:15px;border-radius:8px;border-left:4px solid #4caf50;margin:10px 0;">
+                        <p style="white-space:pre-line;">{message}</p>
+                    </div>
+                    <div style="text-align:center;margin-top:20px;">
+                        <a href="{os.getenv('APP_DOMAIN', 'https://your-domain.com')}/admin/support" 
+                           style="display:inline-block;background:#2e7d32;color:white;padding:10px 24px;text-decoration:none;border-radius:8px;">
+                            View in Admin Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        from email_notifier import send_email
+        send_email(admin_email, email_subject, email_body)
+        
+    except Exception as e:
+        print(f"[Support] Email notification error: {e}")
+    
+    response_msg = {
+        'en': '✅ Your message has been sent. We\'ll get back to you within 24 hours.',
+        'sw': '✅ Ujumbe wako umetumwa. Tutakujibu ndani ya saa 24.'
+    }
+    
+    return jsonify({
+        'success': True,
+        'ticket_id': ticket_id,
+        'message': response_msg.get(lang, response_msg['en'])
+    })
+
+
+# ─────────────────────────────────────────────
+# ADMIN SUPPORT ROUTES
+# ─────────────────────────────────────────────
+
+@app.route('/admin/support')
+@admin_required
+def admin_support():
+    """Admin view for support tickets."""
+    status_filter = request.args.get('status', 'all')
+    
+    if status_filter == 'all':
+        tickets = get_support_tickets(limit=100)
+    else:
+        tickets = get_support_tickets(status=status_filter, limit=100)
+    
+    stats = get_support_ticket_stats()
+    
+    return render_template('admin_support.html',
+        tickets=tickets,
+        pending_count=stats.get('pending', 0),
+        reviewed_count=stats.get('reviewed', 0),
+        resolved_count=stats.get('resolved', 0),
+        closed_count=stats.get('closed', 0),
+        current_status=status_filter,
+        admin_name=session.get('admin_name', 'Admin')
+    )
+
+
+@app.route('/api/admin/support/<int:ticket_id>', methods=['GET'])
+@admin_required
+def get_support_ticket_api(ticket_id):
+    """Get a specific support ticket."""
+    ticket = get_support_ticket(ticket_id)
+    
+    if not ticket:
+        return jsonify({'error': 'Ticket not found'}), 404
+    
+    ticket['created_at'] = str(ticket['created_at'])
+    ticket['updated_at'] = str(ticket['updated_at'])
+    
+    return jsonify(ticket)
+
+
+@app.route('/api/admin/support/update', methods=['POST'])
+@admin_required
+def update_support_ticket_api():
+    """Update a support ticket's status and response."""
+    data = request.get_json()
+    ticket_id = data.get('ticket_id')
+    status = data.get('status')
+    admin_response = data.get('admin_response', '').strip()
+    
+    if not ticket_id or not status:
+        return jsonify({'error': 'Ticket ID and status required'}), 400
+    
+    success = update_support_ticket(ticket_id, status, admin_response)
+    
+    if not success:
+        return jsonify({'error': 'Failed to update ticket'}), 500
+    
+    # ── Notify farmer if response was added ──
+    if admin_response:
+        ticket = get_support_ticket(ticket_id)
+        if ticket and ticket.get('farmer_email'):
+            try:
+                from email_notifier import send_email
+                email_subject = f"📬 Response to Your Support Ticket #{ticket_id}"
+                email_body = f"""
+                <html>
+                <body style="font-family:Arial,sans-serif;background:#f5faf5;padding:20px;">
+                    <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;padding:30px;">
+                        <div style="background:#2e7d32;color:white;padding:15px 20px;border-radius:8px 8px 0 0;">
+                            <h2 style="margin:0;color:white;">📬 Admin Response</h2>
+                        </div>
+                        <div style="padding:20px;">
+                            <p>Hello <strong>{ticket['farmer_name']}</strong>,</p>
+                            <p>Your support ticket <strong>#{ticket_id}</strong> has been updated:</p>
+                            <div style="background:#f1f8f1;padding:15px;border-radius:8px;border-left:4px solid #4caf50;">
+                                <p><strong>Status:</strong> {status}</p>
+                                <p><strong>Response:</strong></p>
+                                <p style="white-space:pre-line;">{admin_response}</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                send_email(ticket['farmer_email'], email_subject, email_body)
+            except Exception as e:
+                print(f"[Support] Response email error: {e}")
+    
+    return jsonify({'success': True})
+
+
+@app.route('/api/admin/support/<int:ticket_id>/delete', methods=['DELETE'])
+@admin_required
+def delete_support_ticket_api(ticket_id):
+    """Delete a support ticket."""
+    success = delete_support_ticket(ticket_id)
+    
+    if not success:
+        return jsonify({'error': 'Ticket not found'}), 404
+    
     return jsonify({'success': True})
 
 
@@ -1735,6 +1945,12 @@ def submit_support():
 def predict():
     if 'farmer_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
+
+    if model is None:
+        return jsonify({
+            'error': 'Model not loaded',
+            'message': 'The AI model is not available. Please contact support.'
+        }), 500
 
     farmer_id = session['farmer_id']
     lang      = request.form.get('lang', 'en')
@@ -1965,9 +2181,15 @@ def download_report_csv():
 # ADMIN AUTH ROUTES
 # ─────────────────────────────────────────────
 
-# Admin credentials (you can move these to database later)
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+# Admin credentials - MUST be set in environment variables
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+if not ADMIN_USERNAME or not ADMIN_PASSWORD:
+    print("[WARNING] ADMIN_USERNAME or ADMIN_PASSWORD not set in environment variables!")
+    print("[WARNING] Using fallback credentials - CHANGE THESE IN PRODUCTION!")
+    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -2258,14 +2480,14 @@ def delete_feedback(feedback_id):
 @app.route('/admin/users')
 @admin_required
 def admin_users():
-    """View all farmers."""
+    """View all farmers - sorted by newest first."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT id, full_name, username, email, phone, 
                is_admin, role, created_at 
         FROM farmers 
-        ORDER BY created_at DESC
+        ORDER BY id DESC
     """)
     users = cursor.fetchall()
     cursor.close()

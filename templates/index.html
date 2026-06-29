@@ -1055,11 +1055,13 @@
             <span class="icon">📧</span> Support
         </a>
 
-        <!-- ADMIN LINK - Only visible to admin users -->
-        {% if session.get('is_admin') %}
-        <a href="/admin/feedback" class="menu-item">
-            <span class="icon">💬</span> Admin Panel
-            <span class="badge">{{ pending_count or 0 }}</span>
+        <!-- ========================================================== -->
+        <!-- ADMIN LINK - Only visible to admin users (is_admin from backend) -->
+        <!-- ========================================================== -->
+        {% if is_admin %}
+        <a href="/admin" class="menu-item">
+            <span class="icon">🛠️</span> Admin Panel
+            <span class="badge">Dashboard</span>
         </a>
         {% endif %}
 

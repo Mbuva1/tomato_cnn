@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Support Tickets</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1a0a; color: #e8f5e9; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        h1 { color: #4caf50; }
+        .admin-badge { background: #ffca28; color: #1a2e1a; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+        
+        .stats { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-box { background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.06); border-radius: 10px; padding: 12px 20px; }
+        .stat-box .number { font-size: 1.5rem; font-weight: 700; color: #4caf50; }
+        .stat-box .number.pending { color: #ffca28; }
+        .stat-box .number.resolved { color: #66bb6a; }
+        .stat-box .number.closed { color: #888; }
+        .stat-box .label { font-size: 0.7rem; color: #a5d6a7; text-transform: uppercase; }
+        
+        .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(76,175,80,0.15); background: transparent; color: #a5d6a7; cursor: pointer; font-size: 0.8rem; text-decoration: none; }
+        .filter-btn.active { background: rgba(76,175,80,0.15); border-color: #4caf50; color: #4caf50; }
+        .filter-btn:hover { background: rgba(76,175,80,0.08); }
+        
+        table { width: 100%; border-collapse: collapse; background: rgba(10,30,10,0.85); border-radius: 12px; overflow: hidden; }
+        th { background: #2e7d32; color: white; padding: 12px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; }
+        tr:hover td { background: rgba(76,175,80,0.03); }
+        
+        .status-badge { padding: 3px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .status-pending { background: rgba(255,193,7,0.15); color: #ffca28; }
+        .status-reviewed { background: rgba(33,150,243,0.15); color: #64b5f6; }
+        .status-resolved { background: rgba(76,175,80,0.15); color: #81c784; }
+        .status-closed { background: rgba(255,255,255,0.05); color: #888; }
+        
+        .btn-view { padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(76,175,80,0.15); background: transparent; color: #81c784; cursor: pointer; font-size: 0.7rem; }
+        .btn-view:hover { background: rgba(76,175,80,0.08); }
+        
+        .no-data { text-align: center; padding: 40px; color: #888; }
+        
+        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.12); border-radius: 8px; color: #a5d6a7; text-decoration: none; }
+        .back-btn:hover { background: rgba(76,175,80,0.15); }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: rgba(10,30,10,0.98); border: 1px solid rgba(76,175,80,0.1); border-radius: 16px; padding: 24px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; }
+        .modal-close { float: right; background: rgba(211,47,47,0.08); border: 1px solid rgba(211,47,47,0.1); color: #ef9a9a; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 0.8rem; }
+        .modal h3 { color: #4caf50; margin-bottom: 12px; }
+        .modal .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.85rem; }
+        .modal .info-row .label { color: #a5d6a7; }
+        .modal .info-row .value { color: #e8f5e9; text-align: right; }
+        .modal .message-box { background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; margin: 10px 0; white-space: pre-line; color: #c8e6c9; font-size: 0.9rem; }
+        .modal .response-area { width: 100%; min-height: 100px; background: rgba(0,0,0,0.12); border: 1px solid rgba(76,175,80,0.06); border-radius: 8px; color: #e8f5e9; padding: 12px; font-family: inherit; font-size: 0.9rem; resize: vertical; }
+        .modal .response-area:focus { outline: none; border-color: #4caf50; }
+        .modal .status-select { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(76,175,80,0.06); background: rgba(0,0,0,0.1); color: #e8f5e9; font-size: 0.9rem; width: 100%; margin: 8px 0; }
+        .modal .btn-update { width: 100%; padding: 12px; background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .modal .btn-update:hover { background: linear-gradient(135deg, #388e3c, #66bb6a); }
+        
+        @media (max-width: 768px) {
+            .stats { flex-direction: column; gap: 8px; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 8px 6px; }
+            .filters { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Support Tickets</h1>
+            <span class="admin-badge">Admin: {{ admin_name }}</span>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number">{{ tickets|length }}</div>
+                <div class="label">Total Tickets</div>
+            </div>
+            <div class="stat-box">
+                <div class="number pending">{{ pending_count }}</div>
+                <div class="label">Pending</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">{{ reviewed_count }}</div>
+                <div class="label">Reviewed</div>
+            </div>
+            <div class="stat-box">
+                <div class="number resolved">{{ resolved_count }}</div>
+                <div class="label">Resolved</div>
+            </div>
+            <div class="stat-box">
+                <div class="number closed">{{ closed_count }}</div>
+                <div class="label">Closed</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <a href="?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">All</a>
+            <a href="?status=pending" class="filter-btn {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="?status=reviewed" class="filter-btn {% if current_status == 'reviewed' %}active{% endif %}">Reviewed</a>
+            <a href="?status=resolved" class="filter-btn {% if current_status == 'resolved' %}active{% endif %}">Resolved</a>
+            <a href="?status=closed" class="filter-btn {% if current_status == 'closed' %}active{% endif %}">Closed</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:60px;">ID</th>
+                    <th>Farmer</th>
+                    <th>Subject</th>
+                    <th style="width:100px;">Status</th>
+                    <th style="width:140px;">Submitted</th>
+                    <th style="width:80px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td style="text-align:center; font-weight:600; color:#4caf50;">#{{ ticket.id }}</td>
+                    <td>
+                        <strong>{{ ticket.farmer_name }}</strong>
+                        <div style="font-size:0.7rem; color:#666;">{{ ticket.farmer_email or 'No email' }}</div>
+                    </td>
+                    <td>{{ ticket.subject[:50] }}{% if ticket.subject|length > 50 %}...{% endif %}</td>
+                    <td>
+                        <span class="status-badge status-{{ ticket.status }}">
+                            {{ ticket.status|title }}
+                        </span>
+                    </td>
+                    <td style="font-size:0.8rem; color:#888;">{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        <button class="btn-view" onclick="openTicket({{ ticket.id }})">👁 View</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="no-data">No support tickets found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="/admin" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">✕ Close</button>
+            <h3 id="modalTitle">🎫 Support Ticket #<span id="ticketId"></span></h3>
+            
+            <div id="ticketDetails">
+                <div class="info-row"><span class="label">Farmer</span><span class="value" id="modalFarmer"></span></div>
+                <div class="info-row"><span class="label">Email</span><span class="value" id="modalEmail"></span></div>
+                <div class="info-row"><span class="label">Phone</span><span class="value" id="modalPhone"></span></div>
+                <div class="info-row"><span class="label">Submitted</span><span class="value" id="modalDate"></span></div>
+                <div class="info-row"><span class="label">Status</span><span class="value" id="modalStatus"></span></div>
+            </div>
+            
+            <div style="margin:12px 0;">
+                <strong style="color:#81c784;">Subject:</strong>
+                <p id="modalSubject" style="margin-top:4px; color:#e8f5e9;"></p>
+            </div>
+            
+            <div style="margin:12px 0;">
+                <strong style="color:#81c784;">Message:</strong>
+                <div class="message-box" id="modalMessage"></div>
+            </div>
+            
+            <div style="margin:12px 0; border-top: 1px solid rgba(255,255,255,0.05); padding-top:12px;">
+                <strong style="color:#81c784;">Admin Response</strong>
+                <textarea class="response-area" id="modalResponse" placeholder="Type your response here..."></textarea>
+                
+                <select class="status-select" id="modalStatusSelect">
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                </select>
+                
+                <button class="btn-update" onclick="updateTicket()">📨 Update & Send Response</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTicketId = null;
+
+        function openTicket(id) {
+            currentTicketId = id;
+            document.getElementById('ticketModal').classList.add('active');
+            
+            fetch(`/api/admin/support/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('ticketId').textContent = data.id;
+                    document.getElementById('modalFarmer').textContent = data.farmer_name;
+                    document.getElementById('modalEmail').textContent = data.farmer_email || 'Not set';
+                    document.getElementById('modalPhone').textContent = data.farmer_phone || 'Not set';
+                    document.getElementById('modalDate').textContent = data.created_at;
+                    document.getElementById('modalSubject').textContent = data.subject;
+                    document.getElementById('modalMessage').textContent = data.message;
+                    document.getElementById('modalResponse').value = data.admin_response || '';
+                    document.getElementById('modalStatusSelect').value = data.status;
+                    
+                    const statusColors = {
+                        'pending': '#ffca28',
+                        'reviewed': '#64b5f6',
+                        'resolved': '#81c784',
+                        'closed': '#888'
+                    };
+                    document.getElementById('modalStatus').innerHTML = 
+                        `<span style="color:${statusColors[data.status] || '#888'}; font-weight:600;">${data.status.toUpperCase()}</span>`;
+                })
+                .catch(() => alert('Error loading ticket details.'));
+        }
+
+        function closeModal() {
+            document.getElementById('ticketModal').classList.remove('active');
+            currentTicketId = null;
+        }
+
+        function updateTicket() {
+            if (!currentTicketId) return;
+            
+            const status = document.getElementById('modalStatusSelect').value;
+            const response = document.getElementById('modalResponse').value.trim();
+            
+            if (!response && status === 'resolved') {
+                if (!confirm('You are marking this as resolved without a response. Continue?')) return;
+            }
+            
+            fetch('/api/admin/support/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ticket_id: currentTicketId,
+                    status: status,
+                    admin_response: response
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Ticket updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to update ticket.'));
+                }
+            })
+            .catch(() => alert('Error updating ticket.'));
+        }
+
+        document.getElementById('ticketModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
