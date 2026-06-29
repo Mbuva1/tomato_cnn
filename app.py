@@ -74,6 +74,21 @@ IMAGE_SIZE = (64, 64)
 
 
 # ─────────────────────────────────────────────
+# ADMIN REQUIRED DECORATOR  ← MUST BE DEFINED BEFORE ANY ROUTE THAT USES IT
+# ─────────────────────────────────────────────
+
+def admin_required(f):
+    """Decorator to require admin login."""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('is_admin'):
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# ─────────────────────────────────────────────
 # FREE TRIAL CONFIGURATION
 # ─────────────────────────────────────────────
 
@@ -534,7 +549,6 @@ def index():
     if 'farmer_id' not in session:
         return redirect(url_for('login'))
     
-    # ── Check if user is admin ──
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT is_admin FROM farmers WHERE id = %s", (session['farmer_id'],))
@@ -922,10 +936,10 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
 
     # ── Helper: severity colour ──
     def sev_color(sev_en):
-        if sev_en in ('Severe', lbl_severe):   return ACCENT_RED
-        if sev_en in ('Moderate', lbl_moderate): return colors.HexColor('#e65100')
-        if sev_en in ('Mild', lbl_mild):        return GREEN_MID
-        if sev_en in ('Healthy', lbl_healthy_row): return GREEN_MID
+        if sev_en in ('Severe', lbl_severe):        return ACCENT_RED
+        if sev_en in ('Moderate', lbl_moderate):    return colors.HexColor('#e65100')
+        if sev_en in ('Mild', lbl_mild):            return GREEN_MID
+        if sev_en in ('Healthy', lbl_healthy_row):  return GREEN_MID
         return GRAY_MID
 
     # ── Helper: rounded rectangle ──
@@ -984,7 +998,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     buf = io.BytesIO()
     cv  = canvas.Canvas(buf, pagesize=letter)
 
-    # ── PDF METADATA (Fixes "untitled" issue) ──
+    # ── PDF METADATA ──
     cv.setTitle(lbl_title)
     cv.setAuthor("TomatoGuard")
     cv.setSubject("Tomato Disease Detection Report")
@@ -1013,7 +1027,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     txt(cv, lbl_subtitle, MARGIN_L + 66, H - 55, "Helvetica", 9,
         colors.HexColor('#a5d6a7'))
 
-    # Meta info (right column in header)
+    # Meta info
     for i, (lbl, val) in enumerate([
         (lbl_farmer, farmer_name),
         (lbl_date,   now),
@@ -1038,12 +1052,8 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     ]
     for i, (lbl, sub, val, val_col, bg_col) in enumerate(card_defs):
         cx = MARGIN_L + i * (card_w + card_gap)
-        # Shadow
         rrect(cv, cx + 2, card_y - 2, card_w, card_h, 9, fill=colors.HexColor('#d8d8d8'))
-        # Body
-        rrect(cv, cx, card_y, card_w, card_h, 9, fill=bg_col,
-              stroke=GREEN_RULE, sw=0.5)
-        # Accent left bar (trapezoidal via path)
+        rrect(cv, cx, card_y, card_w, card_h, 9, fill=bg_col, stroke=GREEN_RULE, sw=0.5)
         cv.setFillColor(val_col)
         p2 = cv.beginPath()
         r2 = 9
@@ -1053,18 +1063,12 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
         p2.lineTo(cx, card_y + card_h - r2)
         p2.arcTo(cx, card_y + card_h - 2*r2, cx + 2*r2, card_y + card_h, 90, 90)
         p2.close(); cv.drawPath(p2, fill=1, stroke=0)
-        # Big number
-        txt(cv, val, cx + card_w/2 + 3, card_y + 28,
-            "Helvetica-Bold", 30, val_col, "center")
-        # Labels
-        txt(cv, lbl, cx + card_w/2 + 3, card_y + 15,
-            "Helvetica-Bold", 7, GRAY_MID, "center")
-        txt(cv, sub, cx + card_w/2 + 3, card_y + 5,
-            "Helvetica", 7, GRAY_MID, "center")
+        txt(cv, val, cx + card_w/2 + 3, card_y + 28, "Helvetica-Bold", 30, val_col, "center")
+        txt(cv, lbl, cx + card_w/2 + 3, card_y + 15, "Helvetica-Bold", 7, GRAY_MID, "center")
+        txt(cv, sub, cx + card_w/2 + 3, card_y + 5,  "Helvetica", 7, GRAY_MID, "center")
 
     y_cursor = card_y - 16
 
-    # Summary sentence
     stxt = summary_line(total, healthy, diseased)
     txt(cv, stxt, MARGIN_L, y_cursor, "Helvetica", 8, GRAY_MID)
     y_cursor -= 20
@@ -1077,19 +1081,14 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
         max_cnt  = sorted_diseases[0][1] if sorted_diseases else 1
         bar_full = 210
         for disease_raw, count in sorted_diseases[:6]:
-            disease_disp = disease_raw  # already clean display name from sorted_diseases
+            disease_disp = disease_raw
             pct     = round(count / total * 100, 1) if total else 0
             bar_w   = max(6, int((count / max_cnt) * bar_full))
-            # Label
             disp_trunc = disease_disp[:30]
             txt(cv, disp_trunc, MARGIN_L, y_cursor, "Helvetica", 8, GRAY_DARK)
-            # Bar track
             rrect(cv, MARGIN_L + 168, y_cursor - 2, bar_full, 11, 5,
                   fill=colors.HexColor('#e0e0e0'))
-            # Bar fill
-            rrect(cv, MARGIN_L + 168, y_cursor - 2, bar_w, 11, 5,
-                  fill=GREEN_LIGHT)
-            # Percentage text
+            rrect(cv, MARGIN_L + 168, y_cursor - 2, bar_w, 11, 5, fill=GREEN_LIGHT)
             txt(cv, f"{count}  ({pct}%)", MARGIN_L + 168 + bar_full + 8,
                 y_cursor, "Helvetica-Bold", 8, GREEN_DARK)
             y_cursor -= 17
@@ -1113,7 +1112,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     section_bar(cv, y_cursor, lbl_history)
     y_cursor -= 10
 
-    # Column layout: (header, x_offset, width, text_align)
     cols = [
         (lbl_no,       0,    24,  "center"),
         (lbl_disease,  24,   150, "left"),
@@ -1125,10 +1123,8 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     row_h    = 16
     header_y = y_cursor - row_h
 
-    # Header row
     cv.setFillColor(GREEN_MID)
     cv.rect(MARGIN_L, header_y, CONTENT_W, row_h, fill=1, stroke=0)
-    # Subtle column separators in header
     cv.setStrokeColor(GREEN_DARK)
     cv.setLineWidth(0.3)
     for _, ox, cw, _ in cols[:-1]:
@@ -1147,7 +1143,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
         row_bg = ROW_ALT if i % 2 == 0 else WHITE
         cv.setFillColor(row_bg)
         cv.rect(MARGIN_L, y_cursor - row_h, CONTENT_W, row_h, fill=1, stroke=0)
-        # Bottom hairline
         cv.setStrokeColor(GREEN_RULE)
         cv.setLineWidth(0.3)
         cv.line(MARGIN_L, y_cursor - row_h, MARGIN_R, y_cursor - row_h)
@@ -1164,7 +1159,7 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
             (str(i + 1),          cols[0]),
             (disease_disp[:26],   cols[1]),
             (conf_val,            cols[2]),
-            (None,                cols[3]),   # pill drawn separately
+            (None,                cols[3]),
             (date_disp,           cols[4]),
         ]
 
@@ -1175,13 +1170,11 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
             txt(cv, val, tx, y_cursor - row_h + 4, "Helvetica", 8,
                 GRAY_DARK, "center" if align == "center" else "left")
 
-        # Severity pill
         _, (_, ox, cw, _) = row_vals[3]
         pill(cv, MARGIN_L + ox + (cw - 68)/2, y_cursor - row_h, sev_display, row_h)
 
         y_cursor -= row_h
 
-    # Table bottom border
     cv.setStrokeColor(GREEN_MID)
     cv.setLineWidth(0.8)
     cv.line(MARGIN_L, y_cursor, MARGIN_R, y_cursor)
@@ -1199,7 +1192,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     txt(cv, lbl_footer, W/2, 16, "Helvetica", 8, GRAY_MID, "center")
     txt(cv, lbl_page,   MARGIN_R, 16, "Helvetica", 8, GRAY_MID, "right")
 
-    # ── Page border accent (thin green frame) ──
     cv.setStrokeColor(GREEN_RULE)
     cv.setLineWidth(2)
     cv.rect(8, 8, W - 16, H - 16, fill=0, stroke=1)
@@ -1223,7 +1215,6 @@ def download_report():
     date_to   = request.args.get('date_to', '')
     farmer_id = session['farmer_id']
 
-    # ── Build query ──
     query  = "SELECT * FROM predictions WHERE farmer_id=%s"
     params = [farmer_id]
     today  = date_cls.today()
@@ -1279,7 +1270,6 @@ def download_report():
         disease_counts[d] = disease_counts.get(d, 0) + 1
     sorted_diseases = sorted(disease_counts.items(), key=lambda x: x[1], reverse=True)
 
-    # ── Smart recommendations ──
     recommendations = []
     if sorted_diseases:
         top = sorted_diseases[0][0]
@@ -1319,7 +1309,6 @@ def download_report():
                 "Consult a local agricultural officer for specific advice" if lang == 'en' else "Wasiliana na afisa kilimo wa eneo lako",
             ]
 
-    # ── IF PDF DOWNLOAD REQUESTED ──
     if request.args.get('download') == '1':
         try:
             pdf_bytes = build_pdf_report(
@@ -1341,9 +1330,7 @@ def download_report():
             return response
         except Exception as e:
             print(f"[PDF Error] {e}")
-            # Fall through to HTML on error
 
-    # ── HTML REPORT VIEW ──
     if lang == 'sw':
         title        = "Ripoti ya Utambuzi wa Magonjwa ya Nyanya"
         subtitle     = "TomatoGuard - Mfumo wa AI wa Kugundua Magonjwa ya Nyanya"
@@ -1743,7 +1730,7 @@ def save_notification_settings():
 
 
 # ─────────────────────────────────────────────
-# SUPPORT ROUTES - UPDATED
+# SUPPORT ROUTES
 # ─────────────────────────────────────────────
 
 @app.route('/support')
@@ -1757,40 +1744,36 @@ def support():
 def submit_support():
     if 'farmer_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
-    
-    data = request.get_json()
+
+    data    = request.get_json()
     subject = data.get('subject', '').strip()
     message = data.get('message', '').strip()
-    lang = data.get('lang', 'en')
-    
+    lang    = data.get('lang', 'en')
+
     if not subject or not message:
         return jsonify({'error': 'Subject and message are required'}), 400
-    
-    # ── Save to database ──
+
     ticket_id = save_support_ticket(session['farmer_id'], subject, message)
-    
+
     if not ticket_id:
         return jsonify({'error': 'Failed to save ticket. Please try again.'}), 500
-    
-    # ── Get farmer details ──
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT full_name, email, phone FROM farmers WHERE id=%s", (session['farmer_id'],))
     farmer = cursor.fetchone()
     cursor.close()
     conn.close()
-    
-    # ── Send email notification to admin ──
+
     try:
-        admin_email = os.getenv('ADMIN_EMAIL', 'admin@tomatoguard.com')
-        
-        email_subject = f"🆕 New Support Ticket: {subject}"
+        admin_email  = os.getenv('ADMIN_EMAIL', 'admin@tomatoguard.com')
+        email_subject = f"New Support Ticket: {subject}"
         email_body = f"""
         <html>
         <body style="font-family:Arial,sans-serif;background:#f5faf5;padding:20px;">
             <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;padding:30px;">
                 <div style="background:#2e7d32;color:white;padding:15px 20px;border-radius:8px 8px 0 0;">
-                    <h2 style="margin:0;color:white;">🆕 New Support Ticket</h2>
+                    <h2 style="margin:0;color:white;">New Support Ticket</h2>
                 </div>
                 <div style="padding:20px;">
                     <p><strong>Ticket ID:</strong> #{ticket_id}</p>
@@ -1802,7 +1785,7 @@ def submit_support():
                         <p style="white-space:pre-line;">{message}</p>
                     </div>
                     <div style="text-align:center;margin-top:20px;">
-                        <a href="{os.getenv('APP_DOMAIN', 'https://your-domain.com')}/admin/support" 
+                        <a href="{os.getenv('APP_DOMAIN', 'https://your-domain.com')}/admin/support"
                            style="display:inline-block;background:#2e7d32;color:white;padding:10px 24px;text-decoration:none;border-radius:8px;">
                             View in Admin Panel
                         </a>
@@ -1812,23 +1795,59 @@ def submit_support():
         </body>
         </html>
         """
-        
         from email_notifier import send_email
         send_email(admin_email, email_subject, email_body)
-        
     except Exception as e:
         print(f"[Support] Email notification error: {e}")
-    
+
     response_msg = {
-        'en': '✅ Your message has been sent. We\'ll get back to you within 24 hours.',
-        'sw': '✅ Ujumbe wako umetumwa. Tutakujibu ndani ya saa 24.'
+        'en': "Your message has been sent. We'll get back to you within 24 hours.",
+        'sw': 'Ujumbe wako umetumwa. Tutakujibu ndani ya saa 24.'
     }
-    
+
     return jsonify({
-        'success': True,
+        'success':   True,
         'ticket_id': ticket_id,
-        'message': response_msg.get(lang, response_msg['en'])
+        'message':   response_msg.get(lang, response_msg['en'])
     })
+
+
+# ─────────────────────────────────────────────
+# ADMIN AUTH ROUTES
+# ─────────────────────────────────────────────
+
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+if not ADMIN_USERNAME or not ADMIN_PASSWORD:
+    print("[WARNING] ADMIN_USERNAME or ADMIN_PASSWORD not set in environment variables!")
+    print("[WARNING] Using fallback credentials - CHANGE THESE IN PRODUCTION!")
+    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if session.get('is_admin'):
+        return redirect(url_for('admin_dashboard'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['is_admin']   = True
+            session['admin_name'] = 'Admin'
+            return redirect(url_for('admin_dashboard'))
+        else:
+            error = 'Invalid admin credentials.'
+    return render_template('admin_login.html', error=error)
+
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('is_admin', None)
+    session.pop('admin_name', None)
+    return redirect(url_for('admin_login'))
 
 
 # ─────────────────────────────────────────────
@@ -1838,72 +1857,61 @@ def submit_support():
 @app.route('/admin/support')
 @admin_required
 def admin_support():
-    """Admin view for support tickets."""
     status_filter = request.args.get('status', 'all')
-    
     if status_filter == 'all':
         tickets = get_support_tickets(limit=100)
     else:
         tickets = get_support_tickets(status=status_filter, limit=100)
-    
     stats = get_support_ticket_stats()
-    
     return render_template('admin_support.html',
-        tickets=tickets,
-        pending_count=stats.get('pending', 0),
-        reviewed_count=stats.get('reviewed', 0),
-        resolved_count=stats.get('resolved', 0),
-        closed_count=stats.get('closed', 0),
-        current_status=status_filter,
-        admin_name=session.get('admin_name', 'Admin')
+        tickets        = tickets,
+        pending_count  = stats.get('pending', 0),
+        reviewed_count = stats.get('reviewed', 0),
+        resolved_count = stats.get('resolved', 0),
+        closed_count   = stats.get('closed', 0),
+        current_status = status_filter,
+        admin_name     = session.get('admin_name', 'Admin')
     )
 
 
 @app.route('/api/admin/support/<int:ticket_id>', methods=['GET'])
 @admin_required
 def get_support_ticket_api(ticket_id):
-    """Get a specific support ticket."""
     ticket = get_support_ticket(ticket_id)
-    
     if not ticket:
         return jsonify({'error': 'Ticket not found'}), 404
-    
     ticket['created_at'] = str(ticket['created_at'])
     ticket['updated_at'] = str(ticket['updated_at'])
-    
     return jsonify(ticket)
 
 
 @app.route('/api/admin/support/update', methods=['POST'])
 @admin_required
 def update_support_ticket_api():
-    """Update a support ticket's status and response."""
-    data = request.get_json()
-    ticket_id = data.get('ticket_id')
-    status = data.get('status')
+    data           = request.get_json()
+    ticket_id      = data.get('ticket_id')
+    status         = data.get('status')
     admin_response = data.get('admin_response', '').strip()
-    
+
     if not ticket_id or not status:
         return jsonify({'error': 'Ticket ID and status required'}), 400
-    
+
     success = update_support_ticket(ticket_id, status, admin_response)
-    
     if not success:
         return jsonify({'error': 'Failed to update ticket'}), 500
-    
-    # ── Notify farmer if response was added ──
+
     if admin_response:
         ticket = get_support_ticket(ticket_id)
         if ticket and ticket.get('farmer_email'):
             try:
                 from email_notifier import send_email
-                email_subject = f"📬 Response to Your Support Ticket #{ticket_id}"
+                email_subject = f"Response to Your Support Ticket #{ticket_id}"
                 email_body = f"""
                 <html>
                 <body style="font-family:Arial,sans-serif;background:#f5faf5;padding:20px;">
                     <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;padding:30px;">
                         <div style="background:#2e7d32;color:white;padding:15px 20px;border-radius:8px 8px 0 0;">
-                            <h2 style="margin:0;color:white;">📬 Admin Response</h2>
+                            <h2 style="margin:0;color:white;">Admin Response</h2>
                         </div>
                         <div style="padding:20px;">
                             <p>Hello <strong>{ticket['farmer_name']}</strong>,</p>
@@ -1921,19 +1929,16 @@ def update_support_ticket_api():
                 send_email(ticket['farmer_email'], email_subject, email_body)
             except Exception as e:
                 print(f"[Support] Response email error: {e}")
-    
+
     return jsonify({'success': True})
 
 
 @app.route('/api/admin/support/<int:ticket_id>/delete', methods=['DELETE'])
 @admin_required
 def delete_support_ticket_api(ticket_id):
-    """Delete a support ticket."""
     success = delete_support_ticket(ticket_id)
-    
     if not success:
         return jsonify({'error': 'Ticket not found'}), 404
-    
     return jsonify({'success': True})
 
 
@@ -1948,7 +1953,7 @@ def predict():
 
     if model is None:
         return jsonify({
-            'error': 'Model not loaded',
+            'error':   'Model not loaded',
             'message': 'The AI model is not available. Please contact support.'
         }), 500
 
@@ -2003,12 +2008,12 @@ def predict():
         return jsonify({'error': 'No file selected'}), 400
     if not allowed_file(file.filename):
         return jsonify({
-            'success':   False,
-            'error':     'invalid_file',
-            'disease':   'Invalid File Type' if lang == 'en' else 'Aina ya Faili si Sahihi',
+            'success':    False,
+            'error':      'invalid_file',
+            'disease':    'Invalid File Type' if lang == 'en' else 'Aina ya Faili si Sahihi',
             'confidence': 0,
-            'treatment': 'Please upload a JPG or PNG image.' if lang == 'en'
-                         else 'Tafadhali pakia picha ya JPG au PNG.'
+            'treatment':  'Please upload a JPG or PNG image.' if lang == 'en'
+                          else 'Tafadhali pakia picha ya JPG au PNG.'
         }), 400
 
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -2033,10 +2038,10 @@ def predict():
                 'confidence': 0, 'treatment': msg
             })
 
-        probs          = model.forward(img)
-        class_id       = int(np.argmax(probs, axis=1)[0])
-        confidence     = float(np.max(probs, axis=1)[0])
-        predicted_class= TOMATO_CLASSES[class_id]
+        probs           = model.forward(img)
+        class_id        = int(np.argmax(probs, axis=1)[0])
+        confidence      = float(np.max(probs, axis=1)[0])
+        predicted_class = TOMATO_CLASSES[class_id]
 
         if predicted_class == "non_tomato":
             msg = 'Mfano ulibainisha picha hii si jani la nyanya.' if lang == 'sw' \
@@ -2063,11 +2068,11 @@ def predict():
         severity      = get_severity(confidence, predicted_class, lang)
 
         prediction_id = save_prediction(
-            farmer_id       = farmer_id,
-            image_name      = file.filename,
+            farmer_id        = farmer_id,
+            image_name       = file.filename,
             predicted_disease= predicted_class,
-            confidence      = confidence,
-            treatment       = TREATMENTS_EN.get(predicted_class, "")
+            confidence       = confidence,
+            treatment        = TREATMENTS_EN.get(predicted_class, "")
         )
 
         scans_remaining = None
@@ -2088,13 +2093,13 @@ def predict():
             )
 
         return jsonify({
-            'success':       True,
-            'disease':       display_name,
-            'confidence':    round(confidence * 100, 2),
-            'treatment':     treatment.strip(),
-            'severity':      severity,
-            'prediction_id': prediction_id,
-            'access_type':   access_type,
+            'success':         True,
+            'disease':         display_name,
+            'confidence':      round(confidence * 100, 2),
+            'treatment':       treatment.strip(),
+            'severity':        severity,
+            'prediction_id':   prediction_id,
+            'access_type':     access_type,
             'trial_remaining': scans_remaining if access_type == 'trial' else None
         })
 
@@ -2178,96 +2183,37 @@ def download_report_csv():
 
 
 # ─────────────────────────────────────────────
-# ADMIN AUTH ROUTES
-# ─────────────────────────────────────────────
-
-# Admin credentials - MUST be set in environment variables
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
-
-if not ADMIN_USERNAME or not ADMIN_PASSWORD:
-    print("[WARNING] ADMIN_USERNAME or ADMIN_PASSWORD not set in environment variables!")
-    print("[WARNING] Using fallback credentials - CHANGE THESE IN PRODUCTION!")
-    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-
-
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    """Admin login page."""
-    if session.get('is_admin'):
-        return redirect(url_for('admin_dashboard'))
-    
-    error = None
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session['is_admin'] = True
-            session['admin_name'] = 'Admin'
-            return redirect(url_for('admin_dashboard'))
-        else:
-            error = 'Invalid admin credentials.'
-    
-    return render_template('admin_login.html', error=error)
-
-
-@app.route('/admin/logout')
-def admin_logout():
-    """Admin logout."""
-    session.pop('is_admin', None)
-    session.pop('admin_name', None)
-    return redirect(url_for('admin_login'))
-
-
-def admin_required(f):
-    """Decorator to require admin login."""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('is_admin'):
-            return redirect(url_for('admin_login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-# ─────────────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────────────
 
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
-    """Admin dashboard with overview stats."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     cursor.execute("SELECT COUNT(*) AS count FROM farmers")
     total_farmers = cursor.fetchone()['count']
-    
+
     cursor.execute("SELECT COUNT(*) AS count FROM predictions")
     total_predictions = cursor.fetchone()['count']
-    
+
     cursor.execute("SELECT COUNT(*) AS count FROM feedback")
     total_feedback = cursor.fetchone()['count']
-    
+
     cursor.execute("SELECT COUNT(*) AS count FROM feedback WHERE status = 'pending'")
     pending_count = cursor.fetchone()['count']
-    
+
     cursor.execute("SELECT COUNT(*) AS count FROM feedback WHERE status = 'resolved'")
     resolved_count = cursor.fetchone()['count']
-    
+
     cursor.execute("SELECT AVG(rating) AS avg FROM feedback WHERE rating IS NOT NULL")
     avg_rating = cursor.fetchone()['avg'] or 0
     avg_rating = round(float(avg_rating), 1)
-    
+
     cursor.execute("""
         SELECT 
-            f.id,
-            f.status,
-            f.rating,
-            f.created_at,
+            f.id, f.status, f.rating, f.created_at,
             fam.full_name as farmer_name,
             p.predicted_disease
         FROM feedback f
@@ -2277,34 +2223,34 @@ def admin_dashboard():
         LIMIT 5
     """)
     recent = cursor.fetchall()
-    
+
     recent_feedback = []
     for fb in recent:
-        disease = fb['predicted_disease'] or 'Unknown'
+        disease      = fb['predicted_disease'] or 'Unknown'
         disease_name = disease.replace('Tomato__','').replace('Tomato_','').replace('_',' ')
         recent_feedback.append({
-            'id': fb['id'],
-            'farmer_name': fb['farmer_name'],
+            'id':           fb['id'],
+            'farmer_name':  fb['farmer_name'],
             'disease_name': disease_name[:25],
-            'confidence': round(fb.get('confidence', 0) * 100, 1) if fb.get('confidence') else 0,
-            'rating': fb['rating'],
-            'status': fb.get('status', 'pending'),
-            'created_at': str(fb['created_at']),
+            'confidence':   round(fb.get('confidence', 0) * 100, 1) if fb.get('confidence') else 0,
+            'rating':       fb['rating'],
+            'status':       fb.get('status', 'pending'),
+            'created_at':   str(fb['created_at']),
         })
-    
+
     cursor.close()
     conn.close()
-    
+
     return render_template('admin_dashboard.html',
-        admin_name=session.get('admin_name', 'Admin'),
-        total_farmers=total_farmers,
-        total_predictions=total_predictions,
-        total_feedback=total_feedback,
-        pending_count=pending_count,
-        resolved_count=resolved_count,
-        avg_rating=avg_rating,
-        recent_feedback=recent_feedback,
-        now=datetime.now().strftime('%d %B %Y, %H:%M')
+        admin_name        = session.get('admin_name', 'Admin'),
+        total_farmers     = total_farmers,
+        total_predictions = total_predictions,
+        total_feedback    = total_feedback,
+        pending_count     = pending_count,
+        resolved_count    = resolved_count,
+        avg_rating        = avg_rating,
+        recent_feedback   = recent_feedback,
+        now               = datetime.now().strftime('%d %B %Y, %H:%M')
     )
 
 
@@ -2315,91 +2261,74 @@ def admin_dashboard():
 @app.route('/admin/feedback')
 @admin_required
 def admin_feedback():
-    """Admin feedback management page."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    
     cursor.execute("""
         SELECT 
-            f.id,
-            f.farmer_id,
-            f.is_correct,
-            f.rating,
-            f.comment,
-            f.created_at,
-            f.status,
-            f.response,
+            f.id, f.farmer_id, f.is_correct, f.rating, f.comment,
+            f.created_at, f.status, f.response,
             fam.full_name as farmer_name,
-            p.predicted_disease,
-            p.confidence
+            p.predicted_disease, p.confidence
         FROM feedback f
         JOIN farmers fam ON fam.id = f.farmer_id
         LEFT JOIN predictions p ON p.id = f.prediction_id
         ORDER BY f.created_at DESC
     """)
     feedback_list = cursor.fetchall()
-    
+
     processed = []
     for fb in feedback_list:
-        disease = fb['predicted_disease'] or 'Unknown'
+        disease      = fb['predicted_disease'] or 'Unknown'
         disease_name = disease.replace('Tomato__','').replace('Tomato_','').replace('_',' ')
         processed.append({
-            'id': fb['id'],
-            'farmer_name': fb['farmer_name'],
+            'id':           fb['id'],
+            'farmer_name':  fb['farmer_name'],
             'disease_name': disease_name[:30],
-            'confidence': round(fb['confidence'] * 100, 1) if fb['confidence'] else 0,
-            'rating': fb['rating'],
-            'comment': fb['comment'],
-            'status': fb.get('status', 'pending'),
-            'response': fb.get('response', ''),
-            'created_at': str(fb['created_at']),
+            'confidence':   round(fb['confidence'] * 100, 1) if fb['confidence'] else 0,
+            'rating':       fb['rating'],
+            'comment':      fb['comment'],
+            'status':       fb.get('status', 'pending'),
+            'response':     fb.get('response', ''),
+            'created_at':   str(fb['created_at']),
         })
-    
-    total_count = len(processed)
-    pending_count = sum(1 for f in processed if f['status'] == 'pending')
+
+    total_count    = len(processed)
+    pending_count  = sum(1 for f in processed if f['status'] == 'pending')
     reviewed_count = sum(1 for f in processed if f['status'] == 'reviewed')
     resolved_count = sum(1 for f in processed if f['status'] == 'resolved')
-    
-    ratings = [f['rating'] for f in processed if f['rating']]
+
+    ratings    = [f['rating'] for f in processed if f['rating']]
     avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0
-    
+
     correct_count = sum(1 for f in feedback_list if f['is_correct'] == 1)
-    helpful_pct = round((correct_count / len(feedback_list) * 100), 1) if feedback_list else 0
-    
+    helpful_pct   = round((correct_count / len(feedback_list) * 100), 1) if feedback_list else 0
+
     cursor.close()
     conn.close()
-    
+
     return render_template('admin_feedback.html',
-        feedback_list=processed,
-        total_count=total_count,
-        pending_count=pending_count,
-        reviewed_count=reviewed_count,
-        resolved_count=resolved_count,
-        avg_rating=avg_rating,
-        helpful_pct=helpful_pct,
-        farmer_name=session.get('admin_name', 'Admin')
+        feedback_list  = processed,
+        total_count    = total_count,
+        pending_count  = pending_count,
+        reviewed_count = reviewed_count,
+        resolved_count = resolved_count,
+        avg_rating     = avg_rating,
+        helpful_pct    = helpful_pct,
+        farmer_name    = session.get('admin_name', 'Admin')
     )
 
 
 @app.route('/api/admin/feedback/<int:feedback_id>', methods=['GET'])
 @admin_required
 def get_feedback_detail(feedback_id):
-    """Get detailed feedback for admin view."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT 
-            f.id,
-            f.farmer_id,
-            f.is_correct,
-            f.rating,
-            f.comment,
-            f.created_at,
-            f.status,
-            f.response,
+            f.id, f.farmer_id, f.is_correct, f.rating, f.comment,
+            f.created_at, f.status, f.response,
             fam.full_name as farmer_name,
-            p.predicted_disease,
-            p.confidence
+            p.predicted_disease, p.confidence
         FROM feedback f
         JOIN farmers fam ON fam.id = f.farmer_id
         LEFT JOIN predictions p ON p.id = f.prediction_id
@@ -2408,61 +2337,57 @@ def get_feedback_detail(feedback_id):
     data = cursor.fetchone()
     cursor.close()
     conn.close()
-    
+
     if not data:
         return jsonify({'error': 'Feedback not found'}), 404
-    
-    disease = data['predicted_disease'] or 'Unknown'
+
+    disease      = data['predicted_disease'] or 'Unknown'
     disease_name = disease.replace('Tomato__','').replace('Tomato_','').replace('_',' ')
-    
+
     return jsonify({
-        'id': data['id'],
-        'farmer_name': data['farmer_name'],
+        'id':           data['id'],
+        'farmer_name':  data['farmer_name'],
         'disease_name': disease_name,
-        'confidence': round(data['confidence'] * 100, 1) if data['confidence'] else 0,
-        'rating': data['rating'],
-        'comment': data['comment'],
-        'status': data.get('status', 'pending'),
-        'response': data.get('response', ''),
-        'created_at': str(data['created_at']),
+        'confidence':   round(data['confidence'] * 100, 1) if data['confidence'] else 0,
+        'rating':       data['rating'],
+        'comment':      data['comment'],
+        'status':       data.get('status', 'pending'),
+        'response':     data.get('response', ''),
+        'created_at':   str(data['created_at']),
     })
 
 
 @app.route('/api/admin/feedback/update', methods=['POST'])
 @admin_required
 def update_feedback():
-    """Update feedback status and response."""
-    data = request.get_json()
+    data        = request.get_json()
     feedback_id = data.get('feedback_id')
-    status = data.get('status')
-    response = data.get('response', '')
-    
+    status      = data.get('status')
+    response    = data.get('response', '')
+
     if not feedback_id or not status:
         return jsonify({'error': 'Feedback ID and status required'}), 400
-    
+
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE feedback 
-        SET status = %s, response = %s 
-        WHERE id = %s
-    """, (status, response, feedback_id))
+    cursor.execute(
+        "UPDATE feedback SET status = %s, response = %s WHERE id = %s",
+        (status, response, feedback_id)
+    )
     conn.commit()
-    
     affected = cursor.rowcount
     cursor.close()
     conn.close()
-    
+
     if affected == 0:
         return jsonify({'error': 'Feedback not found'}), 404
-    
+
     return jsonify({'success': True})
 
 
 @app.route('/api/admin/feedback/<int:feedback_id>/delete', methods=['DELETE'])
 @admin_required
 def delete_feedback(feedback_id):
-    """Delete feedback entry."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM feedback WHERE id = %s", (feedback_id,))
@@ -2470,39 +2395,36 @@ def delete_feedback(feedback_id):
     affected = cursor.rowcount
     cursor.close()
     conn.close()
-    
+
     if affected == 0:
         return jsonify({'error': 'Feedback not found'}), 404
-    
+
     return jsonify({'success': True})
 
 
 @app.route('/admin/users')
 @admin_required
 def admin_users():
-    """View all farmers - sorted by newest first."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT id, full_name, username, email, phone, 
-               is_admin, role, created_at 
-        FROM farmers 
+        SELECT id, full_name, username, email, phone,
+               is_admin, role, created_at
+        FROM farmers
         ORDER BY id DESC
     """)
     users = cursor.fetchall()
     cursor.close()
     conn.close()
-    
     return render_template('admin_users.html',
-        users=users,
-        admin_name=session.get('admin_name', 'Admin')
+        users      = users,
+        admin_name = session.get('admin_name', 'Admin')
     )
 
 
 @app.route('/admin/subscriptions')
 @admin_required
 def admin_subscriptions():
-    """View all subscriptions."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
@@ -2514,10 +2436,9 @@ def admin_subscriptions():
     subscriptions = cursor.fetchall()
     cursor.close()
     conn.close()
-    
     return render_template('admin_subscriptions.html',
-        subscriptions=subscriptions,
-        admin_name=session.get('admin_name', 'Admin')
+        subscriptions = subscriptions,
+        admin_name    = session.get('admin_name', 'Admin')
     )
 
 
