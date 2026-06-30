@@ -9,54 +9,20 @@
         body { font-family: 'Segoe UI', sans-serif; background: #0a1a0a; color: #e8f5e9; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-            flex-wrap: wrap; 
-            gap: 12px; 
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
         h1 { color: #4caf50; }
-        .admin-badge { 
-            background: #ffca28; 
-            color: #1a2e1a; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.7rem; 
-            font-weight: 700; 
-        }
+        .admin-badge { background: #ffca28; color: #1a2e1a; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
         
-        .stats { 
-            display: flex; 
-            gap: 20px; 
-            margin-bottom: 20px; 
-            flex-wrap: wrap; 
-        }
-        .stat-box { 
-            background: rgba(10,30,10,0.85); 
-            border: 1px solid rgba(76,175,80,0.06); 
-            border-radius: 10px; 
-            padding: 12px 20px; 
-        }
-        .stat-box .number { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            color: #4caf50; 
-        }
-        .stat-box .label { 
-            font-size: 0.7rem; 
-            color: #a5d6a7; 
-            text-transform: uppercase; 
-        }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-box { background: rgba(10,30,10,0.85); border: 1px solid rgba(76,175,80,0.06); border-radius: 10px; padding: 12px 20px; }
+        .stat-box .number { font-size: 1.5rem; font-weight: 700; color: #4caf50; }
+        .stat-box .label { font-size: 0.7rem; color: #a5d6a7; text-transform: uppercase; }
         
-        /* Controls */
         .controls {
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
             flex-wrap: wrap;
-            align-items: center;
         }
         .controls input, .controls select {
             padding: 8px 14px;
@@ -72,103 +38,36 @@
             border-color: #4caf50;
             box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
         }
-        .controls input::placeholder {
-            color: #666;
-        }
-        .controls .search-wrap {
-            flex: 1;
-            min-width: 200px;
-        }
-        .controls .search-wrap input {
-            width: 100%;
-        }
+        .controls input::placeholder { color: #666; }
+        .controls .search-wrap { flex: 1; min-width: 200px; }
+        .controls .search-wrap input { width: 100%; }
         
-        /* Table */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background: rgba(10,30,10,0.85); 
-            border-radius: 12px; 
-            overflow: hidden; 
-        }
-        th { 
-            background: #2e7d32; 
-            color: white; 
-            padding: 12px; 
-            text-align: left; 
-            font-size: 0.75rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            user-select: none;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-        th:hover { 
-            background: #388e3c; 
-        }
-        th .sort-icon { 
-            margin-left: 6px; 
-            opacity: 0.4;
-            font-size: 0.7rem;
-        }
-        th.sorted-asc .sort-icon { 
-            opacity: 1; 
-        }
-        th.sorted-asc .sort-icon::after { 
-            content: '▲'; 
-        }
-        th.sorted-desc .sort-icon { 
-            opacity: 1; 
-        }
-        th.sorted-desc .sort-icon::after { 
-            content: '▼'; 
-        }
+        table { width: 100%; border-collapse: collapse; background: rgba(10,30,10,0.85); border-radius: 12px; overflow: hidden; }
+        th { background: #2e7d32; color: white; padding: 12px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; white-space: nowrap; }
+        th:hover { background: #388e3c; }
+        th .sort-icon { margin-left: 4px; opacity: 0.5; }
+        th.sorted-asc .sort-icon { opacity: 1; }
+        th.sorted-asc .sort-icon::after { content: '▲'; }
+        th.sorted-desc .sort-icon { opacity: 1; }
+        th.sorted-desc .sort-icon::after { content: '▼'; }
         
-        td { 
-            padding: 12px; 
-            border-bottom: 1px solid rgba(255,255,255,0.04); 
-            font-size: 0.9rem; 
-        }
-        tr:hover td { 
-            background: rgba(76,175,80,0.05); 
-        }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; }
+        tr:hover td { background: rgba(76,175,80,0.05); }
         
-        .admin-tag { 
-            background: #ffca28; 
-            color: #1a2e1a; 
-            padding: 2px 10px; 
-            border-radius: 12px; 
-            font-size: 0.7rem; 
-            font-weight: 700; 
-        }
-        .farmer-tag { 
-            background: rgba(76,175,80,0.15); 
-            color: #81c784; 
-            padding: 2px 10px; 
-            border-radius: 12px; 
-            font-size: 0.7rem; 
-            font-weight: 700; 
-        }
-        
-        .no-data { text-align: center; padding: 40px; color: #888; }
+        .admin-tag { background: #ffca28; color: #1a2e1a; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+        .farmer-tag { background: rgba(76,175,80,0.15); color: #81c784; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
         .text-muted { color: #888; font-size: 0.8rem; }
         
-        .back-btn { 
-            display: inline-block; 
-            margin-top: 20px; 
-            padding: 10px 20px; 
-            background: rgba(76,175,80,0.08); 
-            border: 1px solid rgba(76,175,80,0.12); 
-            border-radius: 8px; 
-            color: #a5d6a7; 
-            text-decoration: none; 
-        }
-        .back-btn:hover { 
-            background: rgba(76,175,80,0.15); 
+        .no-data { text-align: center; padding: 40px; color: #888; }
+        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.12); border-radius: 8px; color: #a5d6a7; text-decoration: none; }
+        .back-btn:hover { background: rgba(76,175,80,0.15); }
+        
+        .db-id-hint {
+            font-size: 0.6rem;
+            color: #555;
+            margin-left: 4px;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .stats { flex-direction: column; gap: 8px; }
             table { font-size: 0.8rem; }
@@ -185,7 +84,6 @@
             <span class="admin-badge">Admin: {{ admin_name }}</span>
         </div>
 
-        <!-- Stats -->
         <div class="stats">
             <div class="stat-box">
                 <div class="number">{{ users|length }}</div>
@@ -207,7 +105,7 @@
             </div>
         </div>
 
-        <!-- Controls: Search & Sort -->
+        <!-- Controls -->
         <div class="controls">
             <div class="search-wrap">
                 <input type="text" id="searchInput" placeholder="🔍 Search by name, username, email, or phone..." onkeyup="filterTable()">
@@ -217,36 +115,27 @@
                 <option value="admin">Admins Only</option>
                 <option value="farmer">Farmers Only</option>
             </select>
-            <span style="color:#888; font-size:0.8rem;">
+            <select id="sortSelect" onchange="sortTable()">
+                <option value="id-desc">Sort: Newest First</option>
+                <option value="id-asc">Sort: Oldest First</option>
+                <option value="name-asc">Sort: Name A-Z</option>
+                <option value="name-desc">Sort: Name Z-A</option>
+            </select>
+            <span style="color:#888; font-size:0.8rem; align-self:center;">
                 <span id="visibleCount">{{ users|length }}</span> shown
             </span>
         </div>
 
-        <!-- Table -->
         <table>
             <thead>
                 <tr>
-                    <th data-sort="id" onclick="sortByColumn('id')" style="width:50px; text-align:center;">
-                        ID <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="name" onclick="sortByColumn('name')">
-                        Full Name <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="username" onclick="sortByColumn('username')">
-                        Username <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="email" onclick="sortByColumn('email')">
-                        Email <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="phone" onclick="sortByColumn('phone')">
-                        Phone <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="role" onclick="sortByColumn('role')" style="width:110px;">
-                        Role <span class="sort-icon"></span>
-                    </th>
-                    <th data-sort="joined" onclick="sortByColumn('joined')" style="width:110px;">
-                        Joined <span class="sort-icon"></span>
-                    </th>
+                    <th data-sort="index" style="width:50px; text-align:center;">#</th>
+                    <th data-sort="name">Full Name</th>
+                    <th data-sort="username">Username</th>
+                    <th data-sort="email">Email</th>
+                    <th data-sort="phone">Phone</th>
+                    <th data-sort="role" style="width:110px;">Role</th>
+                    <th data-sort="joined" style="width:110px;">Joined</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -261,7 +150,10 @@
                     data-joined="{% if user.created_at %}{{ user.created_at.isoformat() }}{% endif %}"
                     {% if user.is_admin == 1 %}style="border-left: 3px solid #ffca28;"{% endif %}
                 >
-                    <td style="text-align:center; font-weight:600; color:#4caf50;">{{ user.id }}</td>
+                    <td style="text-align:center; font-weight:600; color:#4caf50;">
+                        {{ loop.index }}
+                        <span class="db-id-hint">(ID: {{ user.id }})</span>
+                    </td>
                     <td><strong>{{ user.full_name }}</strong></td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email or '<span class="text-muted">Not set</span>'|safe }}</td>
@@ -294,33 +186,24 @@
 
     <script>
         // ── Sort State ──
+        let currentSortColumn = 'id';
+        let currentSortDirection = 'desc';
         let sortState = {};
 
-        // ── Default: Sort by ID descending (newest first) ──
-        function initSort() {
-            sortState['id'] = 'desc';
-            applySort('id', 'desc');
-            // Update header indicator
-            const th = document.querySelector('th[data-sort="id"]');
-            if (th) th.classList.add('sorted-desc');
-        }
-
-        // ── Sort by Column ──
+        // ── Sorting by Column (click header) ──
         function sortByColumn(column) {
-            // Toggle direction
             if (sortState[column] === 'asc') {
                 sortState[column] = 'desc';
             } else {
                 sortState[column] = 'asc';
             }
+            currentSortColumn = column;
+            currentSortDirection = sortState[column];
             
-            // Remove indicators from all headers
             document.querySelectorAll('thead th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
             });
-            
-            // Add indicator to current column
-            const th = document.querySelector(`th[data-sort="${column}"]`);
+            const th = document.querySelector(`thead th[data-sort="${column}"]`);
             if (th) {
                 th.classList.add(sortState[column] === 'asc' ? 'sorted-asc' : 'sorted-desc');
             }
@@ -331,41 +214,82 @@
         function applySort(column, direction) {
             const tbody = document.getElementById('userTableBody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            
             if (rows.length === 0) return;
             
             const isAsc = direction === 'asc';
             
             rows.sort((a, b) => {
-                let valA = a.dataset[column] || '';
-                let valB = b.dataset[column] || '';
+                let valA, valB;
                 
-                // Handle ID as number
-                if (column === 'id') {
+                // For index column, use the row number
+                if (column === 'index') {
+                    valA = parseInt(a.dataset.id);
+                    valB = parseInt(b.dataset.id);
+                } else {
+                    valA = a.dataset[column] || '';
+                    valB = b.dataset[column] || '';
+                }
+                
+                // Handle numbers
+                if (column === 'id' || column === 'index') {
                     valA = parseInt(valA);
                     valB = parseInt(valB);
                     return isAsc ? valA - valB : valB - valA;
                 }
                 
-                // Handle dates
-                if (column === 'joined') {
-                    if (valA === '') return 1;
-                    if (valB === '') return -1;
-                    return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                }
-                
-                // Handle strings (case insensitive)
+                // Handle strings
                 return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
             });
             
-            // Re-append sorted rows
             rows.forEach(row => tbody.appendChild(row));
-            
-            // Update visible count after sorting
             updateVisibleCount();
+            // Renumber the rows after sorting
+            renumberRows();
         }
 
-        // ── Filter / Search ──
+        function renumberRows() {
+            const rows = document.querySelectorAll('#userTableBody tr');
+            rows.forEach((row, index) => {
+                const numCell = row.querySelector('td:first-child');
+                if (numCell) {
+                    const idSpan = numCell.querySelector('.db-id-hint');
+                    const dbId = row.dataset.id;
+                    numCell.innerHTML = `${index + 1} <span class="db-id-hint">(ID: ${dbId})</span>`;
+                }
+            });
+        }
+
+        // ── Sort by dropdown ──
+        function sortTable() {
+            const select = document.getElementById('sortSelect');
+            const value = select.value;
+            
+            let column, direction;
+            switch(value) {
+                case 'id-desc':   column = 'id'; direction = 'desc'; break;
+                case 'id-asc':    column = 'id'; direction = 'asc'; break;
+                case 'name-asc':  column = 'name'; direction = 'asc'; break;
+                case 'name-desc': column = 'name'; direction = 'desc'; break;
+                default: column = 'id'; direction = 'desc';
+            }
+            
+            sortState = {};
+            sortState[column] = direction;
+            currentSortColumn = column;
+            currentSortDirection = direction;
+            
+            document.querySelectorAll('thead th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            const th = document.querySelector(`thead th[data-sort="${column}"]`);
+            if (th) {
+                th.classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+            
+            applySort(column, direction);
+        }
+
+        // ── Filter/Search ──
         function filterTable() {
             const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
             const roleFilter = document.getElementById('roleFilter').value;
@@ -378,7 +302,6 @@
                 const phone = row.dataset.phone || '';
                 const role = row.dataset.role || 'farmer';
                 
-                // Role filter
                 let matchesRole = true;
                 if (roleFilter === 'admin') {
                     matchesRole = role === 'admin';
@@ -386,7 +309,6 @@
                     matchesRole = role === 'farmer';
                 }
                 
-                // Search filter
                 let matchesSearch = true;
                 if (searchValue) {
                     matchesSearch = name.includes(searchValue) ||
@@ -399,6 +321,7 @@
             });
             
             updateVisibleCount();
+            renumberRows();
         }
 
         function updateVisibleCount() {
@@ -410,8 +333,17 @@
 
         // ── Initialize ──
         document.addEventListener('DOMContentLoaded', function() {
-            initSort();
+            document.getElementById('sortSelect').value = 'id-desc';
+            sortTable();
             filterTable();
+        });
+
+        // Click handlers for sortable columns
+        document.querySelectorAll('thead th[data-sort]').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.dataset.sort;
+                sortByColumn(column);
+            });
         });
     </script>
 </body>
