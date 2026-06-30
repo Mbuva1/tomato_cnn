@@ -62,12 +62,6 @@
         .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.12); border-radius: 8px; color: #a5d6a7; text-decoration: none; }
         .back-btn:hover { background: rgba(76,175,80,0.15); }
         
-        .db-id-hint {
-            font-size: 0.6rem;
-            color: #555;
-            margin-left: 4px;
-        }
-        
         @media (max-width: 768px) {
             .stats { flex-direction: column; gap: 8px; }
             table { font-size: 0.8rem; }
@@ -116,8 +110,8 @@
                 <option value="farmer">Farmers Only</option>
             </select>
             <select id="sortSelect" onchange="sortTable()">
-                <option value="id-desc">Sort: Newest First</option>
                 <option value="id-asc">Sort: Oldest First</option>
+                <option value="id-desc">Sort: Newest First</option>
                 <option value="name-asc">Sort: Name A-Z</option>
                 <option value="name-desc">Sort: Name Z-A</option>
             </select>
@@ -150,10 +144,7 @@
                     data-joined="{% if user.created_at %}{{ user.created_at.isoformat() }}{% endif %}"
                     {% if user.is_admin == 1 %}style="border-left: 3px solid #ffca28;"{% endif %}
                 >
-                    <td style="text-align:center; font-weight:600; color:#4caf50;">
-                        {{ loop.index }}
-                        <span class="db-id-hint">(ID: {{ user.id }})</span>
-                    </td>
+                    <td style="text-align:center; font-weight:600; color:#4caf50;">{{ loop.index }}</td>
                     <td><strong>{{ user.full_name }}</strong></td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email or '<span class="text-muted">Not set</span>'|safe }}</td>
@@ -185,12 +176,10 @@
     </div>
 
     <script>
-        // ── Sort State ──
         let currentSortColumn = 'id';
-        let currentSortDirection = 'desc';
+        let currentSortDirection = 'asc';  // Changed to 'asc' for oldest first
         let sortState = {};
 
-        // ── Sorting by Column (click header) ──
         function sortByColumn(column) {
             if (sortState[column] === 'asc') {
                 sortState[column] = 'desc';
@@ -221,7 +210,6 @@
             rows.sort((a, b) => {
                 let valA, valB;
                 
-                // For index column, use the row number
                 if (column === 'index') {
                     valA = parseInt(a.dataset.id);
                     valB = parseInt(b.dataset.id);
@@ -230,20 +218,17 @@
                     valB = b.dataset[column] || '';
                 }
                 
-                // Handle numbers
                 if (column === 'id' || column === 'index') {
                     valA = parseInt(valA);
                     valB = parseInt(valB);
                     return isAsc ? valA - valB : valB - valA;
                 }
                 
-                // Handle strings
                 return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
             });
             
             rows.forEach(row => tbody.appendChild(row));
             updateVisibleCount();
-            // Renumber the rows after sorting
             renumberRows();
         }
 
@@ -252,25 +237,22 @@
             rows.forEach((row, index) => {
                 const numCell = row.querySelector('td:first-child');
                 if (numCell) {
-                    const idSpan = numCell.querySelector('.db-id-hint');
-                    const dbId = row.dataset.id;
-                    numCell.innerHTML = `${index + 1} <span class="db-id-hint">(ID: ${dbId})</span>`;
+                    numCell.textContent = index + 1;
                 }
             });
         }
 
-        // ── Sort by dropdown ──
         function sortTable() {
             const select = document.getElementById('sortSelect');
             const value = select.value;
             
             let column, direction;
             switch(value) {
-                case 'id-desc':   column = 'id'; direction = 'desc'; break;
                 case 'id-asc':    column = 'id'; direction = 'asc'; break;
+                case 'id-desc':   column = 'id'; direction = 'desc'; break;
                 case 'name-asc':  column = 'name'; direction = 'asc'; break;
                 case 'name-desc': column = 'name'; direction = 'desc'; break;
-                default: column = 'id'; direction = 'desc';
+                default: column = 'id'; direction = 'asc';
             }
             
             sortState = {};
@@ -289,7 +271,6 @@
             applySort(column, direction);
         }
 
-        // ── Filter/Search ──
         function filterTable() {
             const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
             const roleFilter = document.getElementById('roleFilter').value;
@@ -331,14 +312,12 @@
             document.getElementById('visibleCount').textContent = total - hidden;
         }
 
-        // ── Initialize ──
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('sortSelect').value = 'id-desc';
+            document.getElementById('sortSelect').value = 'id-asc';
             sortTable();
             filterTable();
         });
 
-        // Click handlers for sortable columns
         document.querySelectorAll('thead th[data-sort]').forEach(th => {
             th.addEventListener('click', function() {
                 const column = this.dataset.sort;
