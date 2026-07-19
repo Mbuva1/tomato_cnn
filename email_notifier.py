@@ -1,6 +1,6 @@
 """
 =============================================================
-EMAIL NOTIFIER MODULE - SendGrid API (Railway Compatible)
+EMAIL NOTIFIER MODULE - Brevo API (Working)
 Project: Tomato Leaf Disease Detection
 =============================================================
 """
@@ -12,79 +12,65 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── SendGrid Configuration (via Twilio API Key) ──
-# The API Key Secret from Twilio works as the SendGrid API Key
-SENDGRID_API_KEY = os.environ.get('TWILIO_API_KEY_SECRET', '')
-SENDGRID_SENDER_EMAIL = os.environ.get('SENDGRID_SENDER_EMAIL', 'mbuvadavid03@gmail.com')
-SENDGRID_SENDER_NAME = os.environ.get('SENDGRID_SENDER_NAME', 'TomatoGuard')
-
-# Fallback to direct SendGrid API Key if provided
-if not SENDGRID_API_KEY:
-    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+# ── Brevo Configuration ──
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'mbuvadavid03@gmail.com')
+BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'TomatoGuard')
 
 # Check if email is configured
-EMAIL_CONFIGURED = bool(SENDGRID_API_KEY)
+EMAIL_CONFIGURED = bool(BREVO_API_KEY)
 
 if EMAIL_CONFIGURED:
-    print("[Email] ✅ SendGrid configured and ready (100 emails/day)")
+    print("[Email] ✅ Brevo configured and ready (300 emails/day free)")
 else:
-    print("[Email] ⚠️ SendGrid is NOT configured. Set TWILIO_API_KEY_SECRET in .env")
+    print("[Email] ⚠️ Brevo is NOT configured. Set BREVO_API_KEY in .env")
 
 
 def send_email(to_email, subject, html_content, plain_text=None):
-    """Send email using SendGrid's HTTP API."""
+    """Send email using Brevo API."""
     if not EMAIL_CONFIGURED:
-        return False, "SendGrid is not configured"
+        return False, "Email is not configured"
     
     if not to_email:
         return False, "No email address provided"
     
     try:
-        url = "https://api.sendgrid.com/v3/mail/send"
+        # Brevo API endpoint
+        url = 'https://api.brevo.com/v3/smtp/email'
         
-        # Build the email payload
+        # Build payload
         payload = {
-            "personalizations": [
-                {
-                    "to": [{"email": to_email}],
-                    "subject": subject
-                }
-            ],
-            "from": {
-                "email": SENDGRID_SENDER_EMAIL,
-                "name": SENDGRID_SENDER_NAME
+            'sender': {
+                'name': BREVO_SENDER_NAME,
+                'email': BREVO_SENDER_EMAIL
             },
-            "content": [
-                {
-                    "type": "text/html",
-                    "value": html_content
-                }
-            ]
+            'to': [
+                {'email': to_email}
+            ],
+            'subject': subject,
+            'htmlContent': html_content
         }
         
-        # Add plain text version if provided
+        # Add plain text if provided
         if plain_text:
-            payload["content"].append({
-                "type": "text/plain",
-                "value": plain_text
-            })
+            payload['textContent'] = plain_text
         
         # Headers
         headers = {
-            "Authorization": f"Bearer {SENDGRID_API_KEY}",
-            "Content-Type": "application/json"
+            'api-key': BREVO_API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
         
         # Send request
         response = requests.post(url, json=payload, headers=headers, timeout=30)
         
-        # SendGrid returns 202 on success
-        if response.status_code == 202:
+        if response.status_code == 201:
             print(f"[Email] ✅ Sent to: {to_email}")
             return True, "Email sent successfully"
         else:
             try:
-                error = response.json().get('errors', [{}])[0].get('message', response.text)
+                error = response.json().get('message', response.text)
             except:
                 error = response.text
             print(f"[Email] ❌ Error: {error}")
@@ -95,6 +81,48 @@ def send_email(to_email, subject, html_content, plain_text=None):
     except Exception as e:
         print(f"[Email] ❌ Error: {e}")
         return False, f"Error: {str(e)}"
+
+
+# ── Test Email ──
+
+def test_email(to_email):
+    """Send a test email to verify configuration."""
+    current_year = datetime.now().year
+    
+    subject = "🧪 TomatoGuard - Email Test"
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; background: #f5faf5; padding: 20px; }}
+            .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; border: 1px solid #c8e6c9; }}
+            .header {{ text-align: center; padding-bottom: 20px; border-bottom: 2px solid #2e7d32; }}
+            .logo {{ font-size: 24px; font-weight: bold; color: #2e7d32; }}
+            .success-box {{ background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">🍅 TomatoGuard</div>
+            </div>
+            <div class="success-box">
+                <div style="font-size: 48px;">✅</div>
+                <h2 style="color: #2e7d32;">Email Test Successful!</h2>
+                <p>Your email notifications are configured correctly using Brevo.</p>
+                <p style="color: #666; font-size: 12px;">Sent at: {datetime.now().strftime('%d %B %Y, %H:%M')}</p>
+            </div>
+            <p style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+                © {current_year} TomatoGuard
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return send_email(to_email, subject, html_content)
 
 
 # ── Disease Alert Email ──
@@ -271,46 +299,5 @@ def send_healthy_alert_email(to_email, farmer_name, lang='en'):
         </body>
         </html>
         """
-    
-    return send_email(to_email, subject, html_content)
-
-
-# ── Test Email ──
-
-def test_email(to_email):
-    """Send a test email to verify configuration."""
-    current_year = datetime.now().year
-    subject = "🧪 TomatoGuard - Email Test"
-    
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ font-family: Arial, sans-serif; background: #f5faf5; padding: 20px; }}
-            .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; border: 1px solid #c8e6c9; }}
-            .header {{ text-align: center; padding-bottom: 20px; border-bottom: 2px solid #2e7d32; }}
-            .logo {{ font-size: 24px; font-weight: bold; color: #2e7d32; }}
-            .success-box {{ background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <div class="logo">🍅 TomatoGuard</div>
-            </div>
-            <div class="success-box">
-                <div style="font-size: 48px;">✅</div>
-                <h2 style="color: #2e7d32;">Email Test Successful!</h2>
-                <p>Your email notifications are configured correctly using SendGrid.</p>
-                <p style="color: #666; font-size: 12px;">Sent at: {datetime.now().strftime('%d %B %Y, %H:%M')}</p>
-            </div>
-            <p style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
-                © {current_year} TomatoGuard
-            </p>
-        </div>
-    </body>
-    </html>
-    """
     
     return send_email(to_email, subject, html_content)
