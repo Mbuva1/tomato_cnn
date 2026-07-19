@@ -304,8 +304,16 @@ def callback():
         conn = get_connection()
         cursor = conn.cursor()
         
-        if result_code == '0':
-            # Success
+        # ✅ FIX: Check for success more flexibly
+        # result_code '0' OR message contains 'successfully'
+        is_success = (result_code == '0' or 
+                     (result_desc and 'successfully' in result_desc.lower()))
+        
+        if is_success:
+            # ✅ Payment Successful - Activate Subscription
+            print(f"[Payment] ✅ Payment successful for {checkout_id}")
+            
+            # Update transaction status
             cursor.execute("""
                 UPDATE transactions 
                 SET status = 'completed', result_code = %s, result_desc = %s
@@ -313,10 +321,10 @@ def callback():
             """, (result_code, result_desc, checkout_id))
             conn.commit()
             
-            # Activate subscription
+            # Get farmer and plan details
             cursor.execute("""
                 SELECT farmer_id, plan_id FROM transactions 
-                WHERE checkout_request_id = %s AND status = 'completed'
+                WHERE checkout_request_id = %s
             """, (checkout_id,))
             trans = cursor.fetchone()
             
@@ -325,6 +333,7 @@ def callback():
                 
                 expiry = datetime.now() + timedelta(days=30)
                 
+                # Activate subscription
                 cursor.execute("""
                     INSERT INTO subscriptions (farmer_id, plan_id, is_active, expires_at)
                     VALUES (%s, %s, 1, %s)
@@ -339,14 +348,14 @@ def callback():
                 print(f"[Payment] ✅ Subscription activated for farmer {farmer_id} ({plan_id})")
             
         else:
-            # Failed
+            # ❌ Payment Failed
+            print(f"[Payment] ❌ Payment failed: {result_desc}")
             cursor.execute("""
                 UPDATE transactions 
                 SET status = 'failed', result_code = %s, result_desc = %s
                 WHERE checkout_request_id = %s
             """, (result_code, result_desc, checkout_id))
             conn.commit()
-            print(f"[Payment] ❌ Payment failed: {result_desc}")
         
         cursor.close()
         conn.close()
