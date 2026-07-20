@@ -74,7 +74,7 @@ IMAGE_SIZE = (64, 64)
 
 
 # ─────────────────────────────────────────────
-# ADMIN REQUIRED DECORATOR  ← MUST BE DEFINED BEFORE ANY ROUTE THAT USES IT
+# ADMIN REQUIRED DECORATOR
 # ─────────────────────────────────────────────
 
 def admin_required(f):
@@ -514,7 +514,7 @@ def register():
             try:
                 conn = get_connection(); cursor = conn.cursor()
                 cursor.execute(
-                    """INSERT INTO farmers (full_name, username, password, email, phone, role) 
+                    """INSERT INTO farmers (full_name, username, password, email, phone, role)
                        VALUES (%s, %s, %s, %s, %s, 'farmer')""",
                     (full_name, username, hashed, email, phone)
                 )
@@ -548,16 +548,16 @@ def check_username():
 def index():
     if 'farmer_id' not in session:
         return redirect(url_for('login'))
-    
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT is_admin FROM farmers WHERE id = %s", (session['farmer_id'],))
     farmer = cursor.fetchone()
     cursor.close()
     conn.close()
-    
+
     is_admin = farmer.get('is_admin', 0) == 1 if farmer else False
-    
+
     has_access, access_type, access_details = has_subscription_or_trial(session['farmer_id'])
     recent     = get_recent_predictions(farmer_id=session['farmer_id'], limit=10)
     scan_count = get_scan_count(session['farmer_id'])
@@ -815,7 +815,7 @@ def feedback_summary():
 
 
 # ─────────────────────────────────────────────
-# PDF REPORT — CANVAS-BASED (DROP-IN REPLACEMENT)
+# PDF REPORT — CANVAS-BASED
 # ─────────────────────────────────────────────
 
 def build_pdf_report(predictions, farmer_name, period_label, lang, total,
@@ -1138,8 +1138,8 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
 
     y_cursor = header_y
 
-    MAX_ROWS = 20
-    for i, pred in enumerate(predictions[:MAX_ROWS]):
+    # ✅ FIX: Show ALL predictions (removed MAX_ROWS limit)
+    for i, pred in enumerate(predictions):
         row_bg = ROW_ALT if i % 2 == 0 else WHITE
         cv.setFillColor(row_bg)
         cv.rect(MARGIN_L, y_cursor - row_h, CONTENT_W, row_h, fill=1, stroke=0)
@@ -1178,11 +1178,6 @@ def build_pdf_report(predictions, farmer_name, period_label, lang, total,
     cv.setStrokeColor(GREEN_MID)
     cv.setLineWidth(0.8)
     cv.line(MARGIN_L, y_cursor, MARGIN_R, y_cursor)
-
-    if len(predictions) > MAX_ROWS:
-        y_cursor -= 14
-        txt(cv, f"Showing first {MAX_ROWS} of {len(predictions)} detections.",
-            MARGIN_L, y_cursor, "Helvetica", 7, GRAY_MID)
 
     # ── FOOTER ──
     cv.setFillColor(GREEN_PALE)
